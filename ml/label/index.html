@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RAG to Rooms · pairwise labeling</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; margin: 0; background: #f4f2ee; color: #222; }
+  header { display: flex; gap: 16px; align-items: center; padding: 10px 16px; background: #fff; border-bottom: 1px solid #ddd; }
+  header input { font-size: 14px; padding: 4px 8px; width: 140px; }
+  #stats { margin-left: auto; font-size: 13px; color: #555; }
+  main { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 16px; padding: 16px; }
+  .card { background: #fff; border-radius: 10px; padding: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+  .card img { width: 100%; height: 52vh; object-fit: contain; background: #fafafa; border-radius: 6px; }
+  .card h3 { margin: 10px 0 2px; font-size: 15px; }
+  .card .meta { font-size: 12px; color: #666; }
+  .card.pick { outline: 3px solid #2f7d4f; }
+  .key { display: inline-block; min-width: 18px; padding: 1px 6px; border: 1px solid #aaa; border-radius: 4px; font-size: 12px; background: #f7f7f7; text-align: center; }
+  footer { padding: 0 16px 16px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  button { font-size: 14px; padding: 8px 14px; border-radius: 6px; border: 1px solid #bbb; background: #fff; cursor: pointer; }
+  #unsure.on { background: #ffe9b3; border-color: #d9a400; }
+  #msg { font-size: 14px; color: #a33; }
+  #question { padding: 0 16px; font-size: 15px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>RAG to Rooms labeling</strong>
+  <label>Annotator id <input id="annotator" placeholder="e.g. emily" autocomplete="off"></label>
+  <span id="stats"></span>
+</header>
+<p id="question">Which <b id="cat">product</b> fits this room's style better?</p>
+<main>
+  <div class="card"><img id="room" alt="room"><div class="meta" id="roommeta"></div></div>
+  <div class="card" id="cardA"><img id="imgA" alt="product A"><h3 id="titleA"></h3><div class="meta" id="metaA"></div></div>
+  <div class="card" id="cardB"><img id="imgB" alt="product B"><h3 id="titleB"></h3><div class="meta" id="metaB"></div></div>
+</main>
+<footer>
+  <button data-act="a"><span class="key">A</span> / <span class="key">←</span> left</button>
+  <button data-act="b"><span class="key">B</span> / <span class="key">→</span> right</button>
+  <button data-act="tie"><span class="key">T</span> / <span class="key">↓</span> tie</button>
+  <button data-act="skip"><span class="key">S</span> / <span class="key">space</span> skip</button>
+  <button id="unsure"><span class="key">U</span> unsure</button>
+  <span id="msg"></span>
+</footer>
+<script>
+const $ = id => document.getElementById(id);
+let current = null, busy = false, unsure = false;
+$("annotator").value = localStorage.getItem("annotator") || "";
+$("annotator").addEventListener("change", () => { localStorage.setItem("annotator", $("annotator").value.trim()); next(); });
+const annotator = () => $("annotator").value.trim();
+const money = c => c == null ? "" : "$" + (c / 100).toFixed(2);
+
+async function stats() {
+  const s = await (await fetch("/api/stats?annotator=" + encodeURIComponent(annotator()))).json();
+  $("stats").textContent = `you: ${s.mine} · total: ${s.labels} (ties ${s.ties}) · rooms ${s.rooms} · products ${s.products}` +
+    (s.pools_enabled ? "" : " · WARNING: pools disabled (embed first)");
+}
+
+async function next() {
+  $("msg").textContent = "";
+  if (!annotator()) { $("msg").textContent = "Enter an annotator id to start."; return; }
+  const r = await (await fetch("/api/next?annotator=" + encodeURIComponent(annotator()))).json();
+  if (r.error || r.done) { current = null; $("msg").textContent = r.error || r.reason; stats(); return; }
+  current = r;
+  $("cat").textContent = r.category.replace("_", " ");
+  $("room").src = r.room_url; $("roommeta").textContent = `${r.room_id} · pool ${r.pool || "n/a"}`;
+  for (const [side, p] of [["A", r.a], ["B", r.b]]) {
+    $("img" + side).src = p.image_url;
+    $("title" + side).textContent = p.title;
+    $("meta" + side).textContent = [p.variant, p.retailer, money(p.price_cents)].filter(Boolean).join(" · ");
+    $("card" + side).classList.remove("pick");
+  }
+  unsure = false; $("unsure").classList.remove("on");
+  stats();
+}
+
+async function submit(act) {
+  if (!current || busy) return;
+  busy = true;
+  const body = { annotator_id: annotator(), room_id: current.room_id, product_a_id: current.a.id,
+                 product_b_id: current.b.id, uncertainty: unsure ? "unsure" : "sure" };
+  if (act === "skip") body.action = "skip";
+  else body.preferred_product = act === "a" ? current.a.id : act === "b" ? current.b.id : "tie";
+  if (act === "a") $("cardA").classList.add("pick");
+  if (act === "b") $("cardB").classList.add("pick");
+  const res = await fetch("/api/label", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const out = await res.json();
+  busy = false;
+  if (!res.ok) { $("msg").textContent = out.error; return; }
+  next();
+}
+
+document.querySelectorAll("button[data-act]").forEach(b => b.addEventListener("click", () => submit(b.dataset.act)));
+$("unsure").addEventListener("click", () => { unsure = !unsure; $("unsure").classList.toggle("on", unsure); });
+document.addEventListener("keydown", e => {
+  if (e.target.tagName === "INPUT") return;
+  const k = e.key.toLowerCase();
+  const map = { a: "a", arrowleft: "a", b: "b", arrowright: "b", t: "tie", arrowdown: "tie", s: "skip", " ": "skip" };
+  if (k === "u") { $("unsure").click(); e.preventDefault(); return; }
+  if (map[k]) { submit(map[k]); e.preventDefault(); }
+});
+next();
+</script>
+</body>
+</html>

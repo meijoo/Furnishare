@@ -1,0 +1,386 @@
+{
+  "abt-lg-nu70-55-55nu700bpua": {
+    "surface": "black_metal",
+    "bezel": "thin",
+    "stand": "feet"
+  },
+  "abt-samsung-the-frame-ls03f-55-qn55ls03fafxza": {
+    "surface": "black_metal",
+    "bezel": "frame",
+    "stand": "none"
+  },
+  "abt-samsung-u8000h-55-un55u8000hfxza": {
+    "surface": "black_metal",
+    "bezel": "thin",
+    "stand": "feet"
+  },
+  "abt-sony-bravia-3-ii-55-k55xr30m2": {
+    "surface": "black_metal",
+    "bezel": "thin",
+    "stand": "feet"
+  },
+  "abt-tcl-q6lr-55-55q6lr": {
+    "surface": "black_metal",
+    "bezel": "thin",
+    "stand": "feet"
+  },
+  "ikea-ankarudden-6-drawer-dresser-oak-effect": {
+    "surface": "oak",
+    "columns": 2,
+    "rows": 3,
+    "leg_style": "plinth",
+    "handle_style": "none"
+  },
+  "ikea-bjorksnas-bed-queen-birch": {
+    "surface": "pine",
+    "headboard": "spindle",
+    "footboard": true,
+    "leg_style": "tapered",
+    "frame": "platform"
+  },
+  "ikea-borgeby-coffee-table-birch-veneer": {
+    "surface": "white_oak",
+    "leg_style": "straight",
+    "shelf": true,
+    "drawer": false,
+    "top_style": "slab"
+  },
+  "ikea-ekholma-sofa-kilanda-pale-blue": {
+    "surface": "weave",
+    "arm_style": "flared",
+    "back_style": "pillow",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "tapered",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-esseboda-loveseat-tallmyra-blue-birch": {
+    "surface": "weave",
+    "arm_style": "rolled",
+    "back_style": "tufted",
+    "seat_cushions": 2,
+    "back_cushions": 0,
+    "leg_style": "tapered",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-fagelfjallet-6-drawer-dresser-dark-gray-blue": {
+    "surface": "painted",
+    "columns": 2,
+    "rows": 5,
+    "leg_style": "plinth",
+    "handle_style": "cup"
+  },
+  "ikea-fagelfjallet-nightstand-dark-gray-blue": {
+    "surface": "painted",
+    "drawers": 0,
+    "open_shelf": true,
+    "leg_style": "plinth"
+  },
+  "ikea-fjallbo-desk-black": {
+    "surface": "pine",
+    "drawers": 0,
+    "pedestal": "right",
+    "pedestal_open": true,
+    "leg_style": "metal_frame",
+    "shelf": true,
+    "primary_hex": "#B8865A",
+    "accent_surface": "black_metal",
+    "accent_hex": "#222222"
+  },
+  "ikea-grafjallet-nightstand-anthracite": {
+    "surface": "black_metal",
+    "drawers": 0,
+    "open_shelf": true,
+    "door": true,
+    "leg_style": "straight",
+    "accent_surface": "black_metal",
+    "accent_hex": "#222222"
+  },
+  "ikea-gullvalla-sofa-silkeryd-gray-green": {
+    "surface": "weave",
+    "arm_style": "sloped",
+    "back_style": "pillow",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "tapered",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-holmerud-coffee-table-oak-effect": {
+    "surface": "oak",
+    "leg_style": "panel",
+    "shelf": true,
+    "drawer": false,
+    "top_style": "slab"
+  },
+  "ikea-hotellrum-rug-high-pile-blue-green-yellow": {
+    "fringe": false,
+    "pile": "high"
+  },
+  "ikea-jarnvag-rug-low-pile-ornament-pink-beige": {
+    "surface": "wool",
+    "fringe": false,
+    "pile": "low"
+  },
+  "ikea-kivik-loveseat-grann-bomstad-black": {
+    "surface": "leather",
+    "arm_style": "track",
+    "back_style": "pillow",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "block",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-kivik-sofa-gunnared-blue": {
+    "surface": "weave",
+    "arm_style": "track",
+    "back_style": "pillow",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "hidden",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-klippan-loveseat-bomstad-black": {
+    "surface": "leather",
+    "arm_style": "track",
+    "back_style": "tight",
+    "seat_cushions": 1,
+    "back_cushions": 0,
+    "leg_style": "metal",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-lack-coffee-table-black-brown-large": {
+    "surface": "painted",
+    "leg_style": "straight",
+    "shelf": true,
+    "drawer": false,
+    "top_style": "slab",
+    "primary_hex": "#3B2F2A"
+  },
+  "ikea-landbana-rug-flatwoven-dark-blue-7x10": {
+    "surface": "weave",
+    "fringe": false,
+    "pile": "flat"
+  },
+  "ikea-lisabo-desk-ash": {
+    "surface": "white_oak",
+    "drawers": 1,
+    "pedestal": "none",
+    "leg_style": "tapered",
+    "shelf": false
+  },
+  "ikea-lohals-rug-flatwoven-natural-7x10": {
+    "surface": "weave",
+    "fringe": false,
+    "pile": "flat"
+  },
+  "ikea-malm-bed-queen-dark-brown": {
+    "surface": "walnut",
+    "headboard": "panel",
+    "footboard": true,
+    "leg_style": "hidden",
+    "frame": "platform"
+  },
+  "ikea-micke-desk-white": {
+    "surface": "painted",
+    "drawers": 2,
+    "pedestal": "left",
+    "leg_style": "metal_frame",
+    "shelf": false
+  },
+  "ikea-morabo-sofa-gunnared-dark-gray-wood": {
+    "surface": "weave",
+    "arm_style": "track",
+    "back_style": "tufted",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "tapered",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": true
+  },
+  "ikea-ortrask-coffee-table-black-ash-veneer": {
+    "surface": "painted",
+    "leg_style": "straight",
+    "shelf": false,
+    "drawer": false,
+    "top_style": "slab"
+  },
+  "ikea-radmanso-6-drawer-dresser-walnut-effect": {
+    "surface": "walnut",
+    "columns": 2,
+    "rows": 3,
+    "leg_style": "metal",
+    "handle_style": "knob"
+  },
+  "ikea-radmanso-nightstand-walnut-effect": {
+    "surface": "walnut",
+    "drawers": 1,
+    "open_shelf": true,
+    "leg_style": "straight"
+  },
+  "ikea-rast-6-drawer-dresser-pine": {
+    "surface": "pine",
+    "columns": 2,
+    "rows": 3,
+    "leg_style": "plinth",
+    "handle_style": "knob"
+  },
+  "ikea-saltmyran-sofa-oreryd-blue": {
+    "surface": "weave",
+    "arm_style": "track",
+    "back_style": "tight",
+    "seat_cushions": 1,
+    "back_cushions": 0,
+    "leg_style": "metal",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue": {
+    "surface": "weave",
+    "arm_style": "track",
+    "back_style": "pillow",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "block",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-saltsjobaden-loveseat-vittangi-light-beige-white": {
+    "surface": "weave",
+    "arm_style": "track",
+    "back_style": "pillow",
+    "seat_cushions": 2,
+    "back_cushions": 2,
+    "leg_style": "block",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  },
+  "ikea-stockholm-rug-flatwoven-stripe-black-off-white": {
+    "surface": "wool",
+    "fringe": false,
+    "pile": "flat"
+  },
+  "ikea-storklinta-6-drawer-dresser-white": {
+    "surface": "painted",
+    "columns": 2,
+    "rows": 3,
+    "leg_style": "plinth",
+    "handle_style": "cutout"
+  },
+  "ikea-tarva-bed-queen-pine": {
+    "surface": "pine",
+    "headboard": "slatted",
+    "footboard": false,
+    "leg_style": "block",
+    "frame": "platform"
+  },
+  "ikea-tarva-nightstand-pine": {
+    "surface": "pine",
+    "drawers": 1,
+    "open_shelf": true,
+    "leg_style": "straight"
+  },
+  "ikea-tiokrona-rug-flatwoven-natural-8x10": {
+    "surface": "weave",
+    "fringe": false,
+    "pile": "flat"
+  },
+  "ikea-tonstad-desk-oak": {
+    "surface": "oak",
+    "drawers": 1,
+    "pedestal": "none",
+    "leg_style": "straight",
+    "shelf": false
+  },
+  "ikea-tonstad-nightstand-oak": {
+    "surface": "oak",
+    "drawers": 1,
+    "open_shelf": true,
+    "leg_style": "straight"
+  },
+  "ikea-tonstad-storage-bed-queen-oak": {
+    "surface": "oak",
+    "headboard": "panel",
+    "footboard": true,
+    "leg_style": "tapered",
+    "frame": "storage"
+  },
+  "ikea-tranered-coffee-table-dark-brown": {
+    "surface": "oak",
+    "leg_style": "panel",
+    "shelf": false,
+    "drawer": true,
+    "top_style": "slab"
+  },
+  "ikea-valnas-coffee-table-oak-veneer": {
+    "surface": "oak",
+    "leg_style": "straight",
+    "shelf": false,
+    "drawer": false,
+    "top_style": "slab"
+  },
+  "ikea-vittsjo-coffee-table-light-beige-glass": {
+    "surface": "glass",
+    "leg_style": "straight",
+    "shelf": true,
+    "drawer": false,
+    "top_style": "glass",
+    "accent_surface": "painted",
+    "accent_hex": "#F2F2EE"
+  },
+  "walmart-home-design-emma-chesterfield-sofa-navy": {
+    "surface": "velvet",
+    "arm_style": "rolled",
+    "back_style": "tufted",
+    "seat_cushions": 3,
+    "back_cushions": 0,
+    "leg_style": "turned",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false,
+    "accent_surface": "lacquer",
+    "accent_hex": "#C9C9C9"
+  },
+  "walmart-nathan-james-haley-desk-light-brown": {
+    "surface": "oak",
+    "drawers": 1,
+    "pedestal": "none",
+    "leg_style": "trestle",
+    "shelf": false
+  },
+  "walmart-renwick-channel-tufted-bed-queen-navy": {
+    "surface": "linen",
+    "headboard": "channel",
+    "footboard": false,
+    "leg_style": "tapered",
+    "frame": "platform",
+    "accent_surface": "painted",
+    "accent_hex": "#1F3350"
+  },
+  "walmart-serta-hemsworth-sofa-navy-faux-leather": {
+    "surface": "leather",
+    "arm_style": "track",
+    "back_style": "pillow",
+    "seat_cushions": 3,
+    "back_cushions": 3,
+    "leg_style": "metal",
+    "skirt": false,
+    "chaise": "none",
+    "tufted_seat": false
+  }
+}

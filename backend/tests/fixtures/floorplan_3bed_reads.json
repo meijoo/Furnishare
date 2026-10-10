@@ -1,0 +1,156 @@
+[
+ {
+  "label": "Bedroom",
+  "kind": "bedroom",
+  "dimension_text": "13'x 12'",
+  "box_2d": [
+   218,
+   110,
+   495,
+   341
+  ]
+ },
+ {
+  "label": "Closet",
+  "kind": "closet",
+  "dimension_text": null,
+  "box_2d": [
+   296,
+   335,
+   491,
+   381
+  ]
+ },
+ {
+  "label": "Bath",
+  "kind": "bathroom",
+  "dimension_text": null,
+  "box_2d": [
+   491,
+   110,
+   691,
+   256
+  ]
+ },
+ {
+  "label": "hall",
+  "kind": "hall",
+  "dimension_text": null,
+  "box_2d": [
+   491,
+   256,
+   688,
+   381
+  ]
+ },
+ {
+  "label": "Patio/ Deck",
+  "kind": "patio",
+  "dimension_text": null,
+  "box_2d": [
+   234,
+   381,
+   369,
+   631
+  ]
+ },
+ {
+  "label": "Living room",
+  "kind": "living",
+  "dimension_text": "16'x 13'",
+  "box_2d": [
+   369,
+   381,
+   688,
+   631
+  ]
+ },
+ {
+  "label": "Bedroom",
+  "kind": "bedroom",
+  "dimension_text": "13'x 12'",
+  "box_2d": [
+   234,
+   631,
+   603,
+   858
+  ]
+ },
+ {
+  "label": "Closet",
+  "kind": "closet",
+  "dimension_text": null,
+  "box_2d": [
+   510,
+   693,
+   575,
+   854
+  ]
+ },
+ {
+  "label": "Bath",
+  "kind": "bathroom",
+  "dimension_text": null,
+  "box_2d": [
+   575,
+   693,
+   691,
+   854
+  ]
+ },
+ {
+  "label": "Bedroom",
+  "kind": "bedroom",
+  "dimension_text": "14' x 10'",
+  "box_2d": [
+   688,
+   628,
+   908,
+   895
+  ]
+ },
+ {
+  "label": "hall",
+  "kind": "hall",
+  "dimension_text": null,
+  "box_2d": [
+   688,
+   578,
+   908,
+   628
+  ]
+ },
+ {
+  "label": "Dining",
+  "kind": "dining",
+  "dimension_text": "12'6\" x 10'",
+  "box_2d": [
+   691,
+   110,
+   908,
+   395
+  ]
+ },
+ {
+  "label": "Kitchen",
+  "kind": "kitchen",
+  "dimension_text": null,
+  "box_2d": [
+   691,
+   391,
+   908,
+   581
+  ]
+ },
+ {
+  "label": "laundry",
+  "kind": "laundry",
+  "dimension_text": null,
+  "box_2d": [
+   776,
+   82,
+   908,
+   148
+  ]
+ }
+]

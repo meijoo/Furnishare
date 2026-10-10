@@ -1,0 +1,5 @@
+[
+ {"id":"sofa-blue","name":"Cloud sofa","category":"sofa","price_cents":60000,"currency":"USD","dimensions_m":{"width":2.1,"height":0.85,"depth":0.9},"source_type":"fictional-demo","source_url":null},
+ {"id":"sofa-compact","name":"Cove loveseat","category":"sofa","price_cents":45000,"currency":"USD","dimensions_m":{"width":1.65,"height":0.8,"depth":0.85},"source_type":"fictional-demo","source_url":null},
+ {"id":"sofa-green","name":"Meadow sofa","category":"sofa","price_cents":52000,"currency":"USD","dimensions_m":{"width":1.9,"height":0.85,"depth":0.88},"source_type":"fictional-demo","source_url":null}
+]

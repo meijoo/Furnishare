@@ -1,0 +1,10 @@
+# Install into ml/.venv only (not the root .venv):
+#   python3.13 -m venv ml/.venv && ml/.venv/bin/pip install -r ml/requirements.txt
+# Tested with torch 2.14.1, transformers 5.19.0, Pillow 12.3.0, numpy 2.5.3, Python 3.13.
+torch>=2.6,<3
+transformers>=4.49,<6
+Pillow>=11,<13
+numpy>=1.26
+sentencepiece>=0.2
+protobuf>=4
+pytest>=8

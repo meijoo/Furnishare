@@ -1,0 +1,71 @@
+{
+  "household_id": "demo",
+  "state_version": 1,
+  "members": [
+    {"id": "emily", "name": "Emily", "is_payer": true, "has_limit": true, "connected": false},
+    {"id": "maya", "name": "Maya", "is_payer": false, "has_limit": true, "connected": false},
+    {"id": "alex", "name": "Alex", "is_payer": false, "has_limit": true, "connected": false}
+  ],
+  "room": {
+    "width_m": 4.5, "depth_m": 4.0, "height_m": 2.5,
+    "openings": [
+      {"kind": "door", "wall": "front", "offset_m": 1.0, "width_m": 0.9},
+      {"kind": "window", "wall": "back", "offset_m": -1.4, "width_m": 1.0}
+    ],
+    "clearances": [
+      {"label": "door swing", "x_m": 1.0, "z_m": 1.55, "width_m": 0.9, "depth_m": 0.9}
+    ],
+    "inspiration_image_url": null
+  },
+  "budget_cents": 150000,
+  "proposal": {
+    "version": 1,
+    "status": "awaiting_approval",
+    "items": [
+      {"product_id": "sofa-blue", "category": "sofa", "price_cents": 60000},
+      {"product_id": "table", "category": "coffee_table", "price_cents": 12000},
+      {"product_id": "rug", "category": "rug", "price_cents": 8000},
+      {"product_id": "tv", "category": "tv", "price_cents": 30000}
+    ],
+    "known_total_cents": 110000,
+    "unknown_costs": ["shipping", "tax"],
+    "shares": {"emily": 45000, "maya": 45000, "alex": 20000},
+    "approvals": {"emily": true, "maya": false, "alex": false},
+    "objections": {},
+    "explanation": "Offline demo proposal. Alex's limit is $200, so Emily and Maya split the remaining $900 evenly. Shipping and tax are unknown and are not included in the total.",
+    "created_at": "2026-10-10T05:00:00Z"
+  },
+  "scene": {
+    "objects": [
+      {"object_id": "obj-rug", "product_id": "rug", "category": "rug", "position_m": [0.0, 0.0, -0.3],
+       "rotation_y_rad": 0.0, "dimensions_m": {"width": 2.3, "depth": 1.6, "height": 0.015},
+       "color_hex": "#86D1C8", "asset_url": null, "proposal_version": 1},
+      {"object_id": "obj-sofa", "product_id": "sofa-blue", "category": "sofa", "position_m": [0.0, 0.0, -1.5],
+       "rotation_y_rad": 0.0, "dimensions_m": {"width": 2.1, "depth": 0.9, "height": 0.85},
+       "color_hex": "#86B9D6", "asset_url": null, "proposal_version": 1},
+      {"object_id": "obj-table", "product_id": "table", "category": "coffee_table", "position_m": [0.0, 0.0, -0.3],
+       "rotation_y_rad": 0.0, "dimensions_m": {"width": 1.0, "depth": 0.55, "height": 0.42},
+       "color_hex": "#D1B48C", "asset_url": null, "proposal_version": 1},
+      {"object_id": "obj-tv", "product_id": "tv", "category": "tv", "position_m": [-0.4, 0.0, 1.8],
+       "rotation_y_rad": 3.141592653589793, "dimensions_m": {"width": 1.12, "depth": 0.22, "height": 0.7},
+       "color_hex": "#8C9FD1", "asset_url": null, "proposal_version": 1}
+    ],
+    "validation": {"ok": true, "issues": []}
+  },
+  "finance": {
+    "payer_id": "emily",
+    "purchase": null,
+    "reimbursements": [
+      {"liability_id": "liab-maya-1", "from_member": "maya", "to_member": "emily", "amount_cents": 45000, "operation": null},
+      {"liability_id": "liab-alex-1", "from_member": "alex", "to_member": "emily", "amount_cents": 20000, "operation": null}
+    ],
+    "settled": false,
+    "simulator": "mock"
+  },
+  "catalog_mode": "demo",
+  "activity": [
+    {"at": "2026-10-10T05:02:00Z", "text": "Emily approved version 1"},
+    {"at": "2026-10-10T05:01:00Z", "text": "Agent proposed version 1 for $1,100.00 (shipping and tax unknown)"},
+    {"at": "2026-10-10T05:00:00Z", "text": "Offline demo household loaded"}
+  ]
+}

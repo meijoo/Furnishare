@@ -1,0 +1,1029 @@
+{
+  "generated_at": "2026-10-10T15:01:49+00:00",
+  "template_version": "2026.10.2",
+  "catalog": "/Users/emilyjon/code/rag-to-rooms/backend/data/catalog_verified.json",
+  "assets": {
+    "ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue": {
+      "asset_key": "953f271af8dc898b1e6f3f80",
+      "asset_file": "953f271af8dc898b1e6f3f80.usdz",
+      "asset_url": "/assets/953f271af8dc898b1e6f3f80.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 2.051,
+        "depth": 0.879,
+        "height": 0.899
+      },
+      "color_hex": "#667F88",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.969,
+      "measured_bbox_m": {
+        "min": [
+          -1.0255,
+          -0.0,
+          -0.4395
+        ],
+        "max": [
+          1.0255,
+          0.899,
+          0.4395
+        ],
+        "size": [
+          2.051,
+          0.899,
+          0.879
+        ]
+      },
+      "max_abs_error_m": 5.91278075390278e-08
+    },
+    "ikea-saltmyran-sofa-oreryd-blue": {
+      "asset_key": "6ed2ed58e2010a3d8b75d017",
+      "asset_file": "6ed2ed58e2010a3d8b75d017.usdz",
+      "asset_url": "/assets/6ed2ed58e2010a3d8b75d017.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.87,
+        "depth": 0.791,
+        "height": 0.772
+      },
+      "color_hex": "#66737C",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.025,
+      "measured_bbox_m": {
+        "min": [
+          -0.935,
+          -0.0,
+          -0.3955
+        ],
+        "max": [
+          0.935,
+          0.772,
+          0.3955
+        ],
+        "size": [
+          1.87,
+          0.772,
+          0.791
+        ]
+      },
+      "max_abs_error_m": 1.4781951995779252e-08
+    },
+    "ikea-saltsjobaden-loveseat-vittangi-light-beige-white": {
+      "asset_key": "a2377b20f8cf153a9a25ec30",
+      "asset_file": "a2377b20f8cf153a9a25ec30.usdz",
+      "asset_url": "/assets/a2377b20f8cf153a9a25ec30.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.641,
+        "depth": 0.879,
+        "height": 0.899
+      },
+      "color_hex": "#CEC6B4",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.021,
+      "measured_bbox_m": {
+        "min": [
+          -0.8205,
+          -0.0,
+          -0.4395
+        ],
+        "max": [
+          0.8205,
+          0.899,
+          0.4395
+        ],
+        "size": [
+          1.641,
+          0.899,
+          0.879
+        ]
+      },
+      "max_abs_error_m": 1.6212463371800823e-08
+    },
+    "ikea-gullvalla-sofa-silkeryd-gray-green": {
+      "asset_key": "db9dacff362f39000c0ea0c9",
+      "asset_file": "db9dacff362f39000c0ea0c9.usdz",
+      "asset_url": "/assets/db9dacff362f39000c0ea0c9.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.819,
+        "depth": 0.829,
+        "height": 0.781
+      },
+      "color_hex": "#586353",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.021,
+      "measured_bbox_m": {
+        "min": [
+          -0.9095,
+          -0.0,
+          -0.4145
+        ],
+        "max": [
+          0.9095,
+          0.781,
+          0.4145
+        ],
+        "size": [
+          1.819,
+          0.781,
+          0.829
+        ]
+      },
+      "max_abs_error_m": 1.811981209520752e-08
+    },
+    "ikea-kivik-sofa-gunnared-blue": {
+      "asset_key": "fd779b3a3e10aa62bb7f3b0c",
+      "asset_file": "fd779b3a3e10aa62bb7f3b0c.usdz",
+      "asset_url": "/assets/fd779b3a3e10aa62bb7f3b0c.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 2.28,
+        "depth": 0.949,
+        "height": 0.829
+      },
+      "color_hex": "#414E59",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.026,
+      "measured_bbox_m": {
+        "min": [
+          -1.14,
+          -0.0,
+          -0.4745
+        ],
+        "max": [
+          1.14,
+          0.829,
+          0.4745
+        ],
+        "size": [
+          2.28,
+          0.829,
+          0.949
+        ]
+      },
+      "max_abs_error_m": 1.4305114648394124e-08
+    },
+    "ikea-ekholma-sofa-kilanda-pale-blue": {
+      "asset_key": "e745f23b2f34017fdd44d972",
+      "asset_file": "e745f23b2f34017fdd44d972.usdz",
+      "asset_url": "/assets/e745f23b2f34017fdd44d972.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 2.07,
+        "depth": 0.851,
+        "height": 0.94
+      },
+      "color_hex": "#B3C7D0",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.1,
+      "measured_bbox_m": {
+        "min": [
+          -1.035,
+          -0.0,
+          -0.4255
+        ],
+        "max": [
+          1.035,
+          0.94,
+          0.4255
+        ],
+        "size": [
+          2.07,
+          0.94,
+          0.851
+        ]
+      },
+      "max_abs_error_m": 3.337860099428269e-08
+    },
+    "ikea-esseboda-loveseat-tallmyra-blue-birch": {
+      "asset_key": "d7234c5b4a5cab78fd563a85",
+      "asset_file": "d7234c5b4a5cab78fd563a85.usdz",
+      "asset_url": "/assets/d7234c5b4a5cab78fd563a85.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.921,
+        "depth": 0.959,
+        "height": 0.94
+      },
+      "color_hex": "#406C81",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.032,
+      "measured_bbox_m": {
+        "min": [
+          -0.9605,
+          -0.0,
+          -0.4795
+        ],
+        "max": [
+          0.9605,
+          0.94,
+          0.4795
+        ],
+        "size": [
+          1.921,
+          0.94,
+          0.959
+        ]
+      },
+      "max_abs_error_m": 4.291534461131619e-09
+    },
+    "ikea-klippan-loveseat-bomstad-black": {
+      "asset_key": "f719a1454ac206afa45bdc05",
+      "asset_file": "f719a1454ac206afa45bdc05.usdz",
+      "asset_url": "/assets/f719a1454ac206afa45bdc05.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.768,
+        "depth": 0.879,
+        "height": 0.66
+      },
+      "color_hex": "#232325",
+      "material": "fabric",
+      "cached": true,
+      "build_seconds": 0.022,
+      "measured_bbox_m": {
+        "min": [
+          -0.884,
+          -0.0,
+          -0.4395
+        ],
+        "max": [
+          0.884,
+          0.66,
+          0.4395
+        ],
+        "size": [
+          1.768,
+          0.66,
+          0.879
+        ]
+      },
+      "max_abs_error_m": 2.6226043781107933e-08
+    },
+    "ikea-kivik-loveseat-grann-bomstad-black": {
+      "asset_key": "7de84f26e29a0894482bd68d",
+      "asset_file": "7de84f26e29a0894482bd68d.usdz",
+      "asset_url": "/assets/7de84f26e29a0894482bd68d.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.899,
+        "depth": 0.949,
+        "height": 0.829
+      },
+      "color_hex": "#37363A",
+      "material": "fabric",
+      "cached": false,
+      "build_seconds": 0.041,
+      "measured_bbox_m": {
+        "min": [
+          -0.9495,
+          -0.0,
+          -0.4745
+        ],
+        "max": [
+          0.9495,
+          0.829,
+          0.4745
+        ],
+        "size": [
+          1.899,
+          0.829,
+          0.949
+        ]
+      },
+      "max_abs_error_m": 2.4318695057701234e-08
+    },
+    "ikea-morabo-sofa-gunnared-dark-gray-wood": {
+      "asset_key": "e76da476abad09704a38ea41",
+      "asset_file": "e76da476abad09704a38ea41.usdz",
+      "asset_url": "/assets/e76da476abad09704a38ea41.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 2.061,
+        "depth": 0.921,
+        "height": 0.81
+      },
+      "color_hex": "#535154",
+      "material": "fabric",
+      "cached": false,
+      "build_seconds": 0.033,
+      "measured_bbox_m": {
+        "min": [
+          -1.0305,
+          -0.0,
+          -0.4605
+        ],
+        "max": [
+          1.0305,
+          0.81,
+          0.4605
+        ],
+        "size": [
+          2.061,
+          0.81,
+          0.921
+        ]
+      },
+      "max_abs_error_m": 5.435943606357796e-08
+    },
+    "walmart-home-design-emma-chesterfield-sofa-navy": {
+      "asset_key": "56d455769ef6c0f3d43577ad",
+      "asset_file": "56d455769ef6c0f3d43577ad.usdz",
+      "asset_url": "/assets/56d455769ef6c0f3d43577ad.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 2.116,
+        "depth": 0.78,
+        "height": 0.785
+      },
+      "color_hex": "#213954",
+      "material": "fabric",
+      "cached": false,
+      "build_seconds": 0.038,
+      "measured_bbox_m": {
+        "min": [
+          -1.058,
+          -0.0,
+          -0.39
+        ],
+        "max": [
+          1.058,
+          0.785,
+          0.39
+        ],
+        "size": [
+          2.116,
+          0.785,
+          0.78
+        ]
+      },
+      "max_abs_error_m": 3.14712524929206e-08
+    },
+    "walmart-serta-hemsworth-sofa-navy-faux-leather": {
+      "asset_key": "6a70b21fa976f50ecb722efb",
+      "asset_file": "6a70b21fa976f50ecb722efb.usdz",
+      "asset_url": "/assets/6a70b21fa976f50ecb722efb.usdz",
+      "glb_file": null,
+      "category": "sofa",
+      "dimensions_m": {
+        "width": 1.981,
+        "depth": 0.831,
+        "height": 0.889
+      },
+      "color_hex": "#3C424E",
+      "material": "fabric",
+      "cached": false,
+      "build_seconds": 0.044,
+      "measured_bbox_m": {
+        "min": [
+          -0.9905,
+          -0.0,
+          -0.4155
+        ],
+        "max": [
+          0.9905,
+          0.889,
+          0.4155
+        ],
+        "size": [
+          1.981,
+          0.889,
+          0.831
+        ]
+      },
+      "max_abs_error_m": 2.6702880906448456e-08
+    },
+    "ikea-borgeby-coffee-table-birch-veneer": {
+      "asset_key": "8178af1cd3677daee1285ffe",
+      "asset_file": "8178af1cd3677daee1285ffe.usdz",
+      "asset_url": "/assets/8178af1cd3677daee1285ffe.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 0.699,
+        "depth": 0.699,
+        "height": 0.419
+      },
+      "color_hex": "#D0C7B7",
+      "material": "wood",
+      "cached": false,
+      "build_seconds": 0.029,
+      "measured_bbox_m": {
+        "min": [
+          -0.3495,
+          -0.0,
+          -0.3495
+        ],
+        "max": [
+          0.3495,
+          0.419,
+          0.3495
+        ],
+        "size": [
+          0.699,
+          0.419,
+          0.699
+        ]
+      },
+      "max_abs_error_m": 4.768372918739772e-10
+    },
+    "ikea-holmerud-coffee-table-oak-effect": {
+      "asset_key": "c4e379dbb7fc46f26fa2909a",
+      "asset_file": "c4e379dbb7fc46f26fa2909a.usdz",
+      "asset_url": "/assets/c4e379dbb7fc46f26fa2909a.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 0.899,
+        "depth": 0.549,
+        "height": 0.4
+      },
+      "color_hex": "#9C8467",
+      "material": "wood",
+      "cached": false,
+      "build_seconds": 0.012,
+      "measured_bbox_m": {
+        "min": [
+          -0.4495,
+          -0.0,
+          -0.2745
+        ],
+        "max": [
+          0.4495,
+          0.4,
+          0.2745
+        ],
+        "size": [
+          0.899,
+          0.4,
+          0.549
+        ]
+      },
+      "max_abs_error_m": 1.2397766202543181e-08
+    },
+    "ikea-valnas-coffee-table-oak-veneer": {
+      "asset_key": "519a48d416c0e1724b38114c",
+      "asset_file": "519a48d416c0e1724b38114c.usdz",
+      "asset_url": "/assets/519a48d416c0e1724b38114c.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 1.181,
+        "depth": 0.721,
+        "height": 0.498
+      },
+      "color_hex": "#CFB996",
+      "material": "wood",
+      "cached": false,
+      "build_seconds": 0.013,
+      "measured_bbox_m": {
+        "min": [
+          -0.5905,
+          -0.0,
+          -0.3605
+        ],
+        "max": [
+          0.5905,
+          0.498,
+          0.3605
+        ],
+        "size": [
+          1.181,
+          0.498,
+          0.721
+        ]
+      },
+      "max_abs_error_m": 7.867813234252452e-09
+    },
+    "ikea-vittsjo-coffee-table-light-beige-glass": {
+      "asset_key": "c6586e6e67da875a29ba5f15",
+      "asset_file": "c6586e6e67da875a29ba5f15.usdz",
+      "asset_url": "/assets/c6586e6e67da875a29ba5f15.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 0.749,
+        "depth": 0.749,
+        "height": 0.451
+      },
+      "color_hex": "#987C66",
+      "material": "wood",
+      "cached": true,
+      "build_seconds": 0.015,
+      "measured_bbox_m": {
+        "min": [
+          -0.3745,
+          -0.0,
+          -0.3745
+        ],
+        "max": [
+          0.3745,
+          0.451,
+          0.3745
+        ],
+        "size": [
+          0.749,
+          0.451,
+          0.749
+        ]
+      },
+      "max_abs_error_m": 6.437301747208579e-09
+    },
+    "ikea-lack-coffee-table-black-brown-large": {
+      "asset_key": "4fa870c3fe93f7eaa1431d34",
+      "asset_file": "4fa870c3fe93f7eaa1431d34.usdz",
+      "asset_url": "/assets/4fa870c3fe93f7eaa1431d34.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 1.181,
+        "depth": 0.781,
+        "height": 0.451
+      },
+      "color_hex": "#6A6967",
+      "material": "wood",
+      "cached": false,
+      "build_seconds": 0.014,
+      "measured_bbox_m": {
+        "min": [
+          -0.5905,
+          -0.0,
+          -0.3905
+        ],
+        "max": [
+          0.5905,
+          0.451,
+          0.3905
+        ],
+        "size": [
+          1.181,
+          0.451,
+          0.781
+        ]
+      },
+      "max_abs_error_m": 9.059906103114912e-09
+    },
+    "ikea-ortrask-coffee-table-black-ash-veneer": {
+      "asset_key": "234cd6a4674218241267e151",
+      "asset_file": "234cd6a4674218241267e151.usdz",
+      "asset_url": "/assets/234cd6a4674218241267e151.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 1.099,
+        "depth": 0.679,
+        "height": 0.349
+      },
+      "color_hex": "#404040",
+      "material": "wood",
+      "cached": false,
+      "build_seconds": 0.014,
+      "measured_bbox_m": {
+        "min": [
+          -0.5495,
+          -0.0,
+          -0.3395
+        ],
+        "max": [
+          0.5495,
+          0.349,
+          0.3395
+        ],
+        "size": [
+          1.099,
+          0.349,
+          0.679
+        ]
+      },
+      "max_abs_error_m": 1.144409178532868e-08
+    },
+    "ikea-tranered-coffee-table-dark-brown": {
+      "asset_key": "047a5079b6ed2d80505b328b",
+      "asset_file": "047a5079b6ed2d80505b328b.usdz",
+      "asset_url": "/assets/047a5079b6ed2d80505b328b.usdz",
+      "glb_file": null,
+      "category": "coffee_table",
+      "dimensions_m": {
+        "width": 0.899,
+        "depth": 0.899,
+        "height": 0.41
+      },
+      "color_hex": "#49403D",
+      "material": "wood",
+      "cached": false,
+      "build_seconds": 0.013,
+      "measured_bbox_m": {
+        "min": [
+          -0.4495,
+          -0.0,
+          -0.4495
+        ],
+        "max": [
+          0.4495,
+          0.41,
+          0.4495
+        ],
+        "size": [
+          0.899,
+          0.41,
+          0.899
+        ]
+      },
+      "max_abs_error_m": 5.483627441016381e-09
+    },
+    "abt-samsung-u8000h-55-un55u8000hfxza": {
+      "asset_key": "4de1a2507dc14d2ef7735aca",
+      "asset_file": "4de1a2507dc14d2ef7735aca.usdz",
+      "asset_url": "/assets/4de1a2507dc14d2ef7735aca.usdz",
+      "glb_file": null,
+      "category": "tv",
+      "dimensions_m": {
+        "width": 1.224,
+        "depth": 0.198,
+        "height": 0.759
+      },
+      "color_hex": "#16171A",
+      "material": "metal",
+      "cached": false,
+      "build_seconds": 0.013,
+      "measured_bbox_m": {
+        "min": [
+          -0.612,
+          -0.0,
+          -0.099
+        ],
+        "max": [
+          0.612,
+          0.759,
+          0.099
+        ],
+        "size": [
+          1.224,
+          0.759,
+          0.198
+        ]
+      },
+      "max_abs_error_m": 1.144409178532868e-08
+    },
+    "abt-tcl-q6lr-55-55q6lr": {
+      "asset_key": "f11d60becbffc193e376ad6f",
+      "asset_file": "f11d60becbffc193e376ad6f.usdz",
+      "asset_url": "/assets/f11d60becbffc193e376ad6f.usdz",
+      "glb_file": null,
+      "category": "tv",
+      "dimensions_m": {
+        "width": 1.224,
+        "depth": 0.274,
+        "height": 0.762
+      },
+      "color_hex": "#16171A",
+      "material": "metal",
+      "cached": false,
+      "build_seconds": 0.012,
+      "measured_bbox_m": {
+        "min": [
+          -0.612,
+          -0.0,
+          -0.137
+        ],
+        "max": [
+          0.612,
+          0.762,
+          0.137
+        ],
+        "size": [
+          1.224,
+          0.762,
+          0.274
+        ]
+      },
+      "max_abs_error_m": 2.4318695057701234e-08
+    },
+    "abt-lg-nu70-55-55nu700bpua": {
+      "asset_key": "6b67c33afc030d9cf126d6ab",
+      "asset_file": "6b67c33afc030d9cf126d6ab.usdz",
+      "asset_url": "/assets/6b67c33afc030d9cf126d6ab.usdz",
+      "glb_file": null,
+      "category": "tv",
+      "dimensions_m": {
+        "width": 1.227,
+        "depth": 0.231,
+        "height": 0.777
+      },
+      "color_hex": "#16171A",
+      "material": "metal",
+      "cached": true,
+      "build_seconds": 0.006,
+      "measured_bbox_m": {
+        "min": [
+          -0.6135,
+          -0.0,
+          -0.1155
+        ],
+        "max": [
+          0.6135,
+          0.777,
+          0.1155
+        ],
+        "size": [
+          1.227,
+          0.777,
+          0.231
+        ]
+      },
+      "max_abs_error_m": 1.0013580298284808e-08
+    },
+    "abt-sony-bravia-3-ii-55-k55xr30m2": {
+      "asset_key": "ac4bde35f18ab9876519fb61",
+      "asset_file": "ac4bde35f18ab9876519fb61.usdz",
+      "asset_url": "/assets/ac4bde35f18ab9876519fb61.usdz",
+      "glb_file": null,
+      "category": "tv",
+      "dimensions_m": {
+        "width": 1.226,
+        "depth": 0.26,
+        "height": 0.778
+      },
+      "color_hex": "#16171A",
+      "material": "metal",
+      "cached": false,
+      "build_seconds": 0.013,
+      "measured_bbox_m": {
+        "min": [
+          -0.613,
+          -0.0,
+          -0.13
+        ],
+        "max": [
+          0.613,
+          0.778,
+          0.13
+        ],
+        "size": [
+          1.226,
+          0.778,
+          0.26
+        ]
+      },
+      "max_abs_error_m": 2.4318695057701234e-08
+    },
+    "abt-samsung-the-frame-ls03f-55-qn55ls03fafxza": {
+      "asset_key": "b411a10a2db599e85d9f189d",
+      "asset_file": "b411a10a2db599e85d9f189d.usdz",
+      "asset_url": "/assets/b411a10a2db599e85d9f189d.usdz",
+      "glb_file": null,
+      "category": "tv",
+      "dimensions_m": {
+        "width": 1.237,
+        "depth": 0.229,
+        "height": 0.77
+      },
+      "color_hex": "#16171A",
+      "material": "metal",
+      "cached": false,
+      "build_seconds": 0.012,
+      "measured_bbox_m": {
+        "min": [
+          -0.6185,
+          -0.0,
+          -0.1145
+        ],
+        "max": [
+          0.6185,
+          0.77,
+          0.1145
+        ],
+        "size": [
+          1.237,
+          0.77,
+          0.229
+        ]
+      },
+      "max_abs_error_m": 1.907348634588857e-08
+    },
+    "ikea-landbana-rug-flatwoven-dark-blue-7x10": {
+      "asset_key": "e3f925353c2c5e0f701bc733",
+      "asset_file": "e3f925353c2c5e0f701bc733.usdz",
+      "asset_url": "/assets/e3f925353c2c5e0f701bc733.usdz",
+      "glb_file": null,
+      "category": "rug",
+      "dimensions_m": {
+        "width": 2.997,
+        "depth": 2.388,
+        "height": 0.013
+      },
+      "color_hex": "#3B4E50",
+      "material": "wool",
+      "cached": false,
+      "build_seconds": 0.014,
+      "measured_bbox_m": {
+        "min": [
+          -1.4985,
+          -0.0,
+          -1.194
+        ],
+        "max": [
+          1.4985,
+          0.013,
+          1.194
+        ],
+        "size": [
+          2.997,
+          0.013,
+          2.388
+        ]
+      },
+      "max_abs_error_m": 1.0490417423625331e-08
+    },
+    "ikea-hotellrum-rug-high-pile-blue-green-yellow": {
+      "asset_key": "d3891165c9c0a2c1ad2fa7d7",
+      "asset_file": "d3891165c9c0a2c1ad2fa7d7.usdz",
+      "asset_url": "/assets/d3891165c9c0a2c1ad2fa7d7.usdz",
+      "glb_file": null,
+      "category": "rug",
+      "dimensions_m": {
+        "width": 2.311,
+        "depth": 1.6,
+        "height": 0.019
+      },
+      "color_hex": "#DFB81F",
+      "material": "wool",
+      "cached": false,
+      "build_seconds": 0.013,
+      "measured_bbox_m": {
+        "min": [
+          -1.1555,
+          -0.0,
+          -0.8
+        ],
+        "max": [
+          1.1555,
+          0.019,
+          0.8
+        ],
+        "size": [
+          2.311,
+          0.019,
+          1.6
+        ]
+      },
+      "max_abs_error_m": 5.435943606357796e-08
+    },
+    "ikea-tiokrona-rug-flatwoven-natural-8x10": {
+      "asset_key": "2ca442750f8d5078a1137250",
+      "asset_file": "2ca442750f8d5078a1137250.usdz",
+      "asset_url": "/assets/2ca442750f8d5078a1137250.usdz",
+      "glb_file": null,
+      "category": "rug",
+      "dimensions_m": {
+        "width": 2.997,
+        "depth": 2.388,
+        "height": 0.006
+      },
+      "color_hex": "#B5A387",
+      "material": "wool",
+      "cached": true,
+      "build_seconds": 0.007,
+      "measured_bbox_m": {
+        "min": [
+          -1.4985,
+          -0.0,
+          -1.194
+        ],
+        "max": [
+          1.4985,
+          0.006,
+          1.194
+        ],
+        "size": [
+          2.997,
+          0.006,
+          2.388
+        ]
+      },
+      "max_abs_error_m": 1.0490417423625331e-08
+    },
+    "ikea-lohals-rug-flatwoven-natural-7x10": {
+      "asset_key": "ccd37bd05c1150980eeb01cf",
+      "asset_file": "ccd37bd05c1150980eeb01cf.usdz",
+      "asset_url": "/assets/ccd37bd05c1150980eeb01cf.usdz",
+      "glb_file": null,
+      "category": "rug",
+      "dimensions_m": {
+        "width": 2.997,
+        "depth": 2.007,
+        "height": 0.013
+      },
+      "color_hex": "#9D816C",
+      "material": "wool",
+      "cached": false,
+      "build_seconds": 0.012,
+      "measured_bbox_m": {
+        "min": [
+          -1.4985,
+          -0.0,
+          -1.0035
+        ],
+        "max": [
+          1.4985,
+          0.013,
+          1.0035
+        ],
+        "size": [
+          2.997,
+          0.013,
+          2.007
+        ]
+      },
+      "max_abs_error_m": 1.5258789121119776e-08
+    },
+    "ikea-jarnvag-rug-low-pile-ornament-pink-beige": {
+      "asset_key": "1429d9f49e402d6f70e2b87f",
+      "asset_file": "1429d9f49e402d6f70e2b87f.usdz",
+      "asset_url": "/assets/1429d9f49e402d6f70e2b87f.usdz",
+      "glb_file": null,
+      "category": "rug",
+      "dimensions_m": {
+        "width": 2.311,
+        "depth": 1.6,
+        "height": 0.013
+      },
+      "color_hex": "#C8B39E",
+      "material": "wool",
+      "cached": false,
+      "build_seconds": 0.013,
+      "measured_bbox_m": {
+        "min": [
+          -1.1555,
+          -0.0,
+          -0.8
+        ],
+        "max": [
+          1.1555,
+          0.013,
+          0.8
+        ],
+        "size": [
+          2.311,
+          0.013,
+          1.6
+        ]
+      },
+      "max_abs_error_m": 5.435943606357796e-08
+    },
+    "ikea-stockholm-rug-flatwoven-stripe-black-off-white": {
+      "asset_key": "8923a5d9efc94edb8b91ad3a",
+      "asset_file": "8923a5d9efc94edb8b91ad3a.usdz",
+      "asset_url": "/assets/8923a5d9efc94edb8b91ad3a.usdz",
+      "glb_file": null,
+      "category": "rug",
+      "dimensions_m": {
+        "width": 3.505,
+        "depth": 2.489,
+        "height": 0.006
+      },
+      "color_hex": "#101011",
+      "material": "wool",
+      "cached": false,
+      "build_seconds": 0.014,
+      "measured_bbox_m": {
+        "min": [
+          -1.7525,
+          -0.0,
+          -1.2445
+        ],
+        "max": [
+          1.7525,
+          0.006,
+          1.2445
+        ],
+        "size": [
+          3.505,
+          0.006,
+          2.489
+        ]
+      },
+      "max_abs_error_m": 5.7220459037665705e-08
+    }
+  },
+  "skipped": {},
+  "failed": {}
+}

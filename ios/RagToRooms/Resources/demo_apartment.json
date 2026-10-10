@@ -1,0 +1,42 @@
+{
+  "id": "demo",
+  "name": "3 bed / 3 bath apartment",
+  "width_m": 10.5,
+  "depth_m": 9.5,
+  "members": [
+    {"id": "emily", "name": "Emily"},
+    {"id": "maya", "name": "Maya"},
+    {"id": "alex", "name": "Alex"}
+  ],
+  "rooms": [
+    {"id": "bed-emily", "name": "Emily's bedroom", "kind": "bedroom", "shared": false, "owner_id": "emily",
+     "household_id": "demo-bed-emily", "x_m": 0.0, "z_m": 0.0, "width_m": 3.5, "depth_m": 3.5,
+     "summary": {"proposal_version": 1, "status": "awaiting_approval", "known_total_cents": 90600,
+                 "shares": {"emily": 90600}, "item_count": 4,
+                 "approvals_done": 0, "approvals_needed": 1, "settled": false}},
+    {"id": "bed-maya", "name": "Maya's bedroom", "kind": "bedroom", "shared": false, "owner_id": "maya",
+     "household_id": "demo-bed-maya", "x_m": 3.5, "z_m": 0.0, "width_m": 3.5, "depth_m": 3.5, "summary": {}},
+    {"id": "bed-alex", "name": "Alex's bedroom", "kind": "bedroom", "shared": false, "owner_id": "alex",
+     "household_id": "demo-bed-alex", "x_m": 7.0, "z_m": 0.0, "width_m": 3.5, "depth_m": 3.5, "summary": {}},
+
+    {"id": "bath-1", "name": "Bathroom", "kind": "bathroom", "shared": false, "owner_id": null,
+     "household_id": null, "x_m": 0.0, "z_m": 3.5, "width_m": 2.5, "depth_m": 2.0, "summary": null},
+    {"id": "bath-2", "name": "Bathroom", "kind": "bathroom", "shared": false, "owner_id": null,
+     "household_id": null, "x_m": 2.5, "z_m": 3.5, "width_m": 2.5, "depth_m": 2.0, "summary": null},
+    {"id": "hall", "name": "Hall", "kind": "hall", "shared": true, "owner_id": null,
+     "household_id": null, "x_m": 5.0, "z_m": 3.5, "width_m": 3.0, "depth_m": 2.0, "summary": null},
+    {"id": "bath-3", "name": "Bathroom", "kind": "bathroom", "shared": false, "owner_id": null,
+     "household_id": null, "x_m": 8.0, "z_m": 3.5, "width_m": 2.5, "depth_m": 2.0, "summary": null},
+
+    {"id": "living", "name": "Living room", "kind": "living", "shared": true, "owner_id": null,
+     "household_id": "demo", "x_m": 0.0, "z_m": 5.5, "width_m": 4.5, "depth_m": 4.0,
+     "summary": {"proposal_version": 1, "status": "awaiting_approval", "known_total_cents": 110000,
+                 "shares": {"emily": 45000, "maya": 45000, "alex": 20000}, "item_count": 4,
+                 "approvals_done": 1, "approvals_needed": 3, "settled": false}},
+    {"id": "kitchen", "name": "Kitchen (coming soon)", "kind": "kitchen", "shared": true, "owner_id": null,
+     "household_id": null, "x_m": 4.5, "z_m": 5.5, "width_m": 3.0, "depth_m": 4.0, "summary": null},
+    {"id": "entry", "name": "Entry", "kind": "hall", "shared": true, "owner_id": null,
+     "household_id": null, "x_m": 7.5, "z_m": 5.5, "width_m": 3.0, "depth_m": 4.0, "summary": null}
+  ],
+  "totals": {"known_total_cents": 200600, "by_member_cents": {"emily": 135600, "maya": 45000, "alex": 20000}}
+}

@@ -1,0 +1,1253 @@
+[
+  {
+    "id": "walmart-renwick-channel-tufted-bed-queen-navy",
+    "retailer": "Walmart",
+    "retailer_product_id": "20616613199",
+    "title": "Renwick Queen Upholstered Platform Bed Frame with Channel Tufted Headboard",
+    "variant": "Navy Blue, Queen",
+    "category": "bed",
+    "description": "Add comfort and style to your bedroom with this Renwick upholstered platform bed. Featuring clean lines, classic tufted details, and durable linen fabric, it brings a refined look to modern spaces. The upholstered headboard creates a cozy and inviting feel, while sturdy wood slats and center…",
+    "image_url": "https://i5.walmartimages.com/seo/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue_22728938-26ef-413c-931b-44f01ad45418.b16f479afa122e26bf7bef9b97d627f3.png",
+    "local_image": "product_images/walmart-renwick-channel-tufted-bed-queen-navy.jpg",
+    "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199",
+    "price_cents": 10999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.575,
+      "depth": 2.096,
+      "height": 1.143
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"priceString\":\"$109.99\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"82.50 x 62.00 x 45.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"82.50 x 62.00 x 45.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"82.50 x 62.00 x 45.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#2C3A55",
+      "material": "linen blend fabric, wood frame",
+      "tags": [
+        "navy",
+        "blue",
+        "upholstered",
+        "channel tufted",
+        "modern",
+        "budget",
+        "queen"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tarva-bed-queen-pine",
+    "retailer": "IKEA",
+    "retailer_product_id": "s29007794",
+    "title": "TARVA Bed frame",
+    "variant": "pine/Luröy, Queen",
+    "category": "bed",
+    "description": "TARVA Bed frame - pine/Luröy, Queen. TARVA bed frame, pine/Luröy, Queen TARVA bed frame is a modern example of Scandinavian furniture tradition – a simple design and untreated wood. A timeless expression mixes nicely with a variety of other styles and furniture.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tarva-bed-frame-pine-luroey__1102036_pe866857_s5.jpg",
+    "local_image": "product_images/ikea-tarva-bed-queen-pine.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tarva-bed-frame-pine-luroey-s29007794/",
+    "price_cents": 19900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.6,
+      "depth": 2.089,
+      "height": 0.921
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"199\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-bed-frame-pine-luroey-s29007794/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 63 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-bed-frame-pine-luroey-s29007794/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Length 82 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-bed-frame-pine-luroey-s29007794/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Headboard height 36 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-bed-frame-pine-luroey-s29007794/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#D9BE92",
+      "material": "solid pine",
+      "tags": [
+        "light wood",
+        "pine",
+        "scandinavian",
+        "minimalist",
+        "budget",
+        "queen",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-malm-bed-queen-dark-brown",
+    "retailer": "IKEA",
+    "retailer_product_id": "s09574367",
+    "title": "MALM Bed frame",
+    "variant": "dark-brown veneer, Queen",
+    "category": "bed",
+    "description": "MALM Bed frame - dark-brown veneer, Queen. MALM bed frame, dark-brown veneer, Queen A clean design that’s just as beautiful on all sides – place the bed on its own or with the headboard against a wall. If you need space for extra bedding, add MALM bed storage boxes on casters. Suitable for business use.",
+    "image_url": "https://www.ikea.com/us/en/images/products/malm-bed-frame-dark-brown-veneer__1364773_pe956029_s5.jpg",
+    "local_image": "product_images/ikea-malm-bed-queen-dark-brown.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/malm-bed-frame-dark-brown-veneer-s09574367/",
+    "price_cents": 24900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.68,
+      "depth": 2.111,
+      "height": 1.0
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"249\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/malm-bed-frame-dark-brown-veneer-s09574367/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 66 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/malm-bed-frame-dark-brown-veneer-s09574367/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Length 83 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/malm-bed-frame-dark-brown-veneer-s09574367/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 39 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/malm-bed-frame-dark-brown-veneer-s09574367/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#4A3B32",
+      "material": "dark-brown veneer",
+      "tags": [
+        "dark wood",
+        "dark brown",
+        "modern",
+        "queen",
+        "theme-contrast"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-bjorksnas-bed-queen-birch",
+    "retailer": "IKEA",
+    "retailer_product_id": "s89501715",
+    "title": "BJÖRKSNÄS Bed frame",
+    "variant": "birch/birch veneer/Luröy, Queen",
+    "category": "bed",
+    "description": "BJÖRKSNÄS Bed frame - birch/birch veneer/Luröy, Queen. BJÖRKSNÄS bed frame, birch/birch veneer/Luröy, Queen The BJÖRKSNÄS collection has its roots in Scandinavian craftsmanship tradition. Classic and freestanding in durable natural materials with nice details and proportions that make them fit in many rooms.",
+    "image_url": "https://www.ikea.com/us/en/images/products/bjoerksnaes-bed-frame-birch-birch-veneer-luroey__1175827_pe894831_s5.jpg",
+    "local_image": "product_images/ikea-bjorksnas-bed-queen-birch.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/bjoerksnaes-bed-frame-birch-birch-veneer-luroey-s89501715/",
+    "price_cents": 49900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.721,
+      "depth": 2.149,
+      "height": 1.089
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"499\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/bjoerksnaes-bed-frame-birch-birch-veneer-luroey-s89501715/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 67 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/bjoerksnaes-bed-frame-birch-birch-veneer-luroey-s89501715/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Length 84 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/bjoerksnaes-bed-frame-birch-birch-veneer-luroey-s89501715/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Headboard height 42 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/bjoerksnaes-bed-frame-birch-birch-veneer-luroey-s89501715/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#D8C3A0",
+      "material": "solid birch, birch veneer",
+      "tags": [
+        "light wood",
+        "birch",
+        "scandinavian",
+        "premium",
+        "queen",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tonstad-storage-bed-queen-oak",
+    "retailer": "IKEA",
+    "retailer_product_id": "10489146",
+    "title": "TONSTAD Bed frame with storage",
+    "variant": "oak veneer, Queen",
+    "category": "bed",
+    "description": "TONSTAD Bed frame with storage - oak veneer, Queen. TONSTAD bed frame with storage, oak veneer, Queen Classic design meets beautifully brushed veneer in the TONSTAD series, giving the furniture a unique character. This bed frame has soft-closing drawers, making the most of the space under the bed.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tonstad-bed-frame-with-storage-oak-veneer__1320919_pe941443_s5.jpg",
+    "local_image": "product_images/ikea-tonstad-storage-bed-queen-oak.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tonstad-bed-frame-with-storage-oak-veneer-10489146/",
+    "price_cents": 69900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.61,
+      "depth": 2.111,
+      "height": 1.159
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"699\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-bed-frame-with-storage-oak-veneer-10489146/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 63 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-bed-frame-with-storage-oak-veneer-10489146/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Length 83 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-bed-frame-with-storage-oak-veneer-10489146/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Headboard height 45 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-bed-frame-with-storage-oak-veneer-10489146/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#C9A97C",
+      "material": "oak veneer",
+      "tags": [
+        "light wood",
+        "oak",
+        "scandinavian",
+        "storage",
+        "premium",
+        "queen",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-grafjallet-nightstand-anthracite",
+    "retailer": "IKEA",
+    "retailer_product_id": "20570221",
+    "title": "GRÅFJÄLLET Nightstand",
+    "variant": "anthracite",
+    "category": "nightstand",
+    "description": "GRÅFJÄLLET Nightstand - anthracite. GRÅFJÄLLET nightstand, anthracite, 173/4x141/8x231/4\" The GRÅFJÄLLET series combines industrial influences with clean and bold lines that create a timeless look. The bedside table has open storage on two levels and a generous hidden area behind the door.",
+    "image_url": "https://www.ikea.com/us/en/images/products/grafjaellet-nightstand-anthracite__1327638_pe944536_s5.jpg",
+    "local_image": "product_images/ikea-grafjallet-nightstand-anthracite.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/",
+    "price_cents": 4999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.451,
+      "depth": 0.359,
+      "height": 0.591
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"49.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 17 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 14 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 23 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#3A3B3D",
+      "material": "particleboard, anthracite",
+      "tags": [
+        "dark",
+        "anthracite",
+        "gray",
+        "budget",
+        "modern",
+        "theme-contrast"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tarva-nightstand-pine",
+    "retailer": "IKEA",
+    "retailer_product_id": "50219609",
+    "title": "TARVA Nightstand",
+    "variant": "pine",
+    "category": "nightstand",
+    "description": "TARVA Nightstand - pine. TARVA nightstand, pine, 187/8x153/8x243/8\" The simple design and untreated wood are typical for the Scandinavian furniture tradition. The modern, airy expression mixes nicely with a variety of other styles and furniture. Made of solid wood, which is a durable and warm natural material.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tarva-nightstand-pine__0624428_pe691835_s5.jpg",
+    "local_image": "product_images/ikea-tarva-nightstand-pine.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tarva-nightstand-pine-50219609/",
+    "price_cents": 7999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.479,
+      "depth": 0.391,
+      "height": 0.619
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"79.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-nightstand-pine-50219609/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 18 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-nightstand-pine-50219609/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 15 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-nightstand-pine-50219609/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 24 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tarva-nightstand-pine-50219609/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#D9BE92",
+      "material": "solid pine",
+      "tags": [
+        "light wood",
+        "pine",
+        "scandinavian",
+        "budget",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-fagelfjallet-nightstand-dark-gray-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "60633537",
+    "title": "FÅGELFJÄLLET Nightstand",
+    "variant": "dark gray-blue",
+    "category": "nightstand",
+    "description": "FÅGELFJÄLLET Nightstand - dark gray-blue. FÅGELFJÄLLET nightstand, dark gray-blue, 201/2x181/8x26\" The FÅGELFJÄLLET bedroom series features decorative details with a crafted feel. This bedside table has framed fronts, profiled edges and brass-effect knobs – and practical cable management. The surface is durable and easy to keep clean.",
+    "image_url": "https://www.ikea.com/us/en/images/products/fagelfjaellet-nightstand-dark-gray-blue__1509596_pe1009766_s5.jpg",
+    "local_image": "product_images/ikea-fagelfjallet-nightstand-dark-gray-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-nightstand-dark-gray-blue-60633537/",
+    "price_cents": 8999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.521,
+      "depth": 0.46,
+      "height": 0.66
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"89.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-nightstand-dark-gray-blue-60633537/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 20 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-nightstand-dark-gray-blue-60633537/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 18 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-nightstand-dark-gray-blue-60633537/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 26 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-nightstand-dark-gray-blue-60633537/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#4F5F6E",
+      "material": "particleboard, painted dark gray-blue",
+      "tags": [
+        "blue",
+        "gray-blue",
+        "blue accent",
+        "shaker",
+        "brass handles",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-radmanso-nightstand-walnut-effect",
+    "retailer": "IKEA",
+    "retailer_product_id": "80593597",
+    "title": "RÅDMANSÖ Nightstand",
+    "variant": "brown walnut effect",
+    "category": "nightstand",
+    "description": "RÅDMANSÖ Nightstand - brown walnut effect. RÅDMANSÖ nightstand, brown walnut effect, 211/4x151/8x227/8\" The RÅDMANSÖ series is inspired by mid-century design with sleek lines, great functionality and a warm walnut tone. This bedside table has a drawer and a shelf – and cable management to hide your cords.",
+    "image_url": "https://www.ikea.com/us/en/images/products/radmansoe-nightstand-brown-walnut-effect__1384141_pe962860_s5.jpg",
+    "local_image": "product_images/ikea-radmanso-nightstand-walnut-effect.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/radmansoe-nightstand-brown-walnut-effect-80593597/",
+    "price_cents": 9999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.54,
+      "depth": 0.384,
+      "height": 0.581
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"99.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-nightstand-brown-walnut-effect-80593597/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 21 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-nightstand-brown-walnut-effect-80593597/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 15 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-nightstand-brown-walnut-effect-80593597/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 22 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-nightstand-brown-walnut-effect-80593597/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#6B4A33",
+      "material": "particleboard, walnut effect",
+      "tags": [
+        "dark wood",
+        "walnut",
+        "mid-century",
+        "theme-contrast"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tonstad-nightstand-oak",
+    "retailer": "IKEA",
+    "retailer_product_id": "80489322",
+    "title": "TONSTAD Nightstand",
+    "variant": "oak veneer",
+    "category": "nightstand",
+    "description": "TONSTAD Nightstand - oak veneer. TONSTAD nightstand, oak veneer, 153/4x153/4x231/4\" Classic design meets beautifully brushed veneer in the TONSTAD series, giving the furniture a unique character. Details like an integrated handle and round legs add a timeless look to this bedside table.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tonstad-nightstand-oak-veneer__1247217_pe922597_s5.jpg",
+    "local_image": "product_images/ikea-tonstad-nightstand-oak.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tonstad-nightstand-oak-veneer-80489322/",
+    "price_cents": 14999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.4,
+      "depth": 0.4,
+      "height": 0.591
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"149.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-nightstand-oak-veneer-80489322/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 15 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-nightstand-oak-veneer-80489322/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 15 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-nightstand-oak-veneer-80489322/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 23 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-nightstand-oak-veneer-80489322/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#C9A97C",
+      "material": "oak veneer",
+      "tags": [
+        "light wood",
+        "oak",
+        "scandinavian",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-rast-6-drawer-dresser-pine",
+    "retailer": "IKEA",
+    "retailer_product_id": "00582164",
+    "title": "RAST 6-drawer dresser",
+    "variant": "pine",
+    "category": "dresser",
+    "description": "RAST 6-drawer dresser - pine. RAST 6-drawer dresser, pine, 487/8x263/4\" A tribute to traditional Scandinavian design! Love the RAST chest of drawers as it is – or make it more personal by painting it. The generous storage in a compact size makes it ideal for smaller spaces.",
+    "image_url": "https://www.ikea.com/us/en/images/products/rast-6-drawer-dresser-pine__1291248_pe934862_s5.jpg",
+    "local_image": "product_images/ikea-rast-6-drawer-dresser-pine.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/",
+    "price_cents": 12999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.241,
+      "depth": 0.349,
+      "height": 0.679
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"129.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 48 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 13 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 26 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#E3CDA4",
+      "material": "solid pine (untreated)",
+      "tags": [
+        "light wood",
+        "pine",
+        "budget",
+        "low",
+        "scandinavian",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-storklinta-6-drawer-dresser-white",
+    "retailer": "IKEA",
+    "retailer_product_id": "60561248",
+    "title": "STORKLINTA 6-drawer dresser",
+    "variant": "white/anchor/unlock function",
+    "category": "dresser",
+    "description": "STORKLINTA 6-drawer dresser - white/anchor/unlock function. STORKLINTA 6-drawer dresser, white/anchor/unlock function, 551/8x187/8x291/2\" The STORKLINTA series has a modern, simple design that is easy to live with. The chest of drawers comes with Anchor and Unlock that helps to reduce the tip-over risk when combined with wall-anchoring.",
+    "image_url": "https://www.ikea.com/us/en/images/products/storklinta-6-drawer-dresser-white-anchor-unlock-function__1590235_pe1038874_s5.jpg",
+    "local_image": "product_images/ikea-storklinta-6-drawer-dresser-white.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/storklinta-6-drawer-dresser-white-anchor-unlock-function-60561248/",
+    "price_cents": 24999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.4,
+      "depth": 0.479,
+      "height": 0.749
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"249.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/storklinta-6-drawer-dresser-white-anchor-unlock-function-60561248/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 55 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/storklinta-6-drawer-dresser-white-anchor-unlock-function-60561248/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 18 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/storklinta-6-drawer-dresser-white-anchor-unlock-function-60561248/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/storklinta-6-drawer-dresser-white-anchor-unlock-function-60561248/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#F2F2F0",
+      "material": "particleboard, white",
+      "tags": [
+        "white",
+        "neutral",
+        "modern",
+        "minimalist",
+        "wide"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-fagelfjallet-6-drawer-dresser-dark-gray-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "10628246",
+    "title": "FÅGELFJÄLLET 6-drawer dresser",
+    "variant": "dark gray-blue",
+    "category": "dresser",
+    "description": "FÅGELFJÄLLET 6-drawer dresser - dark gray-blue. FÅGELFJÄLLET 6-drawer dresser, dark gray-blue, 321/4x201/8x483/8\" The FÅGELFJÄLLET bedroom series features decorative details with a crafted feel. This chest of drawers has framed fronts, profiled edges and brass-effect handles – plus generous storage! The surface is durable and easy to keep clean.",
+    "image_url": "https://www.ikea.com/us/en/images/products/fagelfjaellet-6-drawer-dresser-dark-gray-blue__1511221_pe1009978_s5.jpg",
+    "local_image": "product_images/ikea-fagelfjallet-6-drawer-dresser-dark-gray-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-6-drawer-dresser-dark-gray-blue-10628246/",
+    "price_cents": 27999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.819,
+      "depth": 0.511,
+      "height": 1.229
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"279.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-6-drawer-dresser-dark-gray-blue-10628246/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 32 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-6-drawer-dresser-dark-gray-blue-10628246/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 20 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-6-drawer-dresser-dark-gray-blue-10628246/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 48 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fagelfjaellet-6-drawer-dresser-dark-gray-blue-10628246/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#4F5F6E",
+      "material": "particleboard, painted dark gray-blue",
+      "tags": [
+        "blue",
+        "gray-blue",
+        "blue accent",
+        "tall",
+        "shaker",
+        "brass handles",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-ankarudden-6-drawer-dresser-oak-effect",
+    "retailer": "IKEA",
+    "retailer_product_id": "80598057",
+    "title": "ANKARUDDEN 6-drawer dresser",
+    "variant": "with 2 inner drawers/oak effect",
+    "category": "dresser",
+    "description": "ANKARUDDEN 6-drawer dresser - with 2 inner drawers/oak effect. ANKARUDDEN 6-drawer dresser, with 2 inner drawers/oak effect, 541/2x187/8x343/8\" ANKARUDDEN storage series combines stylish Scandinavian design with practical storage. This chest of drawers has 6 generous drawers with integrated handles – plus 2 additional inner drawers for smaller items.",
+    "image_url": "https://www.ikea.com/us/en/images/products/ankarudden-6-drawer-dresser-with-2-inner-drawers-oak-effect__1486741_pe1002562_s5.jpg",
+    "local_image": "product_images/ikea-ankarudden-6-drawer-dresser-oak-effect.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/ankarudden-6-drawer-dresser-with-2-inner-drawers-oak-effect-80598057/",
+    "price_cents": 29999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.384,
+      "depth": 0.479,
+      "height": 0.873
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"299.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/ankarudden-6-drawer-dresser-with-2-inner-drawers-oak-effect-80598057/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 54 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/ankarudden-6-drawer-dresser-with-2-inner-drawers-oak-effect-80598057/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 18 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/ankarudden-6-drawer-dresser-with-2-inner-drawers-oak-effect-80598057/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 34 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/ankarudden-6-drawer-dresser-with-2-inner-drawers-oak-effect-80598057/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#C8A57A",
+      "material": "particleboard, oak effect",
+      "tags": [
+        "light wood",
+        "oak",
+        "scandinavian",
+        "modern",
+        "wide",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-radmanso-6-drawer-dresser-walnut-effect",
+    "retailer": "IKEA",
+    "retailer_product_id": "40593839",
+    "title": "RÅDMANSÖ 6-drawer dresser",
+    "variant": "brown walnut effect",
+    "category": "dresser",
+    "description": "RÅDMANSÖ 6-drawer dresser - brown walnut effect. RÅDMANSÖ 6-drawer dresser, brown walnut effect, 625/8x187/8x317/8\" The RÅDMANSÖ series is inspired by mid-century design with sleek lines, great functionality and a warm walnut tone. This wide chest of drawers has 6 generous drawers – and a top that’s great for display.",
+    "image_url": "https://www.ikea.com/us/en/images/products/radmansoe-6-drawer-dresser-brown-walnut-effect__1416942_pe975719_s5.jpg",
+    "local_image": "product_images/ikea-radmanso-6-drawer-dresser-walnut-effect.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/radmansoe-6-drawer-dresser-brown-walnut-effect-40593839/",
+    "price_cents": 34999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.591,
+      "depth": 0.479,
+      "height": 0.81
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"349.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-6-drawer-dresser-brown-walnut-effect-40593839/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 62 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-6-drawer-dresser-brown-walnut-effect-40593839/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 18 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-6-drawer-dresser-brown-walnut-effect-40593839/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 31 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/radmansoe-6-drawer-dresser-brown-walnut-effect-40593839/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#6B4A33",
+      "material": "particleboard, walnut effect",
+      "tags": [
+        "dark wood",
+        "walnut",
+        "mid-century",
+        "wide",
+        "theme-contrast"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-micke-desk-white",
+    "retailer": "IKEA",
+    "retailer_product_id": "80213074",
+    "title": "MICKE Desk",
+    "variant": "white, 41 3/8x19 5/8\"",
+    "category": "desk",
+    "description": "MICKE Desk - white, 41 3/8x19 5/8\". MICKE desk, white, 413/8x195/8\" A clean and simple look that fits just about anywhere. You can combine it with other desks or drawer units in the MICKE series to extend your work space. The clever design at the back hides messy cables. Drawer stops prevent the drawers from being pulled out too far.",
+    "image_url": "https://www.ikea.com/us/en/images/products/micke-desk-white__0736018_pe740345_s5.jpg",
+    "local_image": "product_images/ikea-micke-desk-white.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/",
+    "price_cents": 10999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.051,
+      "depth": 0.498,
+      "height": 0.749
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"109.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 41 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 19 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#F2F2F0",
+      "material": "particleboard, white",
+      "tags": [
+        "white",
+        "budget",
+        "minimalist",
+        "compact",
+        "modern"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-fjallbo-desk-black",
+    "retailer": "IKEA",
+    "retailer_product_id": "90587690",
+    "title": "FJÄLLBO Desk",
+    "variant": "black, 55 1/8x27 1/2\"",
+    "category": "desk",
+    "description": "FJÄLLBO Desk - black, 55 1/8x27 1/2\". FJÄLLBO desk, black, 551/8x271/2\" The metal adds an industrial feel and solid wood makes each piece of furniture unique. FJÄLLBO desk is suitable for those who want a practical hobby space with storage and like a robust and modern style.",
+    "image_url": "https://www.ikea.com/us/en/images/products/fjaellbo-desk-black__1342778_pe949117_s5.jpg",
+    "local_image": "product_images/ikea-fjallbo-desk-black.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/fjaellbo-desk-black-90587690/",
+    "price_cents": 24999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.4,
+      "depth": 0.699,
+      "height": 0.749
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"249.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/fjaellbo-desk-black-90587690/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 55 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fjaellbo-desk-black-90587690/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 27 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fjaellbo-desk-black-90587690/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/fjaellbo-desk-black-90587690/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#2B2B2B",
+      "material": "steel frame, pine top",
+      "tags": [
+        "black",
+        "metal",
+        "industrial",
+        "dark",
+        "theme-contrast"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "walmart-nathan-james-haley-desk-light-brown",
+    "retailer": "Walmart",
+    "retailer_product_id": "17548464889",
+    "title": "Nathan James Haley Mid Century Modern Home Office Desk",
+    "variant": "Light Brown",
+    "category": "desk",
+    "description": "Here's the Haley mid century modern home office desk - a combination of clean lines and natural warmth that adds a timeless sophistication to your workspace. This solid wood writing desk features spacious large middle drawer for storing essentials, accented by a smooth wood drawer pull for a…",
+    "image_url": "https://i5.walmartimages.com/seo/Nathan-James-Haley-Mid-Century-Modern-Home-Office-Desk-Solid-Wood-Writing-Desk-with-Drawer-and-Rounded-Legs-Light-Brown_ec264395-a411-4f8d-b424-f0510be1734f.d8a89539c6b4321d714e36566d821fa8.jpeg",
+    "local_image": "product_images/walmart-nathan-james-haley-desk-light-brown.jpg",
+    "source_url": "https://www.walmart.com/ip/Nathan-James-Haley-Mid-Century-Modern-Home-Office-Desk-Solid-Wood-Writing-Desk-with-Drawer-and-Rounded-Legs-Light-Brown/17548464889",
+    "price_cents": 26143,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.219,
+      "depth": 0.61,
+      "height": 0.762
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"priceString\":\"$261.43\"",
+        "source_url": "https://www.walmart.com/ip/Nathan-James-Haley-Mid-Century-Modern-Home-Office-Desk-Solid-Wood-Writing-Desk-with-Drawer-and-Rounded-Legs-Light-Brown/17548464889"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"24.00 x 48.00 x 30.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Nathan-James-Haley-Mid-Century-Modern-Home-Office-Desk-Solid-Wood-Writing-Desk-with-Drawer-and-Rounded-Legs-Light-Brown/17548464889"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"24.00 x 48.00 x 30.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Nathan-James-Haley-Mid-Century-Modern-Home-Office-Desk-Solid-Wood-Writing-Desk-with-Drawer-and-Rounded-Legs-Light-Brown/17548464889"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"24.00 x 48.00 x 30.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Nathan-James-Haley-Mid-Century-Modern-Home-Office-Desk-Solid-Wood-Writing-Desk-with-Drawer-and-Rounded-Legs-Light-Brown/17548464889"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#B98E5F",
+      "material": "rubberwood, rubberwood veneer, MDF",
+      "tags": [
+        "light wood",
+        "rubberwood",
+        "mid-century",
+        "modern",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-lisabo-desk-ash",
+    "retailer": "IKEA",
+    "retailer_product_id": "10606273",
+    "title": "LISABO Desk",
+    "variant": "ash veneer, 50 3/8x25 5/8\"",
+    "category": "desk",
+    "description": "LISABO Desk - ash veneer, 50 3/8x25 5/8\". LISABO desk, ash veneer, 503/8x255/8\" The design of the LISABO series has been awarded the prestigious Red Dot Award. Here’s the same durable and stable, yet also neat style expression in a slightly more spacious table with a practical drawer. Easy to assemble as each leg has only one fitting.",
+    "image_url": "https://www.ikea.com/us/en/images/products/lisabo-desk-ash-veneer__1487203_pe1002710_s5.jpg",
+    "local_image": "product_images/ikea-lisabo-desk-ash.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/lisabo-desk-ash-veneer-10606273/",
+    "price_cents": 27999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.28,
+      "depth": 0.651,
+      "height": 0.74
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"279.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/lisabo-desk-ash-veneer-10606273/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 50 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lisabo-desk-ash-veneer-10606273/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 25 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lisabo-desk-ash-veneer-10606273/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 29 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lisabo-desk-ash-veneer-10606273/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#D6C2A0",
+      "material": "ash veneer, solid birch legs",
+      "tags": [
+        "light wood",
+        "ash",
+        "scandinavian",
+        "modern",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tonstad-desk-oak",
+    "retailer": "IKEA",
+    "retailer_product_id": "60538205",
+    "title": "TONSTAD Desk",
+    "variant": "oak veneer, 47 1/4x18 1/2\"",
+    "category": "desk",
+    "description": "TONSTAD Desk - oak veneer, 47 1/4x18 1/2\". TONSTAD desk, oak veneer, 471/4x181/2\" Classic design meets beautifully brushed veneer in the TONSTAD series – giving the furniture a unique character. This narrow oak desk is great for hobbies, as a stylish vanity or a sleek hallway table.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tonstad-desk-oak-veneer__1243899_pe921026_s5.jpg",
+    "local_image": "product_images/ikea-tonstad-desk-oak.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tonstad-desk-oak-veneer-60538205/",
+    "price_cents": 29999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.2,
+      "depth": 0.47,
+      "height": 0.749
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"299.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-desk-oak-veneer-60538205/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 47 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-desk-oak-veneer-60538205/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 18 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-desk-oak-veneer-60538205/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tonstad-desk-oak-veneer-60538205/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#C9A97C",
+      "material": "oak veneer",
+      "tags": [
+        "light wood",
+        "oak",
+        "scandinavian",
+        "compact",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  }
+]

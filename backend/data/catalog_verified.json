@@ -1,0 +1,1852 @@
+[
+  {
+    "id": "ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "s79599939",
+    "title": "SALTSJÖBADEN 3-seat sofa",
+    "variant": "Fridtuna dark gray-blue",
+    "category": "sofa",
+    "description": "SALTSJÖBADEN 3-seat sofa - Fridtuna dark gray-blue. The innovative construction of the pocket springs maximizes comfort while minimizing the amount of foam. Pocket springs in the seat, soft yet supportive back cushions and well-balanced dimensions make for truly comfortable seating. _",
+    "image_url": "https://www.ikea.com/us/en/images/products/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue__1578243_pe1033911_s5.jpg",
+    "local_image": "product_images/ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/",
+    "price_cents": 59900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.051,
+      "depth": 0.879,
+      "height": 0.899
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"599\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 80 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 34 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height including back cushions 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#667F88",
+      "material": "fabric",
+      "tags": [
+        "blue",
+        "light wood",
+        "light wood legs",
+        "modern",
+        "scandinavian",
+        "theme-match",
+        "demo-primary"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-saltmyran-sofa-oreryd-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "70618522",
+    "title": "SALTMYRAN Sofa",
+    "variant": "Öreryd blue",
+    "category": "sofa",
+    "description": "SALTMYRAN Sofa - Öreryd blue. Elegant, sleek sofa with simple lines and a slim design that goes well in many different settings. The rounded backrest and armrests add softness to the overall expression, while the placement of the legs gives the sofa a distinctive and personal character.",
+    "image_url": "https://www.ikea.com/us/en/images/products/saltmyran-sofa-oereryd-blue__1578447_pe1034090_s5.jpg",
+    "local_image": "product_images/ikea-saltmyran-sofa-oreryd-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/saltmyran-sofa-oereryd-blue-70618522/",
+    "price_cents": 39900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.87,
+      "depth": 0.791,
+      "height": 0.772
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"399\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/saltmyran-sofa-oereryd-blue-70618522/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 73 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltmyran-sofa-oereryd-blue-70618522/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 31 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltmyran-sofa-oereryd-blue-70618522/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height including back cushions 30 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltmyran-sofa-oereryd-blue-70618522/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#66737C",
+      "material": "fabric",
+      "tags": [
+        "blue",
+        "modern",
+        "compact",
+        "black metal legs",
+        "demo-alternative"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-saltsjobaden-loveseat-vittangi-light-beige-white",
+    "retailer": "IKEA",
+    "retailer_product_id": "s29656588",
+    "title": "SALTSJÖBADEN Loveseat",
+    "variant": "Vittangi light beige/white",
+    "category": "sofa",
+    "description": "SALTSJÖBADEN Loveseat - Vittangi light beige/white. The innovative construction of the pocket springs maximizes comfort while minimizing the amount of foam. Pocket springs in the seat, soft yet supportive back cushions and well-balanced dimensions make for truly comfortable seating. _",
+    "image_url": "https://www.ikea.com/us/en/images/products/saltsjoebaden-loveseat-vittangi-light-beige-white__1576547_pe1032529_s5.jpg",
+    "local_image": "product_images/ikea-saltsjobaden-loveseat-vittangi-light-beige-white.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-loveseat-vittangi-light-beige-white-s29656588/",
+    "price_cents": 46900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.641,
+      "depth": 0.879,
+      "height": 0.899
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"469\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-loveseat-vittangi-light-beige-white-s29656588/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 64 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-loveseat-vittangi-light-beige-white-s29656588/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 34 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-loveseat-vittangi-light-beige-white-s29656588/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height including back cushions 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-loveseat-vittangi-light-beige-white-s29656588/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#CEC6B4",
+      "material": "fabric",
+      "tags": [
+        "beige",
+        "neutral",
+        "light",
+        "light wood",
+        "light wood legs",
+        "modern",
+        "scandinavian",
+        "loveseat",
+        "compact",
+        "demo-alternative-backup"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-gullvalla-sofa-silkeryd-gray-green",
+    "retailer": "IKEA",
+    "retailer_product_id": "80618512",
+    "title": "GULLVALLA Sofa",
+    "variant": "Silkeryd gray-green",
+    "category": "sofa",
+    "description": "GULLVALLA Sofa - Silkeryd gray-green. Soft, simple shapes with well-thought-out details, such as wrinkles on the back cushions and rounded legs – creating a timeless sofa that feels both inviting and traditional. 10-year limited warranty. Read about the terms in the limited warranty brochure.",
+    "image_url": "https://www.ikea.com/us/en/images/products/gullvalla-sofa-silkeryd-gray-green__1576775_pe1032702_s5.jpg",
+    "local_image": "product_images/ikea-gullvalla-sofa-silkeryd-gray-green.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/gullvalla-sofa-silkeryd-gray-green-80618512/",
+    "price_cents": 44900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.819,
+      "depth": 0.829,
+      "height": 0.781
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"449\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/gullvalla-sofa-silkeryd-gray-green-80618512/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 71 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/gullvalla-sofa-silkeryd-gray-green-80618512/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 32 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/gullvalla-sofa-silkeryd-gray-green-80618512/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height including back cushions 30 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/gullvalla-sofa-silkeryd-gray-green-80618512/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#586353",
+      "material": "fabric",
+      "tags": [
+        "green",
+        "gray-green",
+        "traditional",
+        "dark legs",
+        "compact"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-kivik-sofa-gunnared-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "s69499704",
+    "title": "KIVIK Sofa",
+    "variant": "Gunnared blue",
+    "category": "sofa",
+    "description": "KIVIK Sofa - Gunnared blue. Enjoy the super comfy KIVIK sofa with deep seat cushions made of pocket springs, high resilience foam and polyester fibers – adding both firm support and relaxing softness. It is easy to combine the sofa with one or more chaise lounges thanks to the removable armrests.",
+    "image_url": "https://www.ikea.com/us/en/images/products/kivik-sofa-gunnared-blue__1577006_pe1032891_s5.jpg",
+    "local_image": "product_images/ikea-kivik-sofa-gunnared-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/kivik-sofa-gunnared-blue-s69499704/",
+    "price_cents": 89900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.28,
+      "depth": 0.949,
+      "height": 0.829
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"899\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-sofa-gunnared-blue-s69499704/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 89 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-sofa-gunnared-blue-s69499704/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 37 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-sofa-gunnared-blue-s69499704/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 32 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-sofa-gunnared-blue-s69499704/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#414E59",
+      "material": "fabric",
+      "tags": [
+        "blue",
+        "modern",
+        "deep seat",
+        "large"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-ekholma-sofa-kilanda-pale-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "s09579949",
+    "title": "EKHOLMA Sofa",
+    "variant": "Kilanda pale blue",
+    "category": "sofa",
+    "description": "EKHOLMA Sofa - Kilanda pale blue. Traditional design that suits many homes. Fitted cover with piping and visible wooden legs all adds a sophisticated and elegant look to the sofa. The combination of seat height, seat depth and back height gives a good support for a more upright sitting position.",
+    "image_url": "https://www.ikea.com/us/en/images/products/ekholma-sofa-kilanda-pale-blue__1577943_pe1033689_s5.jpg",
+    "local_image": "product_images/ikea-ekholma-sofa-kilanda-pale-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/ekholma-sofa-kilanda-pale-blue-s09579949/",
+    "price_cents": 84900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.07,
+      "depth": 0.851,
+      "height": 0.94
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"849\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/ekholma-sofa-kilanda-pale-blue-s09579949/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 81 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/ekholma-sofa-kilanda-pale-blue-s09579949/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 33 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/ekholma-sofa-kilanda-pale-blue-s09579949/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height including back cushions 37 \"",
+        "source_url": "https://www.ikea.com/us/en/p/ekholma-sofa-kilanda-pale-blue-s09579949/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#B3C7D0",
+      "material": "fabric",
+      "tags": [
+        "light blue",
+        "blue",
+        "soft",
+        "modern",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-esseboda-loveseat-tallmyra-blue-birch",
+    "retailer": "IKEA",
+    "retailer_product_id": "s99443471",
+    "title": "ESSEBODA Loveseat",
+    "variant": "Tallmyra/blue birch",
+    "category": "sofa",
+    "description": "ESSEBODA Loveseat - Tallmyra/blue birch. ESSEBODA sofa stands out with its soft comfort, generous shape and well-thought-out design. It is great throughout the home and can be matched with other items in the series for versatile use. Stationary cover.",
+    "image_url": "https://www.ikea.com/us/en/images/products/esseboda-loveseat-tallmyra-blue-birch__1109356_pe869965_s5.jpg",
+    "local_image": "product_images/ikea-esseboda-loveseat-tallmyra-blue-birch.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/esseboda-loveseat-tallmyra-blue-birch-s99443471/",
+    "price_cents": 114900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.921,
+      "depth": 0.959,
+      "height": 0.94
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"1149\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/esseboda-loveseat-tallmyra-blue-birch-s99443471/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 75 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/esseboda-loveseat-tallmyra-blue-birch-s99443471/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 37 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/esseboda-loveseat-tallmyra-blue-birch-s99443471/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 37 \"",
+        "source_url": "https://www.ikea.com/us/en/p/esseboda-loveseat-tallmyra-blue-birch-s99443471/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#406C81",
+      "material": "fabric, birch wood frame",
+      "tags": [
+        "blue",
+        "light wood",
+        "wood frame",
+        "birch",
+        "mid-century",
+        "scandinavian",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-klippan-loveseat-bomstad-black",
+    "retailer": "IKEA",
+    "retailer_product_id": "50399318",
+    "title": "KLIPPAN Loveseat",
+    "variant": "Bomstad black",
+    "category": "sofa",
+    "description": "KLIPPAN Loveseat - Bomstad black. Durable metal springs in the seat give the sofa a springy comfort, allowing you to sit, relax and enjoy it for many years. The stationary Bomstad cover is made of a durable material that is both smooth and strong.",
+    "image_url": "https://www.ikea.com/us/en/images/products/klippan-loveseat-bomstad-black__1576940_pe1032837_s5.jpg",
+    "local_image": "product_images/ikea-klippan-loveseat-bomstad-black.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/klippan-loveseat-bomstad-black-50399318/",
+    "price_cents": 44900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.768,
+      "depth": 0.879,
+      "height": 0.66
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"449\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/klippan-loveseat-bomstad-black-50399318/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 69 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/klippan-loveseat-bomstad-black-50399318/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 34 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/klippan-loveseat-bomstad-black-50399318/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 26 \"",
+        "source_url": "https://www.ikea.com/us/en/p/klippan-loveseat-bomstad-black-50399318/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#232325",
+      "material": "coated fabric (leather-look)",
+      "tags": [
+        "black",
+        "dark",
+        "leather-look",
+        "compact",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-kivik-loveseat-grann-bomstad-black",
+    "retailer": "IKEA",
+    "retailer_product_id": "30519519",
+    "title": "KIVIK Loveseat",
+    "variant": "Grann/Bomstad black",
+    "category": "sofa",
+    "description": "KIVIK Loveseat - Grann/Bomstad black. Enjoy the super comfy KIVIK sofa with deep seat cushions made of pocket springs, high resilience foam and polyester fibers – adding both firm support and relaxing softness. The cover is easy to keep clean as it can be wiped clean with a damp cloth.",
+    "image_url": "https://www.ikea.com/us/en/images/products/kivik-loveseat-grann-bomstad-black__1578506_pe1034149_s5.jpg",
+    "local_image": "product_images/ikea-kivik-loveseat-grann-bomstad-black.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/kivik-loveseat-grann-bomstad-black-30519519/",
+    "price_cents": 119900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.899,
+      "depth": 0.949,
+      "height": 0.829
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"1199\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-loveseat-grann-bomstad-black-30519519/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 74 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-loveseat-grann-bomstad-black-30519519/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 37 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-loveseat-grann-bomstad-black-30519519/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 32 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/kivik-loveseat-grann-bomstad-black-30519519/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#37363A",
+      "material": "leather / coated fabric",
+      "tags": [
+        "black",
+        "dark",
+        "leather",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-morabo-sofa-gunnared-dark-gray-wood",
+    "retailer": "IKEA",
+    "retailer_product_id": "s89318321",
+    "title": "MORABO Sofa",
+    "variant": "Gunnared dark gray/wood",
+    "category": "sofa",
+    "description": "MORABO Sofa - Gunnared dark gray/wood. Seat cushions filled with high-resilience foam and polyester fiber wadding provide great seating comfort. These wooden legs give MORABO sofa and armchair a warm and natural look. Removable armrests make it easy to add on a chaise lounge. Stationary cover.",
+    "image_url": "https://www.ikea.com/us/en/images/products/morabo-sofa-gunnared-dark-gray-wood__1576951_pe1032842_s5.jpg",
+    "local_image": "product_images/ikea-morabo-sofa-gunnared-dark-gray-wood.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/morabo-sofa-gunnared-dark-gray-wood-s89318321/",
+    "price_cents": 79900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.061,
+      "depth": 0.921,
+      "height": 0.81
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"799\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/morabo-sofa-gunnared-dark-gray-wood-s89318321/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 81 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/morabo-sofa-gunnared-dark-gray-wood-s89318321/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 36 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/morabo-sofa-gunnared-dark-gray-wood-s89318321/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 31 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/morabo-sofa-gunnared-dark-gray-wood-s89318321/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#535154",
+      "material": "fabric, wood legs",
+      "tags": [
+        "gray",
+        "dark gray",
+        "wood legs",
+        "modern"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "walmart-home-design-emma-chesterfield-sofa-navy",
+    "retailer": "Walmart",
+    "retailer_product_id": "7598823996",
+    "title": "Home Design Emma Velvet Rolled Arm Chesterfield Sofa",
+    "variant": "Blue (navy velvet)",
+    "category": "sofa",
+    "description": "Elevate your living room with our luxurious Home Design Emma Contemporary Cushion Velvet Rolled Arm Chesterfield Sofa, designed for both style and comfort. Featuring a padded backrest, rolled arms, and a deep cushioned seat, it creates a cozy yet elegant atmosphere. The diamond button tufting on…",
+    "image_url": "https://i5.walmartimages.com/seo/Home-Design-Emma-Contemporary-Cushion-Velvet-Upholstered-Roll-Arm-Sofa-Adult-Navy-Blue_0db8b177-d762-4ac2-9260-3d963142cb0d.d6ff144bcf43109c4218f193e566e968.jpeg",
+    "local_image": "product_images/walmart-home-design-emma-chesterfield-sofa-navy.jpg",
+    "source_url": "https://www.walmart.com/ip/Home-Design-Emma-Contemporary-Cushion-Velvet-Upholstered-Roll-Arm-Sofa-Adult-Navy-Blue/7598823996",
+    "price_cents": 42000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.116,
+      "depth": 0.78,
+      "height": 0.785
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"priceString\":\"$420.00\"",
+        "source_url": "https://www.walmart.com/ip/Home-Design-Emma-Contemporary-Cushion-Velvet-Upholstered-Roll-Arm-Sofa-Adult-Navy-Blue/7598823996"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "\"name\":\"Assembled product dimensions (l x w x h)\",\"value\":\"30.70 x 83.30 x 30.90 in\"",
+        "source_url": "https://www.walmart.com/ip/Home-Design-Emma-Contemporary-Cushion-Velvet-Upholstered-Roll-Arm-Sofa-Adult-Navy-Blue/7598823996"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "\"name\":\"Assembled product dimensions (l x w x h)\",\"value\":\"30.70 x 83.30 x 30.90 in\"",
+        "source_url": "https://www.walmart.com/ip/Home-Design-Emma-Contemporary-Cushion-Velvet-Upholstered-Roll-Arm-Sofa-Adult-Navy-Blue/7598823996"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "\"name\":\"Assembled product dimensions (l x w x h)\",\"value\":\"30.70 x 83.30 x 30.90 in\"",
+        "source_url": "https://www.walmart.com/ip/Home-Design-Emma-Contemporary-Cushion-Velvet-Upholstered-Roll-Arm-Sofa-Adult-Navy-Blue/7598823996"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#213954",
+      "material": "velvet, turned wood legs",
+      "tags": [
+        "navy",
+        "blue",
+        "dark",
+        "velvet",
+        "ornate",
+        "chesterfield",
+        "tufted",
+        "traditional",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "walmart-serta-hemsworth-sofa-navy-faux-leather",
+    "retailer": "Walmart",
+    "retailer_product_id": "5414791629",
+    "title": "Serta Hemsworth Mid-Century Modern Style Sofa",
+    "variant": "Navy Blue Faux Leather",
+    "category": "sofa",
+    "description": "Brighten up your living space with the Serta Hemsworth Sofa Set! The faux leather upholstery's blue tone provides a pop of color, while the high-density foam and pocket coils within the compressed seat and back cushions ensure comfort for every guest. The solid hardwood frames give the pieces…",
+    "image_url": "https://i5.walmartimages.com/seo/Serta-Hemsworth-Mid-Century-Modern-Style-Sofa-Navy-Blue-Faux-Leather_f54441ea-cdab-4cc6-a3c7-9aa15f3fda4b.1dbf46ff459900c4d7ff5f8d45ba7214.jpeg",
+    "local_image": "product_images/walmart-serta-hemsworth-sofa-navy-faux-leather.jpg",
+    "source_url": "https://www.walmart.com/ip/Serta-Hemsworth-Mid-Century-Modern-Style-Sofa-Navy-Blue-Faux-Leather/5414791629",
+    "price_cents": 42800,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.981,
+      "depth": 0.831,
+      "height": 0.889
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"priceString\":\"$428.00\"",
+        "source_url": "https://www.walmart.com/ip/Serta-Hemsworth-Mid-Century-Modern-Style-Sofa-Navy-Blue-Faux-Leather/5414791629"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Overall dimensions: 78\" W x 32.7\" D x 35\" H",
+        "source_url": "https://www.walmart.com/ip/Serta-Hemsworth-Mid-Century-Modern-Style-Sofa-Navy-Blue-Faux-Leather/5414791629"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Overall dimensions: 78\" W x 32.7\" D x 35\" H",
+        "source_url": "https://www.walmart.com/ip/Serta-Hemsworth-Mid-Century-Modern-Style-Sofa-Navy-Blue-Faux-Leather/5414791629"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Overall dimensions: 78\" W x 32.7\" D x 35\" H",
+        "source_url": "https://www.walmart.com/ip/Serta-Hemsworth-Mid-Century-Modern-Style-Sofa-Navy-Blue-Faux-Leather/5414791629"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#3C424E",
+      "material": "faux leather, metal legs",
+      "tags": [
+        "navy",
+        "dark",
+        "faux leather",
+        "leather-look",
+        "mid-century",
+        "gold metal legs",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-borgeby-coffee-table-birch-veneer",
+    "retailer": "IKEA",
+    "retailer_product_id": "70389356",
+    "title": "BORGEBY Coffee table",
+    "variant": "birch veneer 27 1/2 \"",
+    "category": "coffee_table",
+    "description": "BORGEBY Coffee table - birch veneer 27 1/2 \". BORGEBY storage table has an elegant, simple and stylish design with a harmonious and balanced expression. The rounded airy shape, smooth surface and natural material make the table suitable for many different living situations and interior styles.",
+    "image_url": "https://www.ikea.com/us/en/images/products/borgeby-coffee-table-birch-veneer__0987623_pe817609_s5.jpg",
+    "local_image": "product_images/ikea-borgeby-coffee-table-birch-veneer.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/borgeby-coffee-table-birch-veneer-70389356/",
+    "price_cents": 19999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.699,
+      "depth": 0.699,
+      "height": 0.419
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"199.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/borgeby-coffee-table-birch-veneer-70389356/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Diameter 27 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/borgeby-coffee-table-birch-veneer-70389356/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Diameter 27 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/borgeby-coffee-table-birch-veneer-70389356/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 16 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/borgeby-coffee-table-birch-veneer-70389356/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#D0C7B7",
+      "material": "birch veneer",
+      "tags": [
+        "light wood",
+        "birch",
+        "round",
+        "scandinavian",
+        "theme-match"
+      ],
+      "shape": "round"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-holmerud-coffee-table-oak-effect",
+    "retailer": "IKEA",
+    "retailer_product_id": "90540706",
+    "title": "HOLMERUD Coffee table",
+    "variant": "oak effect 35 3/8x21 5/8 \"",
+    "category": "coffee_table",
+    "description": "HOLMERUD Coffee table - oak effect 35 3/8x21 5/8 \". The clean and stylish architectural shape adds character to the room and makes the coffee table an eye-catcher. The design of this coffee table gives you easily accessible open storage spaces for you to organize and display your items.",
+    "image_url": "https://www.ikea.com/us/en/images/products/holmerud-coffee-table-oak-effect__1193663_pe901563_s5.jpg",
+    "local_image": "product_images/ikea-holmerud-coffee-table-oak-effect.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/",
+    "price_cents": 8999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.899,
+      "depth": 0.549,
+      "height": 0.4
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"89.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 21 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 15 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#9C8467",
+      "material": "particleboard, oak effect",
+      "tags": [
+        "light wood",
+        "oak",
+        "budget",
+        "rectangular",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-valnas-coffee-table-oak-veneer",
+    "retailer": "IKEA",
+    "retailer_product_id": "20628038",
+    "title": "VALNÄS Coffee table",
+    "variant": "oak veneer 46 1/2x28 3/8 \"",
+    "category": "coffee_table",
+    "description": "VALNÄS Coffee table - oak veneer 46 1/2x28 3/8 \". A stylish coffee table with a generous size and a soft elliptic shape, making it easy to place in the room – and for people to move around it. The tabletop have a slightly raised edge that creates a distinct look and prevents things from sliding off.",
+    "image_url": "https://www.ikea.com/us/en/images/products/valnaes-coffee-table-oak-veneer__1474541_pe998121_s5.jpg",
+    "local_image": "product_images/ikea-valnas-coffee-table-oak-veneer.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/valnaes-coffee-table-oak-veneer-20628038/",
+    "price_cents": 29999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.181,
+      "depth": 0.721,
+      "height": 0.498
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"299.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/valnaes-coffee-table-oak-veneer-20628038/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 46 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/valnaes-coffee-table-oak-veneer-20628038/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 28 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/valnaes-coffee-table-oak-veneer-20628038/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 19 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/valnaes-coffee-table-oak-veneer-20628038/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#CFB996",
+      "material": "oak veneer",
+      "tags": [
+        "light wood",
+        "oak",
+        "modern",
+        "rectangular",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-vittsjo-coffee-table-light-beige-glass",
+    "retailer": "IKEA",
+    "retailer_product_id": "30604348",
+    "title": "VITTSJÖ Coffee table",
+    "variant": "light beige/glass 29 1/2 \"",
+    "category": "coffee_table",
+    "description": "VITTSJÖ Coffee table - light beige/glass 29 1/2 \". The minimalist design combining metal, glass and wood creates a sophisticated yet warm expression. The table tops in tempered glass are stain resistant and easy to clean. The tabletops in tempered glass are stain-resistant and easy to clean.",
+    "image_url": "https://www.ikea.com/us/en/images/products/vittsjoe-coffee-table-light-beige-glass__1406776_pe971098_s5.jpg",
+    "local_image": "product_images/ikea-vittsjo-coffee-table-light-beige-glass.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/vittsjoe-coffee-table-light-beige-glass-30604348/",
+    "price_cents": 8999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.749,
+      "depth": 0.749,
+      "height": 0.451
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"89.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/vittsjoe-coffee-table-light-beige-glass-30604348/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Diameter 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/vittsjoe-coffee-table-light-beige-glass-30604348/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Diameter 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/vittsjoe-coffee-table-light-beige-glass-30604348/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 17 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/vittsjoe-coffee-table-light-beige-glass-30604348/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#987C66",
+      "material": "metal, glass",
+      "tags": [
+        "light",
+        "beige",
+        "glass",
+        "metal",
+        "round",
+        "neutral",
+        "budget"
+      ],
+      "shape": "round"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-lack-coffee-table-black-brown-large",
+    "retailer": "IKEA",
+    "retailer_product_id": "00104291",
+    "title": "LACK Coffee table",
+    "variant": "black-brown 46 1/2x30 3/4 \"",
+    "category": "coffee_table",
+    "description": "LACK Coffee table - black-brown 46 1/2x30 3/4 \". Separate shelf for magazines, etc. helps you keep your things organized and the table top clear. Max load on table top: 44 lbs. Product is possible to recycle or use for energy recovery, if available in your community.",
+    "image_url": "https://www.ikea.com/us/en/images/products/lack-coffee-table-black-brown__57537_pe163119_s5.jpg",
+    "local_image": "product_images/ikea-lack-coffee-table-black-brown-large.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/lack-coffee-table-black-brown-00104291/",
+    "price_cents": 4999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.181,
+      "depth": 0.781,
+      "height": 0.451
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"49.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/lack-coffee-table-black-brown-00104291/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 46 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lack-coffee-table-black-brown-00104291/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 30 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lack-coffee-table-black-brown-00104291/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 17 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lack-coffee-table-black-brown-00104291/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#6A6967",
+      "material": "particleboard, black-brown",
+      "tags": [
+        "dark",
+        "black-brown",
+        "budget",
+        "rectangular",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-ortrask-coffee-table-black-ash-veneer",
+    "retailer": "IKEA",
+    "retailer_product_id": "30635849",
+    "title": "ÖRTRÄSK Coffee table",
+    "variant": "black ash veneer 43 1/4x26 3/4 \"",
+    "category": "coffee_table",
+    "description": "ÖRTRÄSK Coffee table - black ash veneer 43 1/4x26 3/4 \". The table top's ash veneer and legs in solid ash give the room a warm and natural feel. The generous size has space for everything you need to enjoy a relaxing moment on the sofa – even if you have guests. Max load on table top: 44 lbs.",
+    "image_url": "https://www.ikea.com/us/en/images/products/oertraesk-coffee-table-black-ash-veneer__1543874_pe1018964_s5.jpg",
+    "local_image": "product_images/ikea-ortrask-coffee-table-black-ash-veneer.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/oertraesk-coffee-table-black-ash-veneer-30635849/",
+    "price_cents": 19999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.099,
+      "depth": 0.679,
+      "height": 0.349
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"199.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/oertraesk-coffee-table-black-ash-veneer-30635849/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 43 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/oertraesk-coffee-table-black-ash-veneer-30635849/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 26 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/oertraesk-coffee-table-black-ash-veneer-30635849/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 13 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/oertraesk-coffee-table-black-ash-veneer-30635849/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#404040",
+      "material": "black ash veneer",
+      "tags": [
+        "black",
+        "dark wood",
+        "modern",
+        "rectangular",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tranered-coffee-table-dark-brown",
+    "retailer": "IKEA",
+    "retailer_product_id": "10608998",
+    "title": "TRANERED Coffee table",
+    "variant": "dark-brown 35 3/8x35 3/8 \"",
+    "category": "coffee_table",
+    "description": "TRANERED Coffee table - dark-brown 35 3/8x35 3/8 \". Discreet design with smart features – perfect for keeping everything around the sofa in order when the whole family is watching a movie or having friends over. Max load on table top: 44 lbs.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tranered-coffee-table-dark-brown__1478959_pe999902_s5.jpg",
+    "local_image": "product_images/ikea-tranered-coffee-table-dark-brown.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tranered-coffee-table-dark-brown-10608998/",
+    "price_cents": 19999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.899,
+      "depth": 0.899,
+      "height": 0.41
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"199.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tranered-coffee-table-dark-brown-10608998/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tranered-coffee-table-dark-brown-10608998/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tranered-coffee-table-dark-brown-10608998/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 16 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tranered-coffee-table-dark-brown-10608998/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#49403D",
+      "material": "dark brown",
+      "tags": [
+        "dark brown",
+        "dark wood",
+        "square",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "abt-samsung-u8000h-55-un55u8000hfxza",
+    "retailer": "Abt Electronics",
+    "retailer_product_id": "243864",
+    "title": "Samsung Crystal UHD U8000H 55-Inch 4K Smart TV in Black",
+    "variant": "55\" (UN55U8000HFXZA)",
+    "category": "tv",
+    "description": "55-Inch 4K LED Smart TV. 60Hz Refresh Rate. Crystal Processor 4K. Samsung Knox Security. Endless Free Content",
+    "image_url": "https://content.abt.com/media/images/products/BDP_Images/samsung-4k-smart-tv-UN58U8000HFXZA-front.jpg",
+    "local_image": "product_images/abt-samsung-u8000h-55-un55u8000hfxza.jpg",
+    "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html",
+    "price_cents": 29799,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.224,
+      "depth": 0.198,
+      "height": 0.759
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "Your Price: $297.99",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width With Stand (in) 48.2 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth With Stand (in) 7.8 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height With Stand (in) 29.9 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#16171A",
+      "material": "plastic/metal",
+      "tags": [
+        "black",
+        "tv",
+        "55-inch",
+        "budget",
+        "samsung"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "abt-tcl-q6lr-55-55q6lr",
+    "retailer": "Abt Electronics",
+    "retailer_product_id": "247320",
+    "title": "TCL Q6LR Series 55-Inch 4K UHD QLED Smart TV with Roku TV",
+    "variant": "55\" (55Q6LR)",
+    "category": "tv",
+    "description": "55-Inch 4K QLED Smart TV. 60Hz Refresh Rate. High Brightness+ LED Backlight. Auto Game Mode (ALLM). Motion Rate 240",
+    "image_url": "https://content.abt.com/media/images/products/BDP_Images/tcl-tv-43Q6LR.jpg",
+    "local_image": "product_images/abt-tcl-q6lr-55-55q6lr.jpg",
+    "source_url": "https://www.abt.com/TCL-Q6LR-Series-55-Inch-4K-UHD-QLED-Smart-TV-with-Roku-TV-55Q6LR/p/247320.html",
+    "price_cents": 28799,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.224,
+      "depth": 0.274,
+      "height": 0.762
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "Your Price: $287.99",
+        "source_url": "https://www.abt.com/TCL-Q6LR-Series-55-Inch-4K-UHD-QLED-Smart-TV-with-Roku-TV-55Q6LR/p/247320.html"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width With Stand (in) 48.2 (TV with stand)",
+        "source_url": "https://www.abt.com/TCL-Q6LR-Series-55-Inch-4K-UHD-QLED-Smart-TV-with-Roku-TV-55Q6LR/p/247320.html"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth With Stand (in) 10.8 (TV with stand)",
+        "source_url": "https://www.abt.com/TCL-Q6LR-Series-55-Inch-4K-UHD-QLED-Smart-TV-with-Roku-TV-55Q6LR/p/247320.html"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height With Stand (in) 30.0 (TV with stand)",
+        "source_url": "https://www.abt.com/TCL-Q6LR-Series-55-Inch-4K-UHD-QLED-Smart-TV-with-Roku-TV-55Q6LR/p/247320.html"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#16171A",
+      "material": "plastic/metal",
+      "tags": [
+        "black",
+        "tv",
+        "55-inch",
+        "budget",
+        "tcl",
+        "qled"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "abt-lg-nu70-55-55nu700bpua",
+    "retailer": "Abt Electronics",
+    "retailer_product_id": "244250",
+    "title": "LG AI NU70 Series 55-Inch Nano 4K UHD Smart TV",
+    "variant": "55\" (55NU700BPUA)",
+    "category": "tv",
+    "description": "55-Inch 4K LED Smart TV. 60Hz Refresh Rate. Alpha 7 AI Processor 4K Gen9. 4K Super Upscaling. HDR10 / HLG",
+    "image_url": "https://content.abt.com/media/images/products/BDP_Images/lg-4k-smart-tv-55NU700BPUA-front.jpg",
+    "local_image": "product_images/abt-lg-nu70-55-55nu700bpua.jpg",
+    "source_url": "https://www.abt.com/LG-AI-NU70-Series-55-Inch-Nano-4K-UHD-Smart-TV-55NU700BPUA/p/244250.html",
+    "price_cents": 27999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.227,
+      "depth": 0.231,
+      "height": 0.777
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "Your Price: $279.99",
+        "source_url": "https://www.abt.com/LG-AI-NU70-Series-55-Inch-Nano-4K-UHD-Smart-TV-55NU700BPUA/p/244250.html"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width With Stand (in) 48.3 (TV with stand)",
+        "source_url": "https://www.abt.com/LG-AI-NU70-Series-55-Inch-Nano-4K-UHD-Smart-TV-55NU700BPUA/p/244250.html"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth With Stand (in) 9.1 (TV with stand)",
+        "source_url": "https://www.abt.com/LG-AI-NU70-Series-55-Inch-Nano-4K-UHD-Smart-TV-55NU700BPUA/p/244250.html"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height With Stand (in) 30.6 (TV with stand)",
+        "source_url": "https://www.abt.com/LG-AI-NU70-Series-55-Inch-Nano-4K-UHD-Smart-TV-55NU700BPUA/p/244250.html"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#16171A",
+      "material": "plastic/metal",
+      "tags": [
+        "black",
+        "tv",
+        "55-inch",
+        "budget",
+        "lg"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "abt-sony-bravia-3-ii-55-k55xr30m2",
+    "retailer": "Abt Electronics",
+    "retailer_product_id": "242525",
+    "title": "Sony BRAVIA 3 II TV 55-Inch 4K HDR LED Google TV with Gemini",
+    "variant": "55\" (K-55XR30M2)",
+    "category": "tv",
+    "description": "55-Inch 4K LED Smart TV. 120Hz Refresh Rate. XR Processor. Google TV. HDR10, HLG, Dolby Vision",
+    "image_url": "https://content.abt.com/media/images/products/BDP_Images/sony-4k-smart-tv-K-43XR30M2-front.jpg",
+    "local_image": "product_images/abt-sony-bravia-3-ii-55-k55xr30m2.jpg",
+    "source_url": "https://www.abt.com/Sony-BRAVIA-3-II-TV-55-Inch-4K-HDR-LED-Google-TV-with-Gemini-K55XR30M2/p/242525.html",
+    "price_cents": 69800,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.226,
+      "depth": 0.26,
+      "height": 0.778
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "Your Price: $698.00",
+        "source_url": "https://www.abt.com/Sony-BRAVIA-3-II-TV-55-Inch-4K-HDR-LED-Google-TV-with-Gemini-K55XR30M2/p/242525.html"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width With Stand (in) 48.25 (TV with stand)",
+        "source_url": "https://www.abt.com/Sony-BRAVIA-3-II-TV-55-Inch-4K-HDR-LED-Google-TV-with-Gemini-K55XR30M2/p/242525.html"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth With Stand (in) 10.25 (TV with stand)",
+        "source_url": "https://www.abt.com/Sony-BRAVIA-3-II-TV-55-Inch-4K-HDR-LED-Google-TV-with-Gemini-K55XR30M2/p/242525.html"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height With Stand (in) 30.63 (TV with stand)",
+        "source_url": "https://www.abt.com/Sony-BRAVIA-3-II-TV-55-Inch-4K-HDR-LED-Google-TV-with-Gemini-K55XR30M2/p/242525.html"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#16171A",
+      "material": "plastic/metal",
+      "tags": [
+        "black",
+        "tv",
+        "55-inch",
+        "sony",
+        "premium"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "abt-samsung-the-frame-ls03f-55-qn55ls03fafxza",
+    "retailer": "Abt Electronics",
+    "retailer_product_id": "218357",
+    "title": "Samsung The Frame LS03F QLED TV 55-Inch 4K Smart in Black",
+    "variant": "55\" (QN55LS03FAFXZA)",
+    "category": "tv",
+    "description": "55-Inch 4K QLED Smart TV. 120Hz Refresh Rate. NQ4 AI Gen2 Processor. Quantum HDR. Samsung Vision AI",
+    "image_url": "https://content.abt.com/media/images/products/BDP_Images/samsung-tv-QN55LS03FAFXZA-front-view.jpg",
+    "local_image": "product_images/abt-samsung-the-frame-ls03f-55-qn55ls03fafxza.jpg",
+    "source_url": "https://www.abt.com/Samsung-The-Frame-LS03F-QLED-TV-55-Inch-4K-Smart-in-Black-QN55LS03FAFXZA/p/218357.html",
+    "price_cents": 79799,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.237,
+      "depth": 0.229,
+      "height": 0.77
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "Your Price: $797.99",
+        "source_url": "https://www.abt.com/Samsung-The-Frame-LS03F-QLED-TV-55-Inch-4K-Smart-in-Black-QN55LS03FAFXZA/p/218357.html"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width With Stand (in) 48.7 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-The-Frame-LS03F-QLED-TV-55-Inch-4K-Smart-in-Black-QN55LS03FAFXZA/p/218357.html"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth With Stand (in) 9 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-The-Frame-LS03F-QLED-TV-55-Inch-4K-Smart-in-Black-QN55LS03FAFXZA/p/218357.html"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height With Stand (in) 30.3 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-The-Frame-LS03F-QLED-TV-55-Inch-4K-Smart-in-Black-QN55LS03FAFXZA/p/218357.html"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#16171A",
+      "material": "plastic/metal",
+      "tags": [
+        "black",
+        "tv",
+        "55-inch",
+        "samsung",
+        "premium",
+        "art tv",
+        "slim"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-landbana-rug-flatwoven-dark-blue-7x10",
+    "retailer": "IKEA",
+    "retailer_product_id": "30575614",
+    "title": "LANDBANA Rug, flatwoven",
+    "variant": "dark blue 7 ' 10 \"x9 ' 10 \"",
+    "category": "rug",
+    "description": "LANDBANA Rug, flatwoven - dark blue 7 ' 10 \"x9 ' 10 \". Ideal in your living room or under your dining table since the flat-woven surface makes it easy to pull out the chairs and vacuum. Jute is a natural material that creates a warm and cozy feeling in the room.",
+    "image_url": "https://www.ikea.com/us/en/images/products/landbana-rug-flatwoven-dark-blue__1237859_pe918183_s5.jpg",
+    "local_image": "product_images/ikea-landbana-rug-flatwoven-dark-blue-7x10.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/landbana-rug-flatwoven-dark-blue-30575614/",
+    "price_cents": 34999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.997,
+      "depth": 2.388,
+      "height": 0.013
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"349.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/landbana-rug-flatwoven-dark-blue-30575614/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 9 ' 10 \"",
+        "source_url": "https://www.ikea.com/us/en/p/landbana-rug-flatwoven-dark-blue-30575614/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 7 ' 10 \"",
+        "source_url": "https://www.ikea.com/us/en/p/landbana-rug-flatwoven-dark-blue-30575614/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Thickness ½ \"",
+        "source_url": "https://www.ikea.com/us/en/p/landbana-rug-flatwoven-dark-blue-30575614/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#3B4E50",
+      "material": "wool blend, flatwoven",
+      "tags": [
+        "blue",
+        "dark blue",
+        "flatwoven",
+        "solid",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-hotellrum-rug-high-pile-blue-green-yellow",
+    "retailer": "IKEA",
+    "retailer_product_id": "40571154",
+    "title": "HOTELLRUM Rug, high pile",
+    "variant": "blue/green yellow 5 ' 3 \"x7 ' 7 \"",
+    "category": "rug",
+    "description": "HOTELLRUM Rug, high pile - blue/green yellow 5 ' 3 \"x7 ' 7 \". The rug is a real eye-catcher thanks to the gradient pattern. The light sheen creates variations in the surface. The high pile dampens sound and provides a soft surface to walk on. This product has been tested for domestic use.",
+    "image_url": "https://www.ikea.com/us/en/images/products/hotellrum-rug-high-pile-blue-green-yellow__1242451_pe920247_s5.jpg",
+    "local_image": "product_images/ikea-hotellrum-rug-high-pile-blue-green-yellow.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/",
+    "price_cents": 19999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.311,
+      "depth": 1.6,
+      "height": 0.019
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"199.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 7 ' 7 \"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 5 ' 3 \"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Thickness ¾ \"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#DFB81F",
+      "material": "high pile",
+      "tags": [
+        "blue",
+        "green",
+        "yellow",
+        "pattern",
+        "high pile",
+        "playful"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-tiokrona-rug-flatwoven-natural-8x10",
+    "retailer": "IKEA",
+    "retailer_product_id": "90628228",
+    "title": "TIOKRONA Rug, flatwoven",
+    "variant": "natural 7 ' 10 \"x9 ' 10 \"",
+    "category": "rug",
+    "description": "TIOKRONA Rug, flatwoven - natural 7 ' 10 \"x9 ' 10 \". The jute has natural color variations that make each rug distinct and unique. Ideal in your living room or under your dining table since the flat-woven surface makes it easy to pull out the chairs and vacuum.",
+    "image_url": "https://www.ikea.com/us/en/images/products/tiokrona-rug-flatwoven-natural__1538970_pe1017536_s5.jpg",
+    "local_image": "product_images/ikea-tiokrona-rug-flatwoven-natural-8x10.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/tiokrona-rug-flatwoven-natural-90628228/",
+    "price_cents": 12999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.997,
+      "depth": 2.388,
+      "height": 0.006
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"129.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/tiokrona-rug-flatwoven-natural-90628228/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 9 ' 10 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tiokrona-rug-flatwoven-natural-90628228/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 7 ' 10 \"",
+        "source_url": "https://www.ikea.com/us/en/p/tiokrona-rug-flatwoven-natural-90628228/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Thickness ¼ \"",
+        "source_url": "https://www.ikea.com/us/en/p/tiokrona-rug-flatwoven-natural-90628228/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#B5A387",
+      "material": "flatwoven natural fiber",
+      "tags": [
+        "natural",
+        "neutral",
+        "light",
+        "jute-look",
+        "budget",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-lohals-rug-flatwoven-natural-7x10",
+    "retailer": "IKEA",
+    "retailer_product_id": "00277395",
+    "title": "LOHALS Rug, flatwoven",
+    "variant": "natural 6 ' 7 \"x9 ' 10 \"",
+    "category": "rug",
+    "description": "LOHALS Rug, flatwoven - natural 6 ' 7 \"x9 ' 10 \". The jute has natural color variations that make each rug distinct and unique. The natural material and neutral tones make this rug easy to mix and match with any style. Jute is a natural material that creates a warm and cozy feeling in the room.",
+    "image_url": "https://www.ikea.com/us/en/images/products/lohals-rug-flatwoven-natural__0280230_pe419175_s5.jpg",
+    "local_image": "product_images/ikea-lohals-rug-flatwoven-natural-7x10.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/lohals-rug-flatwoven-natural-00277395/",
+    "price_cents": 17999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.997,
+      "depth": 2.007,
+      "height": 0.013
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"179.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/lohals-rug-flatwoven-natural-00277395/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 9 ' 10 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lohals-rug-flatwoven-natural-00277395/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 6 ' 7 \"",
+        "source_url": "https://www.ikea.com/us/en/p/lohals-rug-flatwoven-natural-00277395/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Thickness ½ \"",
+        "source_url": "https://www.ikea.com/us/en/p/lohals-rug-flatwoven-natural-00277395/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#9D816C",
+      "material": "jute, flatwoven",
+      "tags": [
+        "natural",
+        "jute",
+        "neutral",
+        "light",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-jarnvag-rug-low-pile-ornament-pink-beige",
+    "retailer": "IKEA",
+    "retailer_product_id": "20595698",
+    "title": "JÄRNVÄG Rug, low pile",
+    "variant": "ornament pattern pink/beige 5 ' 3 \"x7 ' 7 \"",
+    "category": "rug",
+    "description": "JÄRNVÄG Rug, low pile - ornament pattern pink/beige 5 ' 3 \"x7 ' 7 \". Durable and stain resistant since the rug is made of synthetic fibres. Simply wipe stains with a damp cloth. A perfect companion for all types of flooring, even those with underfloor heating.",
+    "image_url": "https://www.ikea.com/us/en/images/products/jaernvaeg-rug-low-pile-ornament-pattern-pink-beige__1435108_pe983701_s5.jpg",
+    "local_image": "product_images/ikea-jarnvag-rug-low-pile-ornament-pink-beige.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/jaernvaeg-rug-low-pile-ornament-pattern-pink-beige-20595698/",
+    "price_cents": 12999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.311,
+      "depth": 1.6,
+      "height": 0.013
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"129.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/jaernvaeg-rug-low-pile-ornament-pattern-pink-beige-20595698/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 7 ' 7 \"",
+        "source_url": "https://www.ikea.com/us/en/p/jaernvaeg-rug-low-pile-ornament-pattern-pink-beige-20595698/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 5 ' 3 \"",
+        "source_url": "https://www.ikea.com/us/en/p/jaernvaeg-rug-low-pile-ornament-pattern-pink-beige-20595698/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Pile length ½ \"",
+        "source_url": "https://www.ikea.com/us/en/p/jaernvaeg-rug-low-pile-ornament-pattern-pink-beige-20595698/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#C8B39E",
+      "material": "low pile",
+      "tags": [
+        "ornate",
+        "pink",
+        "beige",
+        "traditional pattern",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-stockholm-rug-flatwoven-stripe-black-off-white",
+    "retailer": "IKEA",
+    "retailer_product_id": "90103254",
+    "title": "STOCKHOLM Rug, flatwoven",
+    "variant": "handmade/stripe black/off-white 8 ' 2 \"x11 ' 6 \"",
+    "category": "rug",
+    "description": "STOCKHOLM Rug, flatwoven - handmade/stripe black/off-white 8 ' 2 \"x11 ' 6 \". Handwoven by skilled craftspeople, each one is unique. Made in India in organized weaving centers. The durable, soil-resistant wool surface makes this rug perfect in your living room or under your dining table.",
+    "image_url": "https://www.ikea.com/us/en/images/products/stockholm-rug-flatwoven-handmade-stripe-black-off-white__0523361_pe643765_s5.jpg",
+    "local_image": "product_images/ikea-stockholm-rug-flatwoven-stripe-black-off-white.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/stockholm-rug-flatwoven-handmade-stripe-black-off-white-90103254/",
+    "price_cents": 59999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 3.505,
+      "depth": 2.489,
+      "height": 0.006
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"599.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/stockholm-rug-flatwoven-handmade-stripe-black-off-white-90103254/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 11 ' 6 \"",
+        "source_url": "https://www.ikea.com/us/en/p/stockholm-rug-flatwoven-handmade-stripe-black-off-white-90103254/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 8 ' 2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/stockholm-rug-flatwoven-handmade-stripe-black-off-white-90103254/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Thickness ¼ \"",
+        "source_url": "https://www.ikea.com/us/en/p/stockholm-rug-flatwoven-handmade-stripe-black-off-white-90103254/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#101011",
+      "material": "wool, handmade flatwoven",
+      "tags": [
+        "black",
+        "off-white",
+        "stripe",
+        "high contrast",
+        "theme-contrast"
+      ]
+    },
+    "asset_url": null
+  }
+]
