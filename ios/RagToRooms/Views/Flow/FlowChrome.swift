@@ -10,12 +10,12 @@ struct BrandMark: View {
                 .foregroundStyle(.white)
                 .frame(width: compact ? 32 : 38, height: compact ? 32 : 38)
                 .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.aeroSky))
-            Text("FurniShare")
+            Text("Furnishare")
                 .font(compact ? .headline : .title3.weight(.semibold))
                 .foregroundStyle(Color.aeroInk)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("FurniShare")
+        .accessibilityLabel("Furnishare")
     }
 }
 
