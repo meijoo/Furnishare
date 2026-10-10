@@ -38,22 +38,29 @@ struct FlowStepBar: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            HStack(spacing: 6) {
-                ForEach(1...total, id: \.self) { step in
-                    Capsule()
-                        .fill(step <= current ? Color.aeroSky : Color.black.opacity(0.08))
-                        .frame(width: step == current ? 40 : 28, height: 5)
-                }
-            }
             if !captions.isEmpty {
-                HStack(spacing: 16) {
+                HStack(spacing: 8) {
                     ForEach(Array(captions.enumerated()), id: \.offset) { index, caption in
                         Text(caption)
                             .font(.caption.weight(index + 1 == current ? .semibold : .regular))
                             .foregroundStyle(index + 1 <= current ? Color.aeroInk : Color.figmaMuted)
+                            .fixedSize(horizontal: true, vertical: false)
+                            .padding(.top, 13)
+                            .overlay(alignment: .top) {
+                                Capsule()
+                                    .fill(index + 1 <= current ? Color.aeroSky : Color.black.opacity(0.08))
+                                    .frame(height: 5)
+                            }
                     }
                 }
             } else {
+                HStack(spacing: 6) {
+                    ForEach(1...total, id: \.self) { step in
+                        Capsule()
+                            .fill(step <= current ? Color.aeroSky : Color.black.opacity(0.08))
+                            .frame(width: step == current ? 40 : 28, height: 5)
+                    }
+                }
                 Text("\(current) of \(total)").font(.caption.weight(.semibold)).foregroundStyle(Color.figmaMuted)
             }
         }
