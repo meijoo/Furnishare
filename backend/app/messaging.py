@@ -5,7 +5,7 @@ Financial actions require explicit keywords (PAY, SEND) from the member who owns
 import re
 import time
 
-from . import agent, core, db, finance, planner
+from . import agent, core, db, finance, planner, invitations
 from .money import dollars
 
 HID = 'demo'
@@ -41,13 +41,17 @@ def handle_inbound(event: dict) -> dict:
     if not inserted:
         return {'status': 'duplicate'}
     try:
-        reply = process(event['sender_handle'], event['text'].strip())
+        reply = (invitations.group_reply(event) if ';+;' in (event.get('conversation_id') or '')
+                 else process(event['sender_handle'], event['text'].strip()))
     except (core.Conflict, core.Forbidden, ValueError, KeyError) as e:
         reply = f'Sorry, I could not do that: {e}'
     with db.tx() as c:
         if reply:
             core.queue_message(c, None, core.normalize_handle(event['sender_handle']), reply,
                                dedupe_key=f"reply:{event['event_id']}")
+            if ';+;' in (event.get('conversation_id') or ''):
+                c.execute('UPDATE outbound_jobs SET conversation_id = ? WHERE dedupe_key = ?',
+                          (event['conversation_id'], f"reply:{event['event_id']}"))
         c.execute('UPDATE inbound_events SET processed_at = ?, result = ? WHERE event_id = ?',
                   (db.now(), (reply or '')[:500], event['event_id']))
     db.record_timing('inbound_message', (time.perf_counter() - started) * 1000)
@@ -109,6 +113,10 @@ def process(handle: str, text: str) -> str | None:
     if not m:
         return register(handle, text)
     mid = m['id']
+    if m['household_id'] != HID:
+        if re.search(r'\b(limit|budget|pay|send|approve|reimburse|status)\b|\$', text, re.I):
+            return 'Use this room in the app for limits, approvals, and payments.'
+        return invitations.preference(m['household_id'], m, text)
     low = text.lower().strip()
     version_match = VERSION_RE.search(text)
     acts = pending_actions(mid)
@@ -173,10 +181,11 @@ def process(handle: str, text: str) -> str | None:
         if kind == 'status':
             return status_text(mid)
         if kind == 'design_request':
+            invitations.preference(HID, m, text)
             return agent.chat(HID, mid, text)['reply']
         if kind in ('authorize_purchase', 'authorize_reimbursement'):
             return 'To authorize money movement, reply with exactly PAY (purchase) or SEND (reimbursement).'
-    return HELP
+    return invitations.preference(m['household_id'], m, text)
 
 
 def apply_limit(mid: str, limit_cents: int, category: str | None) -> str:
@@ -198,7 +207,8 @@ def claim(worker_id: str, limit: int = 10) -> list[dict]:
         for r in rows:
             c.execute("UPDATE outbound_jobs SET status = 'leased', lease_until = ?, worker_id = ? WHERE job_id = ?",
                       (now + 60, worker_id, r['job_id']))
-    return [{'job_id': r['job_id'], 'to_handle': r['to_handle'], 'conversation_id': r['conversation_id'], 'text': r['text']}
+    return [{'job_id': r['job_id'], 'to_handle': r['to_handle'], 'conversation_id': r['conversation_id'], 'text': r['text'], **db.kv_get(f"job-payload:{r['job_id']}", {}),
+             'line_phone': db.kv_get(f"group:{r['conversation_id']}", {}).get('line_phone')}
             for r in rows]
 
 

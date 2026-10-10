@@ -13,9 +13,14 @@ export interface OutboundJob {
   to_handle: string;
   conversation_id: string | null;
   text: string;
+  participants?: string[];
+  invitation_token?: string;
+  line_phone?: string | null;
 }
 
 export interface JobResult {
+  conversation_id?: string;
+  line_phone?: string;
   status: "sent" | "failed";
   provider_message_id: string | null;
   error: string | null;
