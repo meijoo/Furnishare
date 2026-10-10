@@ -3,6 +3,8 @@ import asyncio
 import hashlib
 import json
 import threading
+
+import httpx
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -452,6 +454,8 @@ async def import_floorplan(aid: str, file: UploadFile = File(...), width_m: floa
         return await asyncio.to_thread(apartment.import_plan, data, mime, f'/uploads/{path.name}', width_m)
     except floorplan.PlanError as e:
         raise HTTPException(422, str(e)) from e
+    except (httpx.TimeoutException, TimeoutError) as e:
+        raise HTTPException(504, 'Reading the floor plan took too long. Please try again.') from e
 
 
 @app.delete('/apartments/{aid}/floorplan')

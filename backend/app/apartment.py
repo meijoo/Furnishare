@@ -1,5 +1,7 @@
 """The demo apartment: a floor plan grouping room scopes (households). Shared rooms split; bedrooms are owner-paid."""
 import json
+import logging
+import time
 
 from . import catalog, config, core, db, floorplan, planner, seed
 
@@ -148,7 +150,9 @@ def import_plan(data: bytes, mime: str, image_url: str, plan_width_m: float | No
     stored = {'name': f"Imported {sum(r['kind'] == 'bedroom' for r in built['rooms'])}-bedroom plan",
               'source': 'imported', 'image_url': image_url, **built}
     db.kv_set(PLAN_KEY, stored)
+    started = time.perf_counter()
     seeded = {r['id']: _seed(r) for r in _owned_bedrooms()}
+    logging.getLogger('uvicorn.error').info('Floor-plan bedroom setup: %.1f s', time.perf_counter() - started)
     return {'apartment': snapshot(), 'warnings': built['warnings'], 'seeded': seeded,
             'scale_m_per_px': built['scale_m_per_px']}
 

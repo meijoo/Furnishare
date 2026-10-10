@@ -8,7 +8,7 @@ struct ContentView: View {
     var body: some View {
         @Bindable var nav = nav
         ZStack {
-            AeroBackground()
+            AquaticBackground()
             screen
             if let success = nav.success {
                 SuccessOverlay(kind: success)
