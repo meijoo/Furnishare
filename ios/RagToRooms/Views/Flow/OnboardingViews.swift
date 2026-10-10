@@ -9,9 +9,10 @@ struct LivingSituationView: View {
             VStack(spacing: 28) {
                 header
                 VStack(spacing: 8) {
-                    SplitHeadline(lead: "How are you ", accent: "living?")
-                    Text("Choose an option to get started.")
-                        .foregroundStyle(Color.figmaMuted)
+                    Text("How are you living?")
+                        .font(.largeTitle.bold())
+                        .foregroundStyle(.black)
+                        .multilineTextAlignment(.center)
                 }
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 18)], spacing: 18) {
                     cards
@@ -26,7 +27,15 @@ struct LivingSituationView: View {
             Spacer()
             FlowStepBar(current: 1, total: 3, captions: ["Group setup", "Floor plan", "Select rooms"])
             Spacer()
-            Button("Log out") { nav.screen = .welcome }.font(.subheadline).foregroundStyle(Color.figmaMuted)
+            Button { nav.screen = .welcome } label: {
+                Label("Back", systemImage: "chevron.left")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(.white, in: RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
         }
     }
 
@@ -124,9 +133,10 @@ struct GroupSetupView: View {
         FlowScreen(maxWidth: 520) {
             VStack(alignment: .leading, spacing: 18) {
                 onboardingChrome(step: 1, back: .livingSituation)
-                SplitHeadline(lead: "Group ", accent: "setup")
-                Text("Name the household so everyone sees the same place. You can change this later.")
-                    .foregroundStyle(Color.figmaMuted)
+                Text("Group setup")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.black)
+                    .multilineTextAlignment(.center)
                 FlowField(title: "Group name", symbol: "person.3", prompt: model.apartment?.name ?? "Chapel Hill apt",
                           text: $nav.groupName)
                 FlowField(title: "Location", symbol: "mappin.and.ellipse", prompt: "Chapel Hill, NC",
