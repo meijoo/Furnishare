@@ -36,7 +36,9 @@ def member(hid: str, mid: str) -> dict:
 
 
 def member_by_handle(handle: str) -> dict | None:
-    return db.one('SELECT * FROM members WHERE handle = ?', normalize_handle(handle))
+    phone = normalize_handle(handle)
+    account_member = db.one('SELECT m.* FROM users u JOIN members m ON m.id=u.id AND m.household_id=u.active_group_id WHERE u.phone=?', phone)
+    return account_member or db.one('SELECT * FROM members WHERE handle = ?', phone)
 
 
 def normalize_handle(handle: str) -> str:
@@ -102,6 +104,9 @@ def queue_message(c, hid: str | None, mid_or_handle: str, text: str, dedupe_key:
     if hid and not mid_or_handle.startswith('+') and '@' not in mid_or_handle:
         row = c.execute('SELECT handle FROM members WHERE household_id = ? AND id = ?', (hid, mid_or_handle)).fetchone()
         handle = row['handle'] if row else None
+    if not handle and hid:
+        user = c.execute('SELECT phone FROM users WHERE id=?', (mid_or_handle,)).fetchone()
+        handle = user['phone'] if user else None
     if not handle:
         return
     c.execute('INSERT OR IGNORE INTO outbound_jobs (household_id, to_handle, text, dedupe_key, status, created_at) '

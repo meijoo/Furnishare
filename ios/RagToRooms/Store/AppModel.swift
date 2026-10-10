@@ -66,6 +66,9 @@ final class AppModel {
     static let defaultBaseURL = "http://127.0.0.1:8000"
     static let defaultHouseholdID = "demo"
     static let apartmentID = "demo"
+    private(set) var account: AccountUser? = AccountSessionStore.load()?.session.user
+    private(set) var currentGroupID: String? = UserDefaults.standard.string(forKey: "backendGroupID")
+    var activeApartmentID: String { currentGroupID ?? Self.apartmentID }
     static let ownedItemsKey = "ownedItems"
     static let extrasKey = "localSceneExtras"
     static let rosterKey = "groupRoster"
@@ -130,13 +133,13 @@ final class AppModel {
         let fixtures = Self.loadFixtures()
         let householdID = UserDefaults.standard.string(forKey: Self.householdKey) ?? Self.defaultHouseholdID
         currentHouseholdID = householdID
-        state = householdID == Self.defaultHouseholdID ? fixtures.state : Self.fixtureState(forScope: householdID)
+        state = householdID.hasPrefix("grp_") ? Self.blankState(forScope: householdID, apartment: nil) : (householdID == Self.defaultHouseholdID ? fixtures.state : Self.fixtureState(forScope: householdID))
         products = fixtures.products
         actingMemberID = UserDefaults.standard.string(forKey: Self.actingMemberKey) ?? "emily"
         ownedItems = Self.loadOwnedItems()
         extrasByHousehold = Self.loadExtras()
         restoreExtras(for: householdID)
-        extraPeople = Self.loadJSON(Self.rosterKey, as: [GroupPerson].self) ?? []
+        extraPeople = currentGroupID == nil ? (Self.loadJSON(Self.rosterKey, as: [GroupPerson].self) ?? []) : []
         memberPhotos = Self.loadJSON(Self.memberPhotosKey, as: [String: String].self) ?? [:]
         inspirationShots = Self.loadJSON(Self.inspirationShotsKey, as: [InspirationShot].self) ?? []
         inviteCode = UserDefaults.standard.string(forKey: Self.inviteKey) ?? Self.makeInviteCode()
@@ -160,7 +163,7 @@ final class AppModel {
     /// recomputed from every scope snapshot this app has seen.
     var apartment: Apartment? {
         if let fetchedApartment { return fetchedApartment }
-        guard let base = Self.fixtureApartment else { return nil }
+        guard currentGroupID == nil, let base = Self.fixtureApartment else { return nil }
         var summaries = scopeCache.mapValues { RoomSummary($0.state) }
         summaries.merge(liveSummaries) { _, live in live }
         if !stateIsPlaceholder { summaries[currentHouseholdID] = RoomSummary(state) }
@@ -195,8 +198,50 @@ final class AppModel {
 
     /// Everyone you can act as: all roommates, even inside a bedroom whose scope only lists its owner.
     var actingCandidates: [(id: String, name: String)] {
+        if let account { return [(account.id, account.name)] }
         if let members = apartment?.members, !members.isEmpty { return members.map { ($0.id, $0.name) } }
         return state.members.map { ($0.id, $0.name) }
+    }
+
+    func acceptAccount(_ session: AccountSession) throws {
+        guard let client else { throw BackendError.invalidBaseURL("No backend configured") }
+        try AccountSessionStore.save(session, backend: client.baseURL)
+        account = session.user
+        connectionTask?.cancel()
+        currentGroupID = nil
+        UserDefaults.standard.removeObject(forKey: "backendGroupID")
+        currentHouseholdID = Self.defaultHouseholdID
+        self.client?.householdID = currentHouseholdID
+        UserDefaults.standard.set(currentHouseholdID, forKey: Self.householdKey)
+        state = Self.blankState(forScope: currentHouseholdID, apartment: nil)
+        source = .fixture
+        scopeCache = [:]; fetchedApartment = nil; extraPeople = []
+        setActingMember(session.user.id)
+    }
+
+    func useGroup(id: String, householdID: String, code: String) async {
+        currentGroupID = id
+        UserDefaults.standard.set(id, forKey: "backendGroupID")
+        fetchedApartment = nil; scopeCache = [:]; extraPeople = []
+        if let account { setActingMember(account.id) }
+        switchScope(to: householdID)
+        adoptInviteCode(code)
+        if let client {
+            try? await refresh(client)
+            if let plan = try? await client.apartment(id: id) { fetchedApartment = plan }
+        }
+    }
+
+    func signOut() async {
+        if let client { try? await client.logout() }
+        AccountSessionStore.clear()
+        account = nil; currentGroupID = nil; fetchedApartment = nil; scopeCache = [:]
+        UserDefaults.standard.removeObject(forKey: "backendGroupID")
+        setActingMember("emily")
+        switchScope(to: Self.defaultHouseholdID)
+        state = Self.loadFixtures().state
+        source = .fixture
+        restartConnection()
     }
 
     func selectRoom(_ roomID: String) {
@@ -222,7 +267,7 @@ final class AppModel {
         stateIsPlaceholder = false
         if let cached = scopeCache[householdID] {
             state = cached.state; chat = cached.chat; source = cached.source
-        } else if !reachedBackend {
+        } else if !reachedBackend && currentGroupID == nil {
             state = Self.fixtureState(forScope: householdID); chat = []; source = .fixture
         } else {
             state = Self.blankState(forScope: householdID, apartment: apartment); chat = []
@@ -241,7 +286,7 @@ final class AppModel {
         apartmentLoading = true
         defer { if generation == apartmentGeneration { apartmentLoading = false } }
         do {
-            let fetched = try await client.apartment(id: Self.apartmentID)
+            let fetched = try await client.apartment(id: activeApartmentID)
             guard generation == apartmentGeneration else { return }
             fetchedApartment = fetched.rooms.isEmpty ? nil : fetched
             if fetchedApartment != nil { return }
@@ -280,7 +325,7 @@ final class AppModel {
         busy.insert("floorplan")
         defer { busy.remove("floorplan") }
         do {
-            let result = try await client.importFloorplan(apartmentID: Self.apartmentID, image: image, widthM: widthM)
+            let result = try await client.importFloorplan(apartmentID: activeApartmentID, image: image, widthM: widthM)
             if let imported = result.apartment, !imported.rooms.isEmpty { fetchedApartment = imported }
             await afterPlanChange()
             return .imported(warnings: result.warnings)
@@ -297,7 +342,7 @@ final class AppModel {
         busy.insert("floorplan")
         defer { busy.remove("floorplan") }
         do {
-            try await client.restoreFloorplan(apartmentID: Self.apartmentID)
+            try await client.restoreFloorplan(apartmentID: activeApartmentID)
             await afterPlanChange()
             return nil
         } catch {
@@ -914,7 +959,7 @@ final class AppModel {
                 sseEventSeen = false
                 let stream = Task { [weak self] in
                     do {
-                        for try await event in EventStream.events(from: client.eventsURL) {
+                        for try await event in EventStream.events(from: client.eventsURL, token: client.authToken) {
                             guard let self, !Task.isCancelled else { return }
                             if event.event != EventStream.openEvent { self.sseEventSeen = true }
                             await self.handle(event, client: client)
@@ -962,6 +1007,11 @@ final class AppModel {
     }
 
     private func fallBackToScopeFixture() {
+        if currentGroupID != nil {
+            scopeNotice = "This room could not be loaded. Check your account and backend connection."
+            connection = .offline("Room unavailable")
+            return
+        }
         reachedBackend = true
         connection = .polling
         scopeNotice = "\(currentRoomName) isn't on the backend yet. Showing demo fixtures; actions stay on this iPad."
@@ -1139,6 +1189,7 @@ final class AppModel {
     }
 
     func resetDemo() async {
+        guard currentGroupID == nil else { errorMessage = "Demo reset is only available in demo mode."; return }
         resetLocalEdits()
         await perform("reset", offline: {
             let fixtures = Self.loadFixtures()

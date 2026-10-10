@@ -332,3 +332,35 @@ catalog, and optionally search shopping listings. Shared links are saved as refe
 unverified listings never enter the scale-aware proposal automatically. State version
 bumps notify the app to refresh its suggestions. This extends the existing demo room
 membership; creating arbitrary new households/accounts remains outside this demo API.
+
+## Persistent accounts and groups
+
+Demo data stays in `seed.py`; it is independent of real accounts. SQLite in
+`backend/data/app.db` now also stores users, sessions, groups, group memberships,
+and room-to-group mappings. Signup never inserts a demo persona.
+
+- `POST /auth/signup`: `{name,email,phone,username,password}` → `{token,user,groups}`.
+  Email/username are case-insensitive and unique; phone is normalized and unique.
+  Passwords have at least eight characters and are stored as salted scrypt hashes.
+- `POST /auth/login`: `{email,password}` → the same response; invalid credentials → 401.
+- `GET /auth/me`: bearer token → `{user,groups}`. Sessions expire after 30 days.
+- `POST /auth/logout`: revokes the current bearer token.
+- `POST /groups`: bearer token, `{name,location,request_id}` → group snapshot
+  `{id,name,location,owner_id,group_code,household_id,members}`. Request id dedupes creation.
+- `GET /groups`: lists the signed-in user's groups.
+- `GET /groups/{id}`: group snapshot, membership required.
+- `POST /groups/join`: `{code}` with a bearer token adds the signed-in user to a real
+  group, idempotently, and returns `{household_id,group_name,group_code,group_id}`.
+  Joining supersedes unpurchased proposals so new members participate in new proposals;
+  joining while a purchase is in progress is rejected.
+
+Real groups have an empty living-room household and a persisted apartment plan.
+Their room APIs require group membership; member actions must use the signed-in
+user's member id. Demo room APIs retain existing behavior. Phone numbers are account
+profile data, not verified ownership; email/phone verification is not implemented.
+Account sessions are saved in the iOS Keychain. Name/email display preferences remain
+in UserDefaults. Account and group creation require a reachable backend.
+
+Real-group invitations can include existing members or new `{phone,name}` invitees.
+They send the group's existing code by DM. Invitees become members when they sign
+up and join with that code; invitations do not create password-less accounts.

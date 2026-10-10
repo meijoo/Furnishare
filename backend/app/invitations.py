@@ -3,11 +3,13 @@ import json
 import re
 import secrets
 
-from . import agent, catalog, core, db, planner, ranking
+from . import agent, catalog, core, db, planner, ranking, accounts
 
 
 def create(hid, members, request_id):
     core.household(hid)
+    if accounts.group_for_room(hid):
+        return create_account_invitation(hid, members, request_id)
     key = f'invitation-request:{hid}:{request_id}'
     existing = db.kv_get(key)
     if existing:
@@ -29,7 +31,8 @@ def create(hid, members, request_id):
             return get(json.loads(prior['value']))
         for _ in range(100):
             code = f'{secrets.randbelow(1000000):06d}'
-            if not c.execute('SELECT 1 FROM kv WHERE key = ?', (f'group-code:{code}',)).fetchone():
+            if (not c.execute('SELECT 1 FROM kv WHERE key = ?', (f'group-code:{code}',)).fetchone()
+                    and not c.execute('SELECT 1 FROM groups WHERE group_code=?', (code,)).fetchone()):
                 break
         else:
             raise ValueError('Could not allocate a group code; try again.')
@@ -51,6 +54,40 @@ def create(hid, members, request_id):
     return get(token)
 
 
+def create_account_invitation(hid, members, request_id):
+    gid = accounts.group_for_room(hid)
+    group = accounts.snapshot(gid)
+    key = f'invitation-request:{hid}:{request_id}'
+    token = secrets.token_urlsafe(24)
+    phones = [core.normalize_handle(m['phone']) for m in members]
+    if not phones or len(set(phones)) != len(phones) or any(not re.fullmatch(r'\+[1-9][0-9]{7,14}', phone) for phone in phones):
+        raise ValueError('Enter distinct international phone numbers.')
+    with db.tx() as c:
+        prior = c.execute('SELECT value FROM kv WHERE key=?', (key,)).fetchone()
+        if prior:
+            return get(json.loads(prior['value']))
+        jobs, labels = [], []
+        for index, (member, phone) in enumerate(zip(members, phones)):
+            mid = member.get('member_id')
+            if mid:
+                account = c.execute('SELECT u.* FROM users u JOIN group_members gm ON gm.user_id=u.id WHERE gm.group_id=? AND u.id=?', (gid, mid)).fetchone()
+                if not account or account['phone'] != phone:
+                    raise ValueError('A registered member must use their account phone number.')
+                label = account['name']
+            else:
+                label = member.get('name', '').strip() or f'Roommate {index + 1}'
+            c.execute('INSERT INTO group_invitees VALUES (?,?,?) ON CONFLICT(group_id,phone) DO UPDATE SET name=excluded.name', (gid, phone, label))
+            cursor = c.execute("INSERT INTO outbound_jobs (household_id,to_handle,text,dedupe_key,status,created_at) VALUES (?,?,?,?,'pending',?)",
+                               (hid, phone, f"Join {group['name']} in Furnishare! Your group code is {group['group_code']}. Create an account, choose Join a group, and enter this code. Reply here with furniture preferences after joining.", f'invite:{token}:{index}', db.now()))
+            jobs.append(cursor.lastrowid)
+            labels.append(label)
+        value = {'token': token, 'household_id': hid, 'group_code': group['group_code'],
+                 'job_id': jobs[0], 'job_ids': jobs, 'recipient_names': labels}
+        for k, v in [(key, token), (f'invitation:{token}', value)]:
+            c.execute('INSERT INTO kv VALUES (?,?)', (k, json.dumps(v)))
+    return get(token)
+
+
 def get(token):
     invitation = db.kv_get(f'invitation:{token}')
     if not invitation:
@@ -69,8 +106,8 @@ def get(token):
     else:
         status = 'failed'
     names = core.names(invitation['household_id'])
-    recipients = [{'member_name': names.get(mid, 'Roommate'), **job}
-                  for mid, job in zip(invitation.get('member_ids', [''] * len(jobs)), jobs)]
+    labels = invitation.get('recipient_names') or [names.get(mid, 'Roommate') for mid in invitation.get('member_ids', [''] * len(jobs))]
+    recipients = [{'member_name': label, **job} for label, job in zip(labels, jobs)]
     errors = [f"{r['member_name']}: {r['error']}" for r in recipients if r['error']]
     return {k: invitation[k] for k in ('token', 'household_id', 'job_id')} | {
         'group_code': invitation.get('group_code'), 'job_ids': job_ids,

@@ -84,3 +84,33 @@ Run the tests for the area you touched before opening a pull request.
 - Private limits are never shown or texted to other roommates.
 - Money moves only after an explicit PAY or SEND from the right person. An uncertain payment is checked with Nessie, never blindly retried.
 - Nessie is a sandbox: no real money moves.
+
+## Accounts and saved groups
+
+**Create your account** now saves a real user in `backend/data/app.db`. Log in with
+that email/password to return to your saved groups. **Group setup** creates a
+persistent group, with an empty living room and a six-digit join code. **Join a
+group** validates the code and stores membership for the signed-in account.
+Passwords are salted scrypt hashes; session tokens are hashed in SQLite, expire
+after 30 days, and are stored in the iOS Keychain. Phone/email verification is not
+yet implemented. Account and group creation require the backend to be running.
+
+Use **Try demo** on the welcome screen for Emily, Maya, and Alex. Demo resets
+preserve real users, groups, memberships, and their invitation jobs. Set
+`RTR_SEED_DEMO=0` to disable automatic demo seeding on backend startup; existing
+demo records remain until explicitly reset or removed. The default is `1`.
+
+To inspect saved records without passwords or session tokens:
+
+```sh
+sqlite3 backend/data/app.db "SELECT id, name FROM users;"
+sqlite3 backend/data/app.db "SELECT id, name, location FROM groups;"
+sqlite3 backend/data/app.db "SELECT group_id, user_id, role FROM group_members;"
+```
+
+New group members join as themselves, rather than taking a demo persona's seat.
+Share lets you enter new roommates' phone numbers and sends the group's code in
+individual Photon messages. Recipients still need Photon permission to receive
+messages on your shared line. Text preferences target the most recently created
+or joined group for that phone. Floor-plan imports are saved per real group;
+bedroom scopes use the group's real member ids.

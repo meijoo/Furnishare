@@ -111,6 +111,12 @@ def status_text(mid: str) -> str:
 def process(handle: str, text: str) -> str | None:
     m = core.member_by_handle(handle)
     if not m:
+        account = db.one('SELECT id FROM users WHERE phone=?', core.normalize_handle(handle))
+        if account:
+            return 'Join or create a group in Furnishare first, then text your furniture preferences here.'
+        invite = db.one('SELECT g.group_code,g.name FROM group_invitees i JOIN groups g ON g.id=i.group_id WHERE i.phone=? ORDER BY g.created_at DESC LIMIT 1', core.normalize_handle(handle))
+        if invite:
+            return f"Create an account in Furnishare, then join {invite['name']} with code {invite['group_code']} before sharing preferences."
         return register(handle, text)
     mid = m['id']
     if m['household_id'] != HID:

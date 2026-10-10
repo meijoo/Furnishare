@@ -46,7 +46,7 @@ struct LivingSituationView: View {
                 switch mode {
                 case .createGroup: nav.screen = .groupSetup
                 case .joinGroup: nav.screen = .joinGroup
-                case .solo: nav.screen = .floorPlan
+                case .solo: nav.screen = .groupSetup
                 }
             } label: {
                 VStack(alignment: .leading, spacing: 0) {
@@ -107,8 +107,12 @@ struct JoinGroupView: View {
             defer { joining = false }
             do {
                 let group = try await client.joinGroup(code: code)
-                model.switchScope(to: group.household_id)
-                model.adoptInviteCode(group.group_code)
+                if let gid = group.group_id {
+                    await model.useGroup(id: gid, householdID: group.household_id, code: group.group_code)
+                } else {
+                    model.switchScope(to: group.household_id)
+                    model.adoptInviteCode(group.group_code)
+                }
                 nav.groupName = group.group_name
                 nav.joinCode = group.group_code
                 nav.finishOnboarding()
@@ -116,10 +120,7 @@ struct JoinGroupView: View {
             } catch { self.error = error.localizedDescription }
             return
         }
-        error = nil
-        if nav.groupName.isEmpty { nav.groupName = "Shared apartment" }
-        model.adoptInviteCode(code)
-        nav.screen = .floorPlan
+        error = "Connect to the backend to check your group code."
     }
 }
 
@@ -127,6 +128,8 @@ struct GroupSetupView: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
     @State private var error: String?
+    @State private var saving = false
+    @State private var requestID = UUID().uuidString
 
     var body: some View {
         @Bindable var nav = nav
@@ -142,22 +145,31 @@ struct GroupSetupView: View {
                 FlowField(title: "Location", symbol: "mappin.and.ellipse", prompt: "Chapel Hill, NC",
                           text: $nav.groupLocation)
                 if let error { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(Color.aeroRed) }
-                Button("Continue") { submit() }.buttonStyle(AeroWideButtonStyle())
+                Button(saving ? "Creating group…" : "Continue") { Task { await submit() } }.buttonStyle(AeroWideButtonStyle()).disabled(saving)
             }
             .glassPanel()
         }
     }
 
-    private func submit() {
+    private func submit() async {
         if nav.groupName.trimmingCharacters(in: .whitespaces).isEmpty {
             nav.groupName = model.apartment?.name ?? "Our apartment"
         }
         if nav.groupLocation.trimmingCharacters(in: .whitespaces).isEmpty {
             nav.groupLocation = "Chapel Hill, NC"
         }
-        error = nil
-        nav.persistProfile()
-        nav.screen = .floorPlan
+        guard model.account != nil, let client = model.client else {
+            error = "Sign in before creating a group. Use Try demo on the welcome screen for the demo."; return
+        }
+        saving = true; error = nil
+        defer { saving = false }
+        do {
+            let group = try await client.createGroup(name: nav.groupName, location: nav.groupLocation, requestID: requestID)
+            await model.useGroup(id: group.id, householdID: group.household_id, code: group.group_code)
+            nav.selectedRoomIDs = []
+            nav.persistProfile()
+            nav.screen = .floorPlan
+        } catch { self.error = error.localizedDescription }
     }
 }
 
@@ -186,7 +198,7 @@ struct FloorPlanUploadView: View {
                         if let apartment = model.apartment {
                             FloorPlanImportControls(apartment: apartment, showImage: $showImage)
                         } else {
-                            Label("The apartment plan isn’t loaded yet. You can continue with the demo rooms.", systemImage: "info.circle")
+                            Label("The floor plan is still loading. You can continue with the current room.", systemImage: "info.circle")
                                 .font(.caption).foregroundStyle(Color.figmaMuted)
                         }
                     }

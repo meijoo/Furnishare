@@ -22,11 +22,12 @@ enum EventStream {
         return URLSession(configuration: config)
     }()
 
-    static func events(from url: URL) -> AsyncThrowingStream<ServerSentEvent, Error> {
+    static func events(from url: URL, token: String? = nil) -> AsyncThrowingStream<ServerSentEvent, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 do {
                     var request = URLRequest(url: url)
+                    if let token { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
                     request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
                     request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
                     let (bytes, response) = try await session.bytes(for: request)
