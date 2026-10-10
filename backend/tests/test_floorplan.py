@@ -205,3 +205,15 @@ def test_textured_asset_swaps_in_when_built(client, tmp_path, monkeypatch):
     obj = next(o for o in client.get('/households/demo/state').json()['scene']['objects'] if o['object_id'] == oid)
     assert obj['texture']['status'] == 'ready' and obj['asset_url'] == f"/assets/{'f' * 24}.usdz"
     textures.delete('demo', oid)
+
+
+def test_import_timeout_returns_actionable_error(client, monkeypatch):
+    import httpx
+
+    def slow_read(data, mime):
+        raise httpx.ReadTimeout('service timed out')
+
+    monkeypatch.setattr(floorplan, 'extract', slow_read)
+    response = client.post('/apartments/demo/floorplan', files={'file': ('plan.png', png(), 'image/png')})
+    assert response.status_code == 504
+    assert response.json()['detail'] == 'Reading the floor plan took too long. Please try again.'
