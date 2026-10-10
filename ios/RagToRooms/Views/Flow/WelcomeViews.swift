@@ -73,7 +73,6 @@ struct SignUpView: View {
 
     var body: some View {
         ZStack {
-            signupDecor
             FlowScreen(maxWidth: 480) {
                 VStack(spacing: 18) {
                     HStack {
@@ -121,33 +120,6 @@ struct SignUpView: View {
                 }
             }
         }
-    }
-
-    private var signupDecor: some View {
-        GeometryReader { proxy in
-            HStack {
-                VStack {
-                    Spacer()
-                    RoomIllustration(scene: .createGroup)
-                        .frame(width: 220, height: 160)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .padding(.leading, 24)
-                        .padding(.bottom, 40)
-                }
-                Spacer()
-                VStack {
-                    Spacer()
-                    RoomIllustration(scene: .solo)
-                        .frame(width: 180, height: 140)
-                        .clipShape(RoundedRectangle(cornerRadius: 20))
-                        .padding(.trailing, 24)
-                        .padding(.bottom, 80)
-                }
-            }
-            .frame(width: proxy.size.width, height: proxy.size.height)
-        }
-        .opacity(0.55)
-        .allowsHitTesting(false)
     }
 
     private func submit() {
