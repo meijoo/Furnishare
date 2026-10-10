@@ -133,6 +133,7 @@ struct RoomWorkspaceView: View {
             designSidePanels
         case .items:
             itemsIntro
+            GroupSuggestionsPanel()
             ProposalPanel().id("proposal")
             ProductDetailPanel().id("product")
         case .budget:
@@ -140,6 +141,7 @@ struct RoomWorkspaceView: View {
             ContributionsPanel().id("contributions")
             FinancePanel().id("finance")
         case .inspiration:
+            GroupSuggestionsPanel()
             ChatPanel().id("chat")
             ActivityPanel().id("activity")
         }

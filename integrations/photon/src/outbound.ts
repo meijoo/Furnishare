@@ -60,7 +60,12 @@ export class OutboundWorker {
   }
 
   private async handle(job: OutboundJob, signal: AbortSignal): Promise<void> {
-    const fields = { job_id: job.job_id, to: maskHandle(job.to_handle), text_length: job.text?.length ?? 0 };
+    const fields = {
+      job_id: job.job_id,
+      target_type: job.participants ? "new_group" : job.conversation_id?.includes(";+;") ? "group" : "dm",
+      ...(job.participants ? { recipient_count: job.participants.length } : { to: maskHandle(job.to_handle) }),
+      text_length: job.text?.length ?? 0,
+    };
 
     if (this.attempted.has(job.job_id)) {
       const prior = this.attempted.get(job.job_id);
@@ -80,8 +85,9 @@ export class OutboundWorker {
     this.remember(job.job_id, null);
     let result: JobResult;
     try {
-      const { providerMessageId } = await this.transport.send(job);
-      result = { status: "sent", provider_message_id: providerMessageId, error: null };
+      const { providerMessageId, conversationId, linePhone } = await this.transport.send(job);
+      result = { status: "sent", provider_message_id: providerMessageId, error: null,
+        conversation_id: conversationId, line_phone: linePhone };
       log.info("outbound sent", { ...fields, provider_message_id: providerMessageId });
     } catch (error) {
       result = { status: "failed", provider_message_id: null, error: errorMessage(error).slice(0, 500) };

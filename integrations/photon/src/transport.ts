@@ -9,6 +9,6 @@ export interface Transport {
   /** Deliver inbound messages to `onInbound` (awaited, in order) until the source ends or `stop()` is called. */
   run(onInbound: InboundHandler): Promise<void>;
   /** Send one outbound job. Resolves with the provider's id for the sent message, if it returns one. */
-  send(job: OutboundJob): Promise<{ providerMessageId: string | null }>;
+  send(job: OutboundJob): Promise<{ providerMessageId: string | null; conversationId?: string; linePhone?: string }>;
   stop(): Promise<void>;
 }

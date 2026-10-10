@@ -66,8 +66,10 @@ struct LivingSituationView: View {
 }
 
 struct JoinGroupView: View {
+    @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
     @State private var error: String?
+    @State private var joining = false
 
     var body: some View {
         @Bindable var nav = nav
@@ -75,24 +77,34 @@ struct JoinGroupView: View {
             VStack(alignment: .leading, spacing: 18) {
                 onboardingChrome(step: 1, back: .livingSituation)
                 SplitHeadline(lead: "Join a ", accent: "group")
-                Text("Ask a housemate for the 6-digit code. In this demo any six digits works and lands you in the shared apartment.")
+                Text("Enter the six-digit code sent to you by Furnishare.")
                     .foregroundStyle(Color.figmaMuted)
                 FlowField(title: "Group code", symbol: "number", prompt: "123456",
                           text: $nav.joinCode, keyboard: .numberPad)
                 if let error { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(Color.aeroRed) }
-                Button("Continue") { submit() }.buttonStyle(AeroWideButtonStyle())
-                    .disabled(nav.joinCode.trimmingCharacters(in: .whitespaces).isEmpty)
+                Button(joining ? "Joining…" : "Continue") { Task { await submit() } }.buttonStyle(AeroWideButtonStyle())
+                    .disabled(joining || nav.joinCode.trimmingCharacters(in: .whitespaces).isEmpty)
             }
             .glassPanel()
         }
     }
 
-    private func submit() {
-        let code = nav.joinCode.filter(\.isNumber)
-        guard code.count == 6 else { error = "Enter six digits."; return }
-        error = nil
-        if nav.groupName.isEmpty { nav.groupName = "Shared apartment" }
-        nav.screen = .floorPlan
+    private func submit() async {
+        let code = nav.joinCode.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard code.count == 6, code.allSatisfy({ "0123456789".contains($0) }) else {
+            error = "Enter six digits."; return
+        }
+        guard let client = model.client else { error = "Connect to your group's backend first."; return }
+        joining = true; error = nil
+        defer { joining = false }
+        do {
+            let group = try await client.joinGroup(code: code)
+            model.switchScope(to: group.household_id)
+            nav.groupName = group.group_name
+            nav.joinCode = group.group_code
+            nav.finishOnboarding()
+            nav.screen = .room
+        } catch { self.error = error.localizedDescription }
     }
 }
 

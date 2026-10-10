@@ -63,6 +63,22 @@ struct BackendClient: Sendable {
 
     // MARK: Endpoints
 
+    func invite(members: [InviteMember], requestID: String) async throws -> RoomInvitation {
+        try await send("POST", "\(household)/invitations", body: InviteRequest(members: members, request_id: requestID))
+    }
+
+    func joinGroup(code: String) async throws -> JoinedGroup {
+        try await send("POST", "/groups/join", body: JoinGroupRequest(code: code))
+    }
+
+    func invitation(token: String) async throws -> RoomInvitation {
+        try await send("GET", "/invitations/\(Self.pathEscaped(token))")
+    }
+
+    func suggestions() async throws -> SuggestionList {
+        try await send("GET", "\(household)/suggestions")
+    }
+
     func health() async throws -> HealthResponse { try await send("GET", "/health") }
 
     func products(category: String? = nil) async throws -> [Product] {
@@ -254,3 +270,31 @@ struct BackendClient: Sendable {
         keys.map { $0.intValue.map { "[\($0)]" } ?? $0.stringValue }.joined(separator: ".")
     }
 }
+
+struct InviteMember: Encodable { let member_id: String; let phone: String }
+struct InviteRequest: Encodable { let members: [InviteMember]; let request_id: String }
+struct InvitationRecipient: Decodable { let member_name: String; let status: String; let error: String? }
+struct RoomInvitation: Decodable {
+    let recipients: [InvitationRecipient]?
+    let token: String
+    let household_id: String
+    let group_code: String?
+    let job_id: Int
+    let status: String
+    let error: String?
+}
+struct SuggestionList: Decodable { let suggestions: [FurnitureSuggestion] }
+struct FurnitureSuggestion: Decodable, Identifiable {
+    let id: String
+    let member_name: String
+    let text: String
+    let links: [String]
+    let products: [SuggestedFurniture]
+}
+struct SuggestedFurniture: Decodable {
+    let title: String?
+    let source_url: String?
+}
+
+struct JoinGroupRequest: Encodable { let code: String }
+struct JoinedGroup: Decodable { let household_id: String; let group_name: String; let group_code: String }

@@ -296,3 +296,31 @@ The texture belongs to the object id, so it carries over when a revision swaps t
 - `unavailable`: Blender is off.
 
 `DELETE` on the same path removes the texture.
+
+## Roommate invitations and group preferences
+
+`POST /households/{hid}/invitations`: `{ "members": [{"member_id", "phone"}], "request_id" }`.
+Phones must be E.164 and members must belong to the room. Include the creator's phone.
+At least two participants are required. Returns `{token, group_code, job_id, status}`. Codes are unique six-digit strings (including leading zeroes).
+Each phone receives a separate DM containing the same code, compatible with shared
+Photon lines. `PHOTON_ENABLE_GROUPS=0` is sufficient. Repeating a request id returns
+the original invitation. `GET /invitations/{token}` returns aggregate delivery status
+and `recipients: [{member_name, status, error}]`. Status is pending, sent, failed, or
+partial (some sent, some failed); individual failures remain visible. Responses also
+include `job_ids`, one job per phone, with `job_id` retained as the first job.
+`POST /groups/join` accepts `{ "code": "123456" }` and returns `{household_id, group_name, group_code}`.
+Unknown codes return 404; malformed codes return 422. The app validates the code
+against the backend, then opens the matching room. Recipients must connect to the
+same backend. Invitations predating codes require a new invitation; reset invalidates codes.
+
+New invitation jobs are ordinary DM jobs with no group-creation payload. Replying
+from a registered phone routes preferences and product URLs to that member’s room.
+Existing dedicated-line group bindings remain supported; financial commands in
+those groups still request a private message.
+
+`GET /households/{hid}/suggestions` returns `{suggestions: [{id, member_name, text,
+links, products}]}`. Text preferences accumulate across members, rank the verified
+catalog, and optionally search shopping listings. Shared links are saved as references;
+unverified listings never enter the scale-aware proposal automatically. State version
+bumps notify the app to refresh its suggestions. This extends the existing demo room
+membership; creating arbitrary new households/accounts remains outside this demo API.

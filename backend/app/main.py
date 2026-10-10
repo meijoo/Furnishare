@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from . import (agent, apartment, assets, blender_mcp_client, catalog, config, core, db, finance, floorplan, messaging,
-               nessie, planner, ranking, seed, state, textures)
+               nessie, planner, ranking, seed, state, textures, invitations)
 from .core import Conflict, Forbidden
 
 
@@ -128,9 +128,25 @@ class ClaimBody(BaseModel):
     max: int = Field(default=10, ge=1, le=50)
 
 
+class JoinGroupBody(BaseModel):
+    code: str = Field(pattern=r"^[0-9]{6}$")
+
+
+class InviteMember(BaseModel):
+    member_id: str
+    phone: str
+
+
+class InviteBody(BaseModel):
+    members: list[InviteMember] = Field(min_length=2, max_length=20)
+    request_id: str = Field(min_length=1, max_length=100)
+
+
 class ResultBody(BaseModel):
     status: str
     provider_message_id: str | None = None
+    conversation_id: str | None = None
+    line_phone: str | None = None
     error: str | None = None
 
 
@@ -138,6 +154,26 @@ class ResultBody(BaseModel):
 def root():
     return {'service': 'RAG to Rooms backend', 'health': '/health', 'apartment': '/apartments/demo',
             'living_room': '/households/demo/state', 'docs': '/docs'}
+
+
+@app.post('/groups/join')
+def join_group(body: JoinGroupBody):
+    return invitations.join(body.code)
+
+
+@app.post('/households/{hid}/invitations')
+def invite(hid: str, body: InviteBody):
+    return invitations.create(hid, [m.model_dump() for m in body.members], body.request_id)
+
+
+@app.get('/invitations/{token}')
+def invitation(token: str):
+    return invitations.get(token)
+
+
+@app.get('/households/{hid}/suggestions')
+def suggestions(hid: str):
+    return {'suggestions': invitations.suggestions(hid)}
 
 
 @app.get('/health')
@@ -365,6 +401,8 @@ def outbound_claim(body: ClaimBody):
 
 @app.post('/messages/outbound/{job_id}/result')
 def outbound_result(job_id: int, body: ResultBody):
+    if body.status == 'sent' and db.kv_get(f'job-payload:{job_id}'):
+        invitations.bind(job_id, body.conversation_id, body.line_phone)
     messaging.result(job_id, body.status, body.provider_message_id, body.error)
     return {'ok': True}
 

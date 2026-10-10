@@ -109,14 +109,18 @@ export class PhotonTransport implements Transport {
     };
   }
 
-  async send(job: OutboundJob): Promise<{ providerMessageId: string | null }> {
+  async send(job: OutboundJob): Promise<{ providerMessageId: string | null; conversationId?: string; linePhone?: string }> {
     const im = imessage(this.requireApp());
     const conversationId = job.conversation_id ?? "";
     const isGroupTarget = conversationId.includes(";+;");
 
     let space;
-    if (isGroupTarget && this.config.enableGroups) {
-      const phone = this.lineForConversation.get(conversationId);
+    if (job.participants) {
+      if (!this.config.enableGroups) throw new Error("Enable PHOTON_ENABLE_GROUPS=1 and use a dedicated Photon line to create group chats.");
+      space = await im.space.create(job.participants);
+      if (space.type !== "group") throw new Error("Photon did not create a group chat.");
+    } else if (isGroupTarget && this.config.enableGroups) {
+      const phone = job.line_phone ?? this.lineForConversation.get(conversationId);
       space = phone ? await im.space.get(conversationId, { phone }) : await im.space.get(conversationId);
     } else {
       if (isGroupTarget) {
@@ -128,7 +132,7 @@ export class PhotonTransport implements Transport {
 
     log.debug("resolved outbound space", { job_id: job.job_id, to: maskHandle(job.to_handle), space_type: space.type });
     const sent = await space.send(text(job.text));
-    return { providerMessageId: sent?.id ?? null };
+    return { providerMessageId: sent?.id ?? null, conversationId: space.id, linePhone: space.phone };
   }
 
   async stop(): Promise<void> {

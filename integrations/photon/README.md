@@ -104,3 +104,23 @@ The SDK reads a few environment variables of its own. They are optional and norm
 - `src/outbound.ts`: the claim/send/result loop
 - `src/backend.ts`: the HTTP client with retry
 - `scripts/fake-backend.ts`: the fake implementation of the three endpoints
+
+## Furnishare roommate invitations
+
+Shared Free/Pro lines send **individual DMs**. Set `PHOTON_ENABLE_GROUPS=0` and
+restart the adapter. In the app, Share lists the room's existing members. Enter
+their E.164 phone numbers, including yours, then choose **Text invitations**.
+Each phone gets its own job containing the same six-digit code. **Check delivery**
+shows each roommate's status, including partial failures. Retrying a failed or
+partial invitation creates a new invitation for all selected numbers.
+
+Recipients enter the code in **Join a group**. The app checks it with the backend
+and opens the matching room. Everyone needs the app configured to reach the same
+backend; physical devices need the Mac's LAN address or a tunnel.
+
+Reply to the individual Photon conversation with furniture preferences and URLs.
+Ideas from all registered roommates accumulate in **Roommate furniture ideas**
+in Items and Inspiration. `SHOPPING_API_KEY` adds live shopping listings.
+The app group is shared; messaging remains individual. Shared-line recipient
+eligibility is controlled by Photon; a disallowed target is reported per person.
+This demo uses existing room members, with no arbitrary account creation.

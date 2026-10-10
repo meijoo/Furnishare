@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @Environment(AppModel.self) private var model
     @State private var nav = AppNavigation()
+    @State private var joinInvitation: RoomInvitation?
 
     var body: some View {
         @Bindable var nav = nav
@@ -13,7 +14,6 @@ struct ContentView: View {
                 SuccessOverlay(kind: success)
             }
         }
-        .environment(nav)
         .sheet(isPresented: $nav.showSettings) { SettingsSheet() }
         .sheet(isPresented: $nav.showRoomSetup) { RoomSetupSheet(room: model.state.room) }
         .sheet(isPresented: $nav.showCatalog) { CatalogSheet() }
@@ -25,8 +25,24 @@ struct ContentView: View {
                               names: Dictionary(model.displayedObjects.map { ($0.objectID, model.displayName($0)) }, uniquingKeysWith: { a, _ in a }),
                               baseURL: model.baseURL, initialObjectID: model.selectedObjectID)
         }
+        // Apply outside the presentation modifiers so sheets inherit navigation too.
+        .environment(nav)
         .onChange(of: nav.showAR) { _, presented in model.arPresented = presented }
         .task { model.start() }
+        .onOpenURL { url in
+            guard url.scheme == "ragtorooms", url.host == "join", !url.lastPathComponent.isEmpty else { return }
+            Task {
+                do { joinInvitation = try await model.client?.invitation(token: url.lastPathComponent) }
+                catch { model.errorMessage = error.localizedDescription }
+            }
+        }
+        .alert("Join this room?", isPresented: Binding(get: { joinInvitation != nil }, set: { if !$0 { joinInvitation = nil } })) {
+            Button("Join") {
+                if let invitation = joinInvitation { model.switchScope(to: invitation.household_id); nav.screen = .room }
+                joinInvitation = nil
+            }
+            Button("Cancel", role: .cancel) { joinInvitation = nil }
+        } message: { Text("Open the room shared by your roommates on your configured backend.") }
         #if DEBUG
         .task { Self.applyDebugOrientation() }
         #endif

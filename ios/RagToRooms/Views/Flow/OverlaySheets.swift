@@ -228,46 +228,110 @@ struct SendMoneySheet: View {
 
 struct ShareSpaceSheet: View {
     @Environment(AppModel.self) private var model
-    @Environment(AppNavigation.self) private var nav
     @Environment(\.dismiss) private var dismiss
 
-    private var linkText: String {
-        let room = model.currentRoomName.replacingOccurrences(of: " ", with: "").lowercased()
-        return "ragtorooms://room/\(room)"
-    }
-
-    private var message: String {
-        "Join our \(model.currentRoomName) in RAG to Rooms. Ask the agent to furnish it, then approve the proposal together. \(linkText)"
-    }
+    @State private var phones: [String: String] = [:]
+    @State private var invitation: RoomInvitation?
+    @State private var requestID = UUID().uuidString
+    @State private var sending = false
+    @State private var failure: String?
 
     var body: some View {
         NavigationStack {
-            VStack(alignment: .leading, spacing: 18) {
-                Text("Share this space").font(.title.bold())
-                Text("Send a housemate a link to this room. On a device with the app, the same household is already loaded — they can switch rooms from the plan.")
-                    .foregroundStyle(.secondary)
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(model.currentRoomName).font(.headline)
-                    Text(linkText).font(.subheadline.monospaced()).foregroundStyle(Color.aeroSky)
+            Form {
+                Section("Invite roommates") {
+                    Text("Enter everyone's number, including yours. Furnishare will text each person the same six-digit code to join this room. Reply to your individual conversation with furniture preferences and links.")
+                    ForEach(model.state.members, id: \.id) { member in
+                        TextField("\(member.name): +15551234567", text: Binding(
+                            get: { phones[member.id] ?? "" },
+                            set: { phones[member.id] = $0; requestID = UUID().uuidString; invitation = nil }
+                        ))
+                        .keyboardType(.phonePad)
+                    }
+                    Button(sending ? "Queuing…" : "Text invitations") {
+                        Task { await invite() }
+                    }
+                    .disabled(sending || model.isOfflineDemo || (invitation != nil && invitation?.status != "failed" && invitation?.status != "partial"))
+                    if model.isOfflineDemo { Text("Connect to the backend to invite roommates.").foregroundStyle(.secondary) }
+                    if let failure { Text(failure).foregroundStyle(.red) }
                 }
-                .padding(14)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(RoundedRectangle(cornerRadius: 16).fill(.white.opacity(0.75)))
-                ShareLink(item: message) { Label("Messages / more", systemImage: "square.and.arrow.up") }
-                    .buttonStyle(AeroWideButtonStyle())
-                Button("Copy link") {
-                    UIPasteboard.general.string = linkText
-                    dismiss()
-                    nav.showSuccess(.linkCopied)
+                if let invitation {
+                    Section("Invitation") {
+                        Text(invitation.status == "sent" ? "Invitations sent to every roommate." : "Delivery: \(invitation.status)")
+                        if let recipients = invitation.recipients {
+                            ForEach(Array(recipients.enumerated()), id: \.offset) { _, recipient in
+                                Text("\(recipient.member_name): \(recipient.status)")
+                            }
+                        }
+                        if let error = invitation.error { Text(error).foregroundStyle(.red) }
+                        if let code = invitation.group_code {
+                            Text(code).font(.largeTitle.monospaced().bold()).textSelection(.enabled)
+                            Text("Enter this code in Join a group.")
+                            Button("Copy group code") { UIPasteboard.general.string = code }
+                        } else { Text("Create a new invitation to get a group code.") }
+                        Button("Check delivery") {
+                            Task {
+                                do { self.invitation = try await model.client?.invitation(token: invitation.token) }
+                                catch { failure = error.localizedDescription }
+                            }
+                        }
+                    }
                 }
-                .buttonStyle(AeroWideButtonStyle(outlined: true))
-                Spacer()
             }
-            .padding(20)
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Share this space")
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
+    }
+
+    private func invite() async {
+        guard let client = model.client else { return }
+        if invitation?.status == "failed" || invitation?.status == "partial" { requestID = UUID().uuidString }
+        sending = true; failure = nil
+        defer { sending = false }
+        let members = model.state.members.compactMap { member -> InviteMember? in
+            let phone = (phones[member.id] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+            return phone.isEmpty ? nil : InviteMember(member_id: member.id, phone: phone)
+        }
+        do { invitation = try await client.invite(members: members, requestID: requestID) }
+        catch { failure = error.localizedDescription }
+    }
+}
+
+struct GroupSuggestionsPanel: View {
+    @Environment(AppModel.self) private var model
+    @State private var suggestions: [FurnitureSuggestion] = []
+    @State private var failure: String?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Roommate furniture ideas").font(.headline)
+            if let failure { Text(failure).foregroundStyle(.secondary) }
+            if suggestions.isEmpty { Text("Share preferences or furniture links in your individual Photon conversation to see suggestions here.").foregroundStyle(.secondary) }
+            ForEach(suggestions.reversed()) { suggestion in
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(suggestion.member_name).font(.subheadline.bold())
+                    Text(suggestion.text)
+                    ForEach(suggestion.links, id: \.self) { link in
+                        if let url = URL(string: link) { Link("Shared furniture link", destination: url) }
+                    }
+                    ForEach(Array(suggestion.products.enumerated()), id: \.offset) { _, product in
+                        if let link = product.source_url, let url = URL(string: link) {
+                            Link(product.title ?? "Furniture suggestion", destination: url)
+                        } else { Text(product.title ?? "Furniture suggestion").font(.subheadline) }
+                    }
+                }
+                Divider()
+            }
+        }
+        .padding(16)
+        .background(RoundedRectangle(cornerRadius: 16).fill(Color.white))
+        .task(id: "\(model.currentHouseholdID):\(model.state.stateVersion)") {
+            suggestions = []
+            guard let client = model.client else { return }
+            do { suggestions = try await client.suggestions().suggestions; failure = nil }
+            catch { failure = error.localizedDescription }
+        }
     }
 }
 
