@@ -131,7 +131,8 @@ def test_brown_couch_prefers_live_matches(client, monkeypatch):
     assert r.status_code == 200, r.text
     titles = [p['title'] for p in r.json()]
     assert titles[0] == 'Brown linen couch'
-    assert all(p['category'] == 'sofa' for p in r.json())
+    assert r.json()[0]['id'] == 'live-brown-couch'
+    assert catalog.get('live-brown-couch')['title'] == 'Brown linen couch'
 
 
 def test_put_budget(client):

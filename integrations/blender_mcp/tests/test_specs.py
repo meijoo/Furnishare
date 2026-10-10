@@ -254,8 +254,7 @@ def test_spec_from_product_texture(tmp_path, png):
         return {"id": "x", "category": cat, "dimensions_m": dims, "style": dict({"color_hex": "#808080"}, **style)}
     s = specs.spec_from_product(product(texture_path=str(png)))
     assert s["texture"] == {"path": str(png), "mode": "print", "tile_m": 0.3}
-    s = specs.spec_from_product(product("sofa", DIMS, texture_path=str(png), texture_tile_m=0.01))
-    assert s["texture"] == {"path": str(png), "mode": "tile", "tile_m": 0.05}
+    assert "texture" not in specs.spec_from_product(product("sofa", DIMS, texture_path=str(png), texture_tile_m=0.01))
     s = specs.spec_from_product(product(texture_path=str(png), texture_mode="tile", texture_tile_m=0.6))
     assert s["texture"] == {"path": str(png), "mode": "tile", "tile_m": 0.6}
     # Bad mode / tile size fall back to defaults; unusable files are ignored silently (still buildable).
@@ -272,7 +271,7 @@ def test_spec_from_product_texture(tmp_path, png):
     assert round_rug["shape"] == "round" and round_rug["texture"]["mode"] == "print"
     fallback = specs.spec_from_product(product("coffee_table", {"width": 1.0, "depth": 0.5, "height": 0.4},
                                                shape="round", texture_path=str(png)))
-    assert fallback["shape"] == "rect" and fallback["texture"]["mode"] == "tile"
+    assert fallback["shape"] == "rect" and "texture" not in fallback
 
 
 CAT_DIMS = {"sofa": DIMS, "coffee_table": {"width": 1.0, "depth": 0.55, "height": 0.42},

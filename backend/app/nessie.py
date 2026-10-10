@@ -164,6 +164,11 @@ class MockNessie:
     def create_transfer(self, account_id, payee_account_id, amount_cents, description):
         return self._txn('transfer', account_id, amount_cents, description, payee_account_id)
 
+    def reset(self):
+        with self.lock:
+            self.accounts.clear()
+            self.txns.clear()
+
     def find(self, kind, account_id, external_id=None, description=None):
         with self.lock:
             for t in self.txns.values():

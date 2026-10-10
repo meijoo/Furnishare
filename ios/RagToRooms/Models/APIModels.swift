@@ -616,7 +616,16 @@ struct ObjectBody: Encodable, Sendable {
 struct ChatBody: Encodable, Sendable {
     let memberID: String
     let text: String
-    enum CodingKeys: String, CodingKey { case text; case memberID = "member_id" }
+    var pickIds: [String] = []
+    var mode: String?
+    var skipCategories: [String] = []
+    enum CodingKeys: String, CodingKey {
+        case text
+        case memberID = "member_id"
+        case pickIds = "pick_ids"
+        case mode
+        case skipCategories = "skip_categories"
+    }
 }
 
 struct ChatReply: Decodable, Sendable {
@@ -759,6 +768,7 @@ extension String {
         case "nightstand": "lamp.table.fill"
         case "dresser": "cabinet.fill"
         case "desk": "studentdesk"
+        case "chair": "chair.fill"
         default: "shippingbox.fill"
         }
     }

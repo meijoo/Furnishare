@@ -64,11 +64,13 @@ def _key(product: dict) -> str | None:
 
 
 def apply(hid: str, objects: list[dict]) -> list[dict]:
-    """Adds `texture` to objects that have one and swaps in the textured asset once it is built."""
+    """Adds `texture` to rugs that have one and swaps in the textured asset once it is built."""
     entries = _all().get(hid)
     if not entries:
         return objects
     for o in objects:
+        if o.get('category') != 'rug':
+            continue
         entry = entries.get(o['object_id'])
         if not entry:
             continue

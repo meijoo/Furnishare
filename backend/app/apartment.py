@@ -1,7 +1,7 @@
 """The demo apartment: a floor plan grouping room scopes (households). Shared rooms split; bedrooms are owner-paid."""
 import json
 
-from . import catalog, core, db, floorplan, planner, seed
+from . import catalog, config, core, db, floorplan, planner, seed
 
 AID = 'demo'
 NAME = '3 bed / 3 bath apartment'
@@ -95,6 +95,8 @@ def reset_bedroom(room: dict) -> dict:
         c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, NULL, NULL)',
                   (hid, owner, name))
         db.log(c, hid, f"{room['name']} created; {name} pays for it alone")
+    if config.SHOPPING_API_KEY:
+        return {'ok': True, 'household_id': hid, 'proposal_version': None, 'total_cents': 0}
     pick = planner.select_bundle(hid, list(catalog.BEDROOM_CATEGORIES), BEDROOM_BUDGETS[owner],
                                 BEDROOM_STYLES.get(owner, BEDROOM_STYLE))
     if not pick['ok'] or not pick['products']:

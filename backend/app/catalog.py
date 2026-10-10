@@ -1,4 +1,4 @@
-"""Product records: verified catalog first, fictional demo fixtures as a last resort, live search as evidence only."""
+"""Product records: verified catalog, live search cache, fictional demo fixtures as a last resort."""
 import hashlib
 import json
 import os
@@ -14,6 +14,8 @@ from .geometry import fits_room
 LIVING_CATEGORIES = ('sofa', 'coffee_table', 'tv', 'rug')
 BEDROOM_CATEGORIES = ('bed', 'nightstand', 'dresser', 'desk')
 CATEGORIES = LIVING_CATEGORIES + BEDROOM_CATEGORIES
+# Searchable / placeable extras. Not in default room needs, so auto-design does not add a chair to every plan.
+PLACEABLE_CATEGORIES = CATEGORIES + ('chair',)
 VERIFIED = Path(os.getenv('RTR_CATALOG', config.DATA_DIR / 'catalog_verified.json'))
 EXTRA = [Path(p) for p in os.getenv('RTR_CATALOG_EXTRA', str(config.DATA_DIR / 'catalog_bedroom.json')).split(os.pathsep) if p]
 DEMO = config.BACKEND_DIR / 'catalog.json'
@@ -38,6 +40,8 @@ DEMO_EXTRAS = [
 ]
 DEMO_COLORS = {'sofa-blue': '#6FA8C7', 'sofa-compact': '#7DB2CF', 'sofa-green': '#8CC28C'}
 
+LIVE_KEY = 'live_products'
+
 _lock = threading.Lock()
 _cache = {'mtime': None, 'products': []}
 
@@ -60,7 +64,7 @@ def _demo_products() -> list[dict]:
 
 
 def _normalize(p: dict) -> dict | None:
-    if p.get('category') not in CATEGORIES or type(p.get('price_cents')) is not int:
+    if p.get('category') not in PLACEABLE_CATEGORIES or type(p.get('price_cents')) is not int:
         return None
     p = dict(p)
     p.setdefault('currency', 'USD')
@@ -115,8 +119,69 @@ def products() -> list[dict]:
     return [{**p, 'asset_url': assets.get(p['id'])} for p in items]
 
 
+def _rememberable(p: dict) -> dict:
+    q = dict(p)
+    q.setdefault('retailer', 'Live')
+    q.setdefault('variant', 'default')
+    q.setdefault('description', None)
+    q.setdefault('image_url', None)
+    q.setdefault('local_image', None)
+    q.setdefault('source_url', None)
+    q.setdefault('price_cents', 0)
+    q.setdefault('currency', 'USD')
+    q.setdefault('source_type', 'live')
+    q.setdefault('retrieved_at', None)
+    q.setdefault('additional_costs', {'shipping_cents': None, 'tax_cents': None, 'assembly_cents': None})
+    q.setdefault('style', {})
+    q['style'].setdefault('color_hex', '#AAB')
+    q['style'].setdefault('tags', [])
+    q.setdefault('asset_url', None)
+    return q
+
+
+def remember(items: list[dict] | None) -> None:
+    """Keep live/session products so catalog.get and proposals can use them."""
+    store = db.kv_get(LIVE_KEY, {})
+    for raw in items or []:
+        if not raw or not raw.get('id'):
+            continue
+        store[raw['id']] = _rememberable(raw)
+    db.kv_set(LIVE_KEY, store)
+
+
+def clear_remembered() -> None:
+    db.kv_set(LIVE_KEY, {})
+
+
+def remembered() -> list[dict]:
+    assets = db.kv_get('asset_urls', {})
+    return [{**p, 'asset_url': p.get('asset_url') or assets.get(p['id'])} for p in db.kv_get(LIVE_KEY, {}).values()]
+
+
 def get(product_id: str) -> dict | None:
-    return next((p for p in products() if p['id'] == product_id), None)
+    hit = next((p for p in products() if p['id'] == product_id), None)
+    if hit:
+        return hit
+    store = db.kv_get(LIVE_KEY, {})
+    if product_id in store:
+        assets = db.kv_get('asset_urls', {})
+        rec = store[product_id]
+        return {**rec, 'asset_url': rec.get('asset_url') or assets.get(product_id)}
+    from . import realize
+    rec = realize.get(product_id)
+    if rec and rec.get('product'):
+        remember([rec['product']])
+        return get(product_id)
+    return None
+
+
+def placeable(product: dict | None, room: dict | None = None) -> bool:
+    if not product:
+        return False
+    dims = product.get('dimensions_m')
+    if not dims or not all(isinstance(dims.get(k), (int, float)) and dims[k] > 0 for k in ('width', 'depth', 'height')):
+        return False
+    return True if room is None else fits_room(dims, room)
 
 
 def eligible(category: str, room: dict, max_price_cents: int | None = None) -> list[dict]:
@@ -127,6 +192,21 @@ def eligible(category: str, room: dict, max_price_cents: int | None = None) -> l
             continue
         if max_price_cents is not None and p['price_cents'] > max_price_cents:
             continue
+        out.append(p)
+    return out
+
+
+def design_pool(category: str, room: dict, max_price_cents: int | None = None,
+                extra: list[dict] | None = None) -> list[dict]:
+    """Verified catalog plus remembered live items that have placeable sizes."""
+    seen, out = set(), []
+    for p in list(products()) + remembered() + list(extra or []):
+        pid = p.get('id')
+        if not pid or pid in seen or p.get('category') != category or not placeable(p, room):
+            continue
+        if max_price_cents is not None and (p.get('price_cents') or 0) > max_price_cents:
+            continue
+        seen.add(pid)
         out.append(p)
     return out
 
@@ -145,6 +225,7 @@ DEFAULT_DIMS = {
     'coffee_table': {'width': 1.10, 'depth': 0.60, 'height': 0.42},
     'rug': {'width': 2.00, 'depth': 1.40, 'height': 0.02},
     'tv': {'width': 1.20, 'depth': 0.12, 'height': 0.75},
+    'chair': {'width': 0.70, 'depth': 0.75, 'height': 0.85},
     'other': {'width': 0.80, 'depth': 0.80, 'height': 0.80},
 }
 
@@ -152,6 +233,7 @@ _CATEGORY_WORDS = (
     ('bed', r'\b(beds?|mattress)\b'),
     ('nightstand', r'\b(nightstands?|night table|bedside)\b'),
     ('dresser', r'\b(dressers?|chest of drawers)\b'),
+    ('chair', r'\b((?:arm|accent|dining|lounge|side|office|desk)\s+)?chairs?\b|\barmchairs?\b'),
     ('desk', r'\bdesks?\b'),
     ('sofa', r'\b(sofas?|couch(?:es)?|sectionals?|loveseats?)\b'),
     ('coffee_table', r'\bcoffee tables?\b'),
@@ -278,14 +360,17 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
         return []
     try:
         r = httpx.get('https://serpapi.com/search.json', timeout=12, params={
-            'engine': 'google_shopping', 'q': query, 'api_key': config.SHOPPING_API_KEY, 'gl': 'us', 'hl': 'en'})
+            'engine': 'google_shopping', 'q': query, 'api_key': config.SHOPPING_API_KEY,
+            'gl': 'us', 'hl': 'en', 'num': max(limit, 24)})
         r.raise_for_status()
     except httpx.HTTPError:
         return []
     category = infer_category(query)
     dims = DEFAULT_DIMS.get(category, DEFAULT_DIMS['other'])
+    data = r.json()
+    raw = list(data.get('shopping_results') or []) + list(data.get('inline_shopping_results') or [])
     out = []
-    for item in r.json().get('shopping_results', [])[:limit]:
+    for item in raw[: max(limit, 24)]:
         title = item.get('title') or 'Item'
         url = item.get('product_link') or item.get('link') or title
         price = item.get('extracted_price')
@@ -293,8 +378,6 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
         if item_cat == 'other':
             item_cat = category
         listed = parse_listing_dimensions(_listing_text(item), item_cat)
-        if listed is None and item.get('product_id') and len(out) < 6:
-            listed = _product_specs(str(item.get('product_id')))
         kind = 'assembled' if listed else 'estimated'
         out.append({
             'id': 'live-' + hashlib.sha256(url.encode()).hexdigest()[:16],
@@ -321,6 +404,7 @@ _CATEGORY_ALIASES = {
     'nightstand': {'nightstand', 'nightstands', 'bedside'},
     'dresser': {'dresser', 'dressers'},
     'desk': {'desk', 'desks'},
+    'chair': {'chair', 'chairs', 'armchair', 'armchairs'},
     'coffee_table': {'coffee', 'table', 'tables'},
     'rug': {'rug', 'rugs', 'carpet', 'carpets'},
     'tv': {'tv', 'tvs', 'television', 'televisions'},
@@ -337,39 +421,79 @@ def _score(product: dict, tokens: list[str]) -> int:
     return sum(3 if t in title else 1 if t in hay else 0 for t in tokens)
 
 
+def _style_tokens(tokens: list[str], category: str) -> list[str]:
+    aliases = set(_STOP)
+    for words in _CATEGORY_ALIASES.values():
+        aliases |= words
+    aliases.update({category, category.replace('_', '')})
+    return [t for t in tokens if t not in aliases]
+
+
+def _local_matches(query: str, category: str, tokens: list[str]) -> list[dict]:
+    """Same-category catalog hits. Unknown types must match every token so 'green chair' is not dressers."""
+    style = _style_tokens(tokens, category)
+    local = []
+    for p in products():
+        hay = _hay(p)
+        if category != 'other':
+            if p.get('category') != category:
+                continue
+        elif tokens and not all(t in hay for t in tokens):
+            continue
+        local.append(p)
+    if category != 'other' and style:
+        styled = [p for p in local if any(t in _hay(p) for t in style)]
+        if styled:
+            local = styled
+    local.sort(key=lambda p: (-_score(p, tokens), p.get('price_cents') or 0))
+    return local
+
+
 def search(query: str, limit: int = 20) -> list[dict]:
-    """Live shopping first when the query has style words; catalog otherwise. Deduped by title."""
+    """Live shopping first, then catalog items that actually match the query (same type / all tokens)."""
     q = (query or '').strip()
     if not q:
         return []
     category = infer_category(q)
     tokens = [t for t in re.findall(r"[a-z0-9']+", q.lower()) if t not in _STOP]
-    extras = [t for t in tokens if t not in _CATEGORY_ALIASES.get(category, set())]
-    local = []
-    for p in products():
-        if category != 'other' and p.get('category') != category:
-            continue
-        if category == 'other' and tokens and not any(t in _hay(p) for t in tokens):
-            continue
-        local.append(p)
-    local.sort(key=lambda p: (-_score(p, tokens), p.get('price_cents') or 0))
-    live = []
-    seen_titles = {(p.get('title') or '').lower() for p in local}
-    for p in live_search(q, limit=limit):
+    live, seen = [], set()
+    for p in live_search(q, limit=max(limit, 24)):
         title = (p.get('title') or '').lower()
-        if title in seen_titles:
+        if not p.get('id') or title in seen or p['id'] in seen:
             continue
-        seen_titles.add(title)
+        if category != 'other' and p.get('category') not in (category, 'other'):
+            continue
+        seen.add(title)
+        seen.add(p['id'])
         live.append(p)
     live.sort(key=lambda p: -_score(p, tokens))
-    # "brown couch" should not bury shopping hits under IKEA sofas that never say brown.
-    head, tail = (live, local) if extras else (local, live)
-    merged, ids = [], set()
-    for p in head + tail:
-        if p['id'] in ids:
+    chosen = list(live)
+    for p in _local_matches(q, category, tokens):
+        title = (p.get('title') or '').lower()
+        if not p.get('id') or p['id'] in seen or title in seen:
             continue
-        ids.add(p['id'])
-        merged.append(p)
-        if len(merged) >= limit:
-            break
-    return merged
+        seen.add(p['id'])
+        seen.add(title)
+        chosen.append(p)
+    remember(chosen[:limit])
+    return chosen[:limit]
+
+
+def design_query(category: str, style_text: str = '') -> str:
+    label = category.replace('_', ' ')
+    tokens = [t for t in re.findall(r"[a-z0-9']+", (style_text or '').lower())
+              if t not in _STOP and t not in _CATEGORY_ALIASES.get(category, set())
+              and t not in {'furnish', 'living', 'room', 'bedroom', 'keep', 'door', 'clear', 'just'}]
+    return ' '.join(tokens[:6] + [label]).strip() or label
+
+
+def candidates_for_design(category: str, room: dict, style_text: str = '',
+                          max_price_cents: int | None = None) -> list[dict]:
+    """Live listings for this category when shopping works; catalog fixtures only as a fallback."""
+    found = search(design_query(category, style_text), limit=10)
+    pool = [p for p in found if p.get('category') == category and placeable(p, room)]
+    if max_price_cents is not None:
+        pool = [p for p in pool if (p.get('price_cents') or 0) <= max_price_cents]
+    if pool:
+        return pool
+    return design_pool(category, room, max_price_cents)

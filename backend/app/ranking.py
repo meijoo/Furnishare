@@ -20,13 +20,14 @@ def _hex_rgb(h: str) -> tuple[float, float, float]:
 def heuristic_similarity(product: dict, reference: dict | None, style_text: str) -> float:
     """Fallback when no learned or embedding ranker is reachable: color distance plus tag/style word overlap."""
     score = 0.0
-    tags = {t.lower() for t in product.get('style', {}).get('tags', [])}
+    tags = {t.lower() for t in (product.get('style') or {}).get('tags', [])}
     words = {w.strip('.,!').lower() for w in style_text.split()}
     score += 0.3 * len(tags & words)
     if reference:
-        a, b = _hex_rgb(product['style'].get('color_hex')), _hex_rgb(reference['style'].get('color_hex'))
+        a = _hex_rgb((product.get('style') or {}).get('color_hex'))
+        b = _hex_rgb((reference.get('style') or {}).get('color_hex'))
         score += 1.0 - min(1.0, sum((x - y) ** 2 for x, y in zip(a, b)) ** 0.5)
-        score += 0.2 * len(tags & {t.lower() for t in reference['style'].get('tags', [])})
+        score += 0.2 * len(tags & {t.lower() for t in (reference.get('style') or {}).get('tags', [])})
     return score
 
 

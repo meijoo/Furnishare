@@ -44,16 +44,30 @@ def layout(products: list[dict], room: dict, existing: list[dict] | None = None)
     return placed, geometry.validate_scene(room, placed)
 
 
-def select_bundle(hid: str, categories: list[str], budget_cents: int, style_text: str = '') -> dict:
+def select_bundle(hid: str, categories: list[str], budget_cents: int, style_text: str = '',
+                  picks: list[dict] | None = None, skip_categories: list[str] | None = None) -> dict:
     """Pick one product per category maximizing visual rank under the budget and the members' combined limits."""
     started = time.perf_counter()
     h = core.household(hid)
     lim = core.limits(hid)
     capacity = sum(lim.values()) if all(v is not None for v in lim.values()) else None
     cap = min(budget_cents, capacity) if capacity is not None else budget_cents
+    skip = set(skip_categories or [])
+    categories = [c for c in categories if c not in skip]
+    preferred = {}
+    for p in picks or []:
+        cat = p.get('category')
+        if cat in skip or cat in preferred or not catalog.placeable(p, h['room']):
+            continue
+        if (p.get('price_cents') or 0) > cap:
+            continue
+        preferred[cat] = p
     pools, modes, notes = {}, set(), []
     for cat in categories:
-        cands = catalog.eligible(cat, h['room'], max_price_cents=cap)
+        if cat in preferred:
+            pools[cat] = [(preferred[cat], 1.0)]
+            continue
+        cands = catalog.candidates_for_design(cat, h['room'], style_text, cap)
         if not cands:
             notes.append(f"No {cat.replace('_', ' ')} with confirmed dimensions fits the room under {dollars(cap)}.")
             continue
@@ -169,7 +183,8 @@ def revise(hid: str, trigger: str = 'limit', focus_category: str | None = None) 
         else:
             headroom = (capacity - total) if capacity is not None else (h['budget_cents'] - total)
             max_price = old['price_cents'] + max(0, headroom) - over
-        cands = [p for p in catalog.eligible(old['category'], h['room'], max_price_cents=max_price) if p['id'] != old['id']]
+        cands = [p for p in catalog.candidates_for_design(old['category'], h['room'], h.get('style_text') or '', max_price)
+                 if p['id'] != old['id']]
         if not cands:
             tried.append(old)
             continue
@@ -201,7 +216,7 @@ def revise(hid: str, trigger: str = 'limit', focus_category: str | None = None) 
     if capacity is not None:
         cheapest = {}
         for old in cur['items']:
-            pool = catalog.eligible(old['category'], h['room'])
+            pool = catalog.design_pool(old['category'], h['room'])
             if pool:
                 cheapest[old['category']] = min(p['price_cents'] for p in pool)
         floor = sum(cheapest.values())

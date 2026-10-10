@@ -118,6 +118,9 @@ def default_position(category: str, dims: dict, room: dict, others: list[dict]) 
     sofa_front = (sofa['position_m'][2] + sofa['dimensions_m']['depth'] / 2) if sofa else -hd + 1.0
     if category == 'coffee_table':
         return [0.0, 0.0, sofa_front + 0.45 + dims['depth'] / 2], 0.0
+    if category == 'chair':
+        sofa_half = (sofa['dimensions_m']['width'] / 2) if sofa else 1.0
+        return [sofa_half + 0.25 + dims['width'] / 2, 0.0, sofa_front - dims['depth'] / 2], -0.4
     if category == 'rug':
         return [0.0, 0.0, min(sofa_front - 0.25 + dims['depth'] / 2, hd - dims['depth'] / 2 - 0.05)], 0.0
     return [0.0, 0.0, 0.0], 0.0

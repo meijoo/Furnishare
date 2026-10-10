@@ -239,6 +239,8 @@ def product_texture(product: dict) -> dict | None:
     if not isinstance(style, dict) or not style.get("texture_path"):
         return None
     cat = product.get("category")
+    if cat != "rug":
+        return None
     mode = style.get("texture_mode")
     tile = style.get("texture_tile_m")
     raw = {"path": style["texture_path"],

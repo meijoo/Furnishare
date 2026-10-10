@@ -40,11 +40,13 @@ Everything runs **without keys** using clearly labeled fallbacks:
 | Key | Without it |
 |---|---|
 | `NESSIE_API_KEY` | Payments run in an in-process mock, labeled "Simulated (mock)" |
-| `GEMINI_API_KEY`, or Vertex (`GOOGLE_GENAI_USE_VERTEXAI`, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, `GEMINI_MODEL`) | A deterministic planner replaces the agent |
+| `GEMINI_API_KEY` (AI Studio). Vertex ADC is ignored when this key is set. | A deterministic planner replaces the agent |
 | `PHOTON_PROJECT_ID`, `PHOTON_PROJECT_SECRET` | Use `npm run mock` to type messages in a terminal |
 | `SHOPPING_API_KEY` (SerpAPI) | Verified catalog only |
 
 Ask the team lead for keys privately. Never paste them into the repo, issues or chat logs.
+
+Teammates copy `.env.example` and paste the same `GEMINI_API_KEY` (and `SHOPPING_API_KEY`). `GET /health` should show `"gemini_backend": "ai_studio"`.
 
 ## Run
 

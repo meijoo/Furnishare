@@ -90,6 +90,9 @@ class HandleBody(BaseModel):
 class ChatBody(BaseModel):
     member_id: str | None = None
     text: str = Field(min_length=1, max_length=2000)
+    pick_ids: list[str] = []
+    mode: str | None = Field(default=None, pattern='^(design|refine)$')
+    skip_categories: list[str] = []
 
 
 class MoveBody(BaseModel):
@@ -308,7 +311,8 @@ def chat(hid: str, body: ChatBody):
     core.household(hid)
     if body.member_id:
         core.member(hid, body.member_id)
-    return agent.furnish(hid, body.member_id, body.text)
+    return agent.furnish(hid, body.member_id, body.text, pick_ids=body.pick_ids,
+                         mode=body.mode, skip_categories=body.skip_categories)
 
 
 @app.put('/households/{hid}/budget')
@@ -385,8 +389,11 @@ def finance_setup(hid: str):
 async def put_texture(hid: str, object_id: str, file: UploadFile = File(...), mode: str | None = Form(None),
                       tile_m: float | None = Form(None)):
     core.household(hid)
-    if not any(o['object_id'] == object_id for o in core.scene_objects(hid)):
+    obj = next((o for o in core.scene_objects(hid) if o['object_id'] == object_id), None)
+    if not obj:
         raise HTTPException(404, f'No object {object_id} in this room')
+    if obj.get('category') != 'rug':
+        raise HTTPException(422, 'Image textures are only supported on rugs')
     if mode is not None and mode not in textures.MODES:
         raise HTTPException(422, f'mode must be one of {", ".join(textures.MODES)}')
     if tile_m is not None and not 0.05 <= tile_m <= 2.0:

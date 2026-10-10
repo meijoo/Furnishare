@@ -86,7 +86,7 @@ struct AddItemSheet: View {
     @State private var depthIn = ""
     @State private var heightIn = ""
 
-    private let categories = ["bed", "nightstand", "dresser", "desk", "sofa", "coffee_table", "rug", "tv", "other"]
+    private let categories = ["bed", "nightstand", "dresser", "desk", "chair", "sofa", "coffee_table", "rug", "tv", "other"]
 
     var body: some View {
         NavigationStack {
