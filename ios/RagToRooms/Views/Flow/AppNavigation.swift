@@ -186,8 +186,7 @@ final class AppNavigation {
 
     static var debugTab: RoomTab? {
         switch UserDefaults.standard.string(forKey: "RTRScrollTo") {
-        case "floorplan": .design
-        case "proposal", "product": .items
+        case "floorplan", "proposal", "product": .items
         case "contributions", "finance": .budget
         case "chat", "activity": .inspiration
         default: nil

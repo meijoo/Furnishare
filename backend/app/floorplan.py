@@ -16,8 +16,12 @@ MIN_BEDROOM_M = 2.4
 PROMPT = """This image is an apartment floor plan. List every room or space drawn on it, including closets, patios,
 halls and laundry. Ignore furniture, fixtures and text that is not a room label. For each space return:
 - label: the room name as written (or a short description if unlabelled)
-- kind: one of bedroom, bathroom, living, kitchen, dining, hall, closet, patio, laundry, other
-- dimension_text: the size text printed in that room exactly as written (for example 13'x12' or 12'6" x 10'), or null
+- kind: one of bedroom, bathroom, living, kitchen, dining, hall, closet, patio, laundry, other.
+  A toilet room is bathroom even if labelled washroom or W.C. Washer/dryer or W/D is laundry.
+  Family room or great room is living.
+- dimension_text: the size text printed in that room exactly as written. Copy width×depth such as
+  10'-10"X14'-5" or 12'6" x 10', or square footage such as 137 sq ft / 78sqft. Also copy a lone
+  exterior tick like 17'-1" if that is all that is printed. Null only if no size is printed.
 - box_2d: [ymin, xmin, ymax, xmax] normalized to 0-1000, tight to the inside of the room's walls.
 If a space is L-shaped or has a bay, box its main rectangle."""
 
@@ -63,23 +67,91 @@ def image_size(data: bytes) -> tuple[int, int]:
     raise PlanError('Upload a PNG or JPEG floor plan')
 
 
-_FT_IN = r"(\d+(?:\.\d+)?)\s*(?:'|ft|’)\s*(?:(\d+(?:\.\d+)?)\s*(?:\"|in|”|'')?)?"
+# 10'-10", 12'6", 13', 8'-8½", 6'-½"
+_FT_MARK = r"(?:'|ft|’|′)"
+_IN_MARK = r"(?:\"|in|”|''|″)"
+_INCHES = r"((?:\d+(?:\.\d+)?)?\s*(?:½|1/2)|\d+(?:\.\d+)?)"
+_FT_IN = rf"(\d+(?:\.\d+)?)\s*{_FT_MARK}\s*-?\s*(?:{_INCHES}\s*{_IN_MARK}?)?"
+_SQFT = re.compile(r'(\d+(?:\.\d+)?)\s*(?:sq\.?\s*ft|sqft|sf|square\s*feet)\b')
+_SQM = re.compile(r'(\d+(?:\.\d+)?)\s*(?:m2|m\^2|sq\.?\s*m|square\s*metres?)\b')
+SQFT = 0.09290304
+
+
+def _inches(raw: str | None) -> float:
+    if not raw:
+        return 0.0
+    s = raw.strip()
+    if '½' in s or '1/2' in s:
+        whole = s.replace('½', '').replace('1/2', '').strip()
+        return (float(whole) if whole else 0.0) + 0.5
+    return float(s)
+
+
+def _normalize_size_text(text: str) -> str:
+    return (text.strip().lower().replace('×', 'x').replace('–', '-').replace('—', '-')
+            .replace('′', "'").replace('″', '"'))
 
 
 def parse_dimensions(text: str | None) -> tuple[float, float] | None:
-    """Metres (a, b) from size text like 13'x12', 12'6" x 10', 4.2 x 3.6 m. Order as written."""
+    """Metres (a, b) from size text like 13'x12', 10'-10"X14'-5", 12'6" x 10', 4.2 x 3.6 m."""
     if not text:
         return None
-    t = text.strip().lower().replace('×', 'x')
+    t = _normalize_size_text(text)
     m = re.search(_FT_IN + r'\s*x\s*' + _FT_IN, t)
     if m:
-        a = float(m.group(1)) + float(m.group(2) or 0) / 12
-        b = float(m.group(3)) + float(m.group(4) or 0) / 12
+        a = float(m.group(1)) + _inches(m.group(2)) / 12
+        b = float(m.group(3)) + _inches(m.group(4)) / 12
         return a * FT, b * FT
     m = re.search(r'(\d+(?:\.\d+)?)\s*m?\s*x\s*(\d+(?:\.\d+)?)\s*m\b', t)
     if m:
         return float(m.group(1)), float(m.group(2))
     return None
+
+
+def parse_area_m2(text: str | None) -> float | None:
+    """Square metres from '137 sq ft', '78sqft', or '12.5 m2'."""
+    if not text:
+        return None
+    t = _normalize_size_text(text)
+    if m := _SQFT.search(t):
+        return float(m.group(1)) * SQFT
+    if m := _SQM.search(t):
+        return float(m.group(1))
+    return None
+
+
+def dims_from_area(area_m2: float, width_px: float, height_px: float) -> tuple[float, float] | None:
+    """Width and depth in metres from printed area and the drawn box's aspect ratio."""
+    if area_m2 <= 0 or width_px < 1 or height_px < 1:
+        return None
+    width_m = (area_m2 * (width_px / height_px)) ** 0.5
+    return width_m, area_m2 / width_m
+
+
+def size_from_read(read: dict) -> tuple[float, float] | None:
+    """WxD metres from dimension_text or the room label (area is turned into WxD later)."""
+    blob = ' '.join(str(read.get(k) or '') for k in ('dimension_text', 'label'))
+    if dims := parse_dimensions(blob):
+        return dims
+    return None
+
+
+def area_from_read(read: dict) -> float | None:
+    blob = ' '.join(str(read.get(k) or '') for k in ('dimension_text', 'label'))
+    return parse_area_m2(blob)
+
+
+def kind_from_label(label: str | None, kind: str) -> str:
+    """Correct obvious Gemini kind mistakes from the printed name."""
+    t = re.sub(r'[^a-z0-9]+', ' ', (label or '').lower()).strip()
+    words = set(t.split())
+    if words & {'washroom', 'wc'} or t.startswith('w c') or 'bath' in t:
+        return 'bathroom'
+    if 'laundry' in words or re.search(r'\bw\s*d\b', t):
+        return 'laundry'
+    if words & {'family', 'great', 'sitting', 'lounge'} or 'living' in t:
+        return 'living'
+    return kind if kind in KINDS else 'other'
 
 
 def extract(data: bytes, mime: str) -> list[dict]:
@@ -150,9 +222,13 @@ def build_plan(reads: list[dict], width_px: int, height_px: int, members: list[s
         y0, y1 = sorted((y0 / 1000 * height_px, y1 / 1000 * height_px))
         if x1 - x0 < 4 or y1 - y0 < 4:
             continue
-        kind = r.get('kind') if r.get('kind') in KINDS else 'other'
+        kind = kind_from_label(r.get('label'), r.get('kind') if r.get('kind') in KINDS else 'other')
+        w_px, h_px = x1 - x0, y1 - y0
+        dims = size_from_read(r)
+        if not dims and (area := area_from_read(r)):
+            dims = dims_from_area(area, w_px, h_px)
         spaces.append({'label': str(r.get('label') or kind.title())[:40], 'kind': kind,
-                       'dims': parse_dimensions(r.get('dimension_text')), 'dimension_text': r.get('dimension_text'),
+                       'dims': dims, 'dimension_text': r.get('dimension_text') or r.get('label'),
                        'px': (x0, y0, x1, y1)})
     if not spaces:
         raise PlanError('No rooms found on the floor plan')
@@ -167,6 +243,10 @@ def build_plan(reads: list[dict], width_px: int, height_px: int, members: list[s
             w, h = s['px'][2] - s['px'][0], s['px'][3] - s['px'][1]
             long_m, short_m = max(s['dims']), min(s['dims'])
             ratios += [long_m / max(w, h), short_m / min(w, h)]
+        elif area := parse_area_m2(s.get('dimension_text')):
+            w, h = s['px'][2] - s['px'][0], s['px'][3] - s['px'][1]
+            if w * h > 0:
+                ratios.append((area ** 0.5) / ((w * h) ** 0.5))
     if ratios:
         scale = statistics.median(ratios)
     elif plan_width_m:

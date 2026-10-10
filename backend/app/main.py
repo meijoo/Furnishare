@@ -14,8 +14,9 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from . import (agent, apartment, assets, blender_mcp_client, catalog, config, core, db, finance, floorplan, messaging,
-               nessie, planner, ranking, seed, state, textures, invitations)
+               nessie, planner, ranking, realize, seed, state, textures, invitations)
 from .core import Conflict, Forbidden
+from .money import dollars
 
 
 @asynccontextmanager
@@ -76,6 +77,10 @@ class PurchaseBody(MemberBody):
 
 class LimitBody(BaseModel):
     limit_cents: int | None = Field(default=None, ge=0)
+
+
+class BudgetBody(BaseModel):
+    budget_cents: int = Field(ge=0, le=50_000_000)
 
 
 class HandleBody(BaseModel):
@@ -150,6 +155,18 @@ class ResultBody(BaseModel):
     error: str | None = None
 
 
+class RealizeBody(BaseModel):
+    id: str
+    title: str
+    category: str
+    image_url: str | None = None
+    source_url: str | None = None
+    retailer: str | None = None
+    description: str | None = None
+    price_cents: int = 0
+    dimensions_m: dict[str, float]
+
+
 @app.get('/')
 def root():
     return {'service': 'RAG to Rooms backend', 'health': '/health', 'apartment': '/apartments/demo',
@@ -187,6 +204,44 @@ def health():
 @app.get('/products')
 def products(category: str | None = None):
     return [p for p in catalog.products() if not category or p['category'] == category]
+
+
+@app.get('/products/search')
+def search_products(q: str, limit: int = 20):
+    q = (q or '').strip()
+    if not q:
+        raise HTTPException(422, 'q is required')
+    return catalog.search(q, limit=max(1, min(limit, 30)))
+
+
+@app.post('/products/realize')
+def realize_product(body: RealizeBody):
+    try:
+        return realize.start(body.model_dump())
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+
+
+@app.post('/products/realize/upload')
+async def realize_upload(id: str = Form(...), title: str = Form(...), category: str = Form(...),
+                         width: float = Form(...), depth: float = Form(...), height: float = Form(...),
+                         file: UploadFile = File(...), source_url: str | None = Form(None)):
+    image = await file.read()
+    try:
+        return realize.start(
+            {'id': id, 'title': title, 'category': category, 'source_url': source_url,
+             'dimensions_m': {'width': width, 'depth': depth, 'height': height}},
+            image_bytes=image, mime=file.content_type or 'image/jpeg')
+    except ValueError as e:
+        raise HTTPException(422, str(e)) from e
+
+
+@app.get('/products/realize/{pid}')
+def realize_status(pid: str):
+    rec = realize.snapshot(pid)
+    if rec is None:
+        raise HTTPException(404, f'No realized product {pid}')
+    return rec
 
 
 @app.get('/households/{hid}/state')
@@ -254,6 +309,16 @@ def chat(hid: str, body: ChatBody):
     if body.member_id:
         core.member(hid, body.member_id)
     return agent.furnish(hid, body.member_id, body.text)
+
+
+@app.put('/households/{hid}/budget')
+def put_budget(hid: str, body: BudgetBody):
+    core.household(hid)
+    with db.tx() as c:
+        c.execute('UPDATE households SET budget_cents = ? WHERE id = ?', (body.budget_cents, hid))
+        db.log(c, hid, f'Budget set to {dollars(body.budget_cents)}')
+        db.bump(c, hid)
+    return state.snapshot(hid)
 
 
 @app.put('/households/{hid}/members/{mid}/limit')

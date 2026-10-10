@@ -5,126 +5,28 @@ struct WelcomeView: View {
     @Environment(AppNavigation.self) private var nav
 
     var body: some View {
-        FlowScreen(maxWidth: 1080) {
-            VStack(alignment: .leading, spacing: 36) {
-                HStack {
-                    BrandMark()
-                    Spacer()
-                    Button("Log in") { nav.screen = .login }.buttonStyle(GlassChipStyle())
-                    Button("Sign up") { nav.screen = .signUp }.buttonStyle(AeroButtonStyle(compact: true))
-                }
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .center, spacing: 36) { hero.frame(maxWidth: 460, alignment: .leading); preview }
-                    VStack(alignment: .leading, spacing: 28) { hero; preview }
-                }
-                featureRow
-            }
-        }
-    }
-
-    private var hero: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            Text("LIVE TOGETHER, EASIER.")
-                .font(.caption.weight(.heavy)).tracking(1.4).foregroundStyle(Color.figmaMuted)
-            VStack(alignment: .leading, spacing: 0) {
-                Text("Share your space,")
-                    .font(.system(size: 38, weight: .bold))
-                    .foregroundStyle(Color.aeroInk)
-                Text("brighter days.")
-                    .font(.system(size: 38, weight: .bold))
-                    .foregroundStyle(Color.aeroSky)
-            }
-            .fixedSize(horizontal: false, vertical: true)
-            Text("FurniShare helps you organize your home, share your space, and live together more easily. Roommates pick a room, approve furniture that fits, and settle up in the Nessie sandbox.")
-                .font(.body).foregroundStyle(Color.figmaMuted)
-            HStack(spacing: 12) {
+        VStack(spacing: 28) {
+            Spacer()
+            BrandMark()
+            Text("Share your space.")
+                .font(.system(size: 40, weight: .bold))
+                .foregroundStyle(Color.aeroInk)
+            VStack(spacing: 12) {
                 Button { nav.screen = .signUp } label: {
-                    Label("Get started", systemImage: "arrow.right")
+                    Text("Get started")
                 }
-                .buttonStyle(AeroButtonStyle())
-                Button { nav.skipToDemo(apartment: model.apartment, actingName: model.actingMemberName) } label: {
-                    Text("Learn more")
-                }
-                .buttonStyle(GlassChipStyle())
+                .buttonStyle(AeroWideButtonStyle())
+                Button("Log in") { nav.screen = .login }
+                    .buttonStyle(AeroWideButtonStyle(outlined: true))
             }
-            HStack(spacing: 10) {
-                MemberAvatars(names: model.apartment?.members.map(\.name) ?? ["Emily", "Maya", "Alex"])
-                Text("Trusted by this demo household")
-                    .font(.caption).foregroundStyle(Color.figmaMuted)
-            }
+            .frame(maxWidth: 320)
+            Button("Skip") { nav.skipToDemo(apartment: model.apartment, actingName: model.actingMemberName) }
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.figmaMuted)
+            Spacer()
         }
-    }
-
-    private var preview: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                BrandMark(compact: true)
-                Spacer()
-                Image(systemName: "bell").foregroundStyle(Color.figmaMuted)
-                Circle().fill(Color.figmaWash).frame(width: 28, height: 28)
-                    .overlay(Text(String(nav.greetingName.prefix(1))).font(.caption2.bold()).foregroundStyle(Color.aeroSky))
-            }
-            Text("Hi \(nav.greetingName == "there" ? "there" : nav.greetingName)!")
-                .font(.title2.bold()).foregroundStyle(Color.aeroInk)
-            Text("Here’s what’s happening in your home.").font(.caption).foregroundStyle(Color.figmaMuted)
-            HStack(spacing: 10) {
-                stat("5", "Rooms", "house")
-                stat("3", "Housemates", "person.2")
-                stat("8", "Tasks", "checklist")
-            }
-            Text("Your rooms").font(.subheadline.weight(.semibold))
-            HStack(spacing: 10) {
-                miniRoom(.living, "Living room")
-                miniRoom(.bedroom, "Bedroom")
-                miniRoom(.kitchen, "Kitchen")
-            }
-        }
-        .padding(18)
-        .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.white))
-        .shadow(color: .black.opacity(0.08), radius: 24, y: 12)
-        .frame(maxWidth: 520)
-    }
-
-    private func stat(_ value: String, _ label: String, _ symbol: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Image(systemName: symbol).foregroundStyle(Color.aeroSky)
-            Text(value).font(.headline)
-            Text(label).font(.caption2).foregroundStyle(Color.figmaMuted)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(10)
-        .background(RoundedRectangle(cornerRadius: 12).fill(Color.figmaWash))
-    }
-
-    private func miniRoom(_ scene: RoomScene, _ title: String) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            RoomIllustration(scene: scene)
-                .frame(height: 72)
-                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            Text(title).font(.caption2.weight(.semibold)).foregroundStyle(Color.aeroInk)
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var featureRow: some View {
-        HStack(alignment: .top, spacing: 16) {
-            feature("house.fill", "Organize shared spaces", "Map your home, manage rooms, and keep everyone on the same page.")
-            feature("person.2.fill", "Live better together", "Share access, assign the budget, and simplify everyday living.")
-            feature("calendar", "All-in-one home hub", "Rooms, people, and payments — all in one place.")
-        }
-    }
-
-    private func feature(_ symbol: String, _ title: String, _ detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Image(systemName: symbol)
-                .font(.title3)
-                .foregroundStyle(Color.aeroSky)
-                .frame(width: 40, height: 40)
-                .background(Circle().fill(Color.figmaWash))
-            Text(title).font(.subheadline.weight(.semibold)).foregroundStyle(Color.aeroInk)
-            Text(detail).font(.caption).foregroundStyle(Color.figmaMuted)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(32)
     }
 }
 

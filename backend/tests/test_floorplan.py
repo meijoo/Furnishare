@@ -31,13 +31,63 @@ def jpeg_header(width: int, height: int) -> bytes:
     ("13'x 12'", (13 * 0.3048, 12 * 0.3048)),
     ('12\'6" x 10\'', (12.5 * 0.3048, 10 * 0.3048)),
     ("14' x 10'", (14 * 0.3048, 10 * 0.3048)),
+    ('9\'-0" x 12\'-0"', (9 * 0.3048, 12 * 0.3048)),
+    ('12\'-8" x 12\'-0"', ((12 + 8 / 12) * 0.3048, 12 * 0.3048)),
+    ('15\'-0" x 16\'-4"', (15 * 0.3048, (16 + 4 / 12) * 0.3048)),
+    ('10\'-10"X14\'-5"', ((10 + 10 / 12) * 0.3048, (14 + 5 / 12) * 0.3048)),
+    ('8\'-8½" x 8\'-0"', ((8 + 8.5 / 12) * 0.3048, 8 * 0.3048)),
+    ('4\'-0" x 6\'-½"', (4 * 0.3048, (6 + 0.5 / 12) * 0.3048)),
+    ('9’ – 0” x 12’ – 0”', (9 * 0.3048, 12 * 0.3048)),
     ('4.2 x 3.6 m', (4.2, 3.6)),
+    ('137 sq ft', None),
     ('Closet', None),
     (None, None),
 ])
 def test_parse_dimensions(text, expect):
     got = floorplan.parse_dimensions(text)
     assert got == expect if expect is None else got == pytest.approx(expect)
+
+
+@pytest.mark.parametrize('text,expect', [
+    ('137 sq ft', 137 * 0.09290304),
+    ('78sqft', 78 * 0.09290304),
+    ('48 square feet', 48 * 0.09290304),
+    ('12.5 m2', 12.5),
+    ("9'-0\" x 12'-0\"", None),
+    (None, None),
+])
+def test_parse_area_m2(text, expect):
+    got = floorplan.parse_area_m2(text)
+    assert got == expect if expect is None else got == pytest.approx(expect)
+
+
+def test_build_plan_from_square_footage():
+    reads = [
+        {'label': 'Bedroom 1', 'kind': 'bedroom', 'dimension_text': '137 sq ft',
+         'box_2d': [100, 50, 450, 400]},
+        {'label': 'Sitting Room 145 sq ft', 'kind': 'other', 'dimension_text': None,
+         'box_2d': [460, 50, 900, 550]},
+        {'label': 'Kitchen', 'kind': 'kitchen', 'dimension_text': '85 sq ft',
+         'box_2d': [100, 560, 400, 900]},
+    ]
+    plan = floorplan.build_plan(reads, 800, 619, MEMBERS)
+    rooms = {r['kind']: r for r in plan['rooms']}
+    assert rooms['bedroom'].get('interior_m')
+    assert rooms['living']['id'] == 'living'
+    assert plan['width_m'] > 4
+
+
+@pytest.mark.parametrize('label,kind,expect', [
+    ('WASHROOM', 'laundry', 'bathroom'),
+    ('W.C.', 'other', 'bathroom'),
+    ('Master Bath', 'other', 'bathroom'),
+    ('LAUNDRY / W/D', 'other', 'laundry'),
+    ('FAMILY ROOM', 'other', 'living'),
+    ('Sitting Room 145 sq ft', 'other', 'living'),
+    ('Kitchen', 'kitchen', 'kitchen'),
+])
+def test_kind_from_label(label, kind, expect):
+    assert floorplan.kind_from_label(label, kind) == expect
 
 
 def test_image_size_png_and_jpeg():

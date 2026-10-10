@@ -1,6 +1,8 @@
 """Product records: verified catalog first, fictional demo fixtures as a last resort, live search as evidence only."""
+import hashlib
 import json
 import os
+import re
 import threading
 from pathlib import Path
 
@@ -134,8 +136,144 @@ def catalog_mode() -> str:
     return 'verified' if ps and ps[0]['source_type'] == 'verified' else 'demo'
 
 
-def live_search(query: str, limit: int = 8) -> list[dict]:
-    """Google Shopping via SerpAPI. Results lack confirmed dimensions, so they are evidence only."""
+DEFAULT_DIMS = {
+    'bed': {'width': 1.60, 'depth': 2.10, 'height': 1.00},
+    'nightstand': {'width': 0.50, 'depth': 0.40, 'height': 0.55},
+    'dresser': {'width': 1.20, 'depth': 0.50, 'height': 0.85},
+    'desk': {'width': 1.20, 'depth': 0.60, 'height': 0.75},
+    'sofa': {'width': 2.00, 'depth': 0.90, 'height': 0.85},
+    'coffee_table': {'width': 1.10, 'depth': 0.60, 'height': 0.42},
+    'rug': {'width': 2.00, 'depth': 1.40, 'height': 0.02},
+    'tv': {'width': 1.20, 'depth': 0.12, 'height': 0.75},
+    'other': {'width': 0.80, 'depth': 0.80, 'height': 0.80},
+}
+
+_CATEGORY_WORDS = (
+    ('bed', r'\b(beds?|mattress)\b'),
+    ('nightstand', r'\b(nightstands?|night table|bedside)\b'),
+    ('dresser', r'\b(dressers?|chest of drawers)\b'),
+    ('desk', r'\bdesks?\b'),
+    ('sofa', r'\b(sofas?|couch(?:es)?|sectionals?|loveseats?)\b'),
+    ('coffee_table', r'\bcoffee tables?\b'),
+    ('rug', r'\b(rugs?|carpets?)\b'),
+    ('tv', r'\b(tvs?|televisions?)\b'),
+)
+
+_IN = 0.0254
+_CM = 0.01
+_NUM = r'(\d+(?:\.\d+)?)'
+_UNIT_IN = r'(?:["”]|in(?:ch(?:es)?)?\.?)'
+_UNIT_CM = r'(?:cm|centimet(?:er|re)s?)'
+
+
+def _to_metres(value: float, unit: str) -> float:
+    return value * (_CM if unit == 'cm' else _IN)
+
+
+def parse_listing_dimensions(text: str | None, category: str = 'other') -> dict | None:
+    """Assembled W×D×H in metres from listing text. None when no size is written."""
+    if not text:
+        return None
+    t = (text.lower().replace('×', 'x').replace('–', '-').replace('—', '-')
+         .replace('′', "'").replace('″', '"').replace('”', '"'))
+    labeled = re.search(
+        rf'w(?:idth)?\s*[:=]?\s*{_NUM}\s*(?:{_UNIT_IN}|{_UNIT_CM})?'
+        rf'\s*[x,;/]\s*d(?:epth|eep)?\s*[:=]?\s*{_NUM}\s*(?:{_UNIT_IN}|{_UNIT_CM})?'
+        rf'\s*[x,;/]\s*h(?:eight|t)?\s*[:=]?\s*{_NUM}\s*({_UNIT_IN}|{_UNIT_CM})',
+        t)
+    if labeled:
+        unit = 'cm' if 'cm' in labeled.group(4) else 'in'
+        return _dims(float(labeled.group(1)), float(labeled.group(2)), float(labeled.group(3)), unit)
+    numbered = re.search(
+        rf'{_NUM}\s*(?:{_UNIT_IN}|{_UNIT_CM})?\s*w(?:idth)?'
+        rf'\s*[x,;/]\s*{_NUM}\s*(?:{_UNIT_IN}|{_UNIT_CM})?\s*d(?:epth|eep)?'
+        rf'\s*[x,;/]\s*{_NUM}\s*({_UNIT_IN}|{_UNIT_CM})\s*h(?:eight|t)?',
+        t)
+    if numbered:
+        unit = 'cm' if 'cm' in numbered.group(4) else 'in'
+        return _dims(float(numbered.group(1)), float(numbered.group(2)), float(numbered.group(3)), unit)
+    triple_in = re.search(
+        rf'{_NUM}\s*{_UNIT_IN}\s*[xby/]\s*{_NUM}\s*{_UNIT_IN}\s*[xby/]\s*{_NUM}\s*{_UNIT_IN}', t)
+    if triple_in:
+        return _dims(float(triple_in.group(1)), float(triple_in.group(2)), float(triple_in.group(3)), 'in')
+    triple_u = re.search(
+        rf'{_NUM}\s*[xby/]\s*{_NUM}\s*[xby/]\s*{_NUM}\s*({_UNIT_IN}|{_UNIT_CM})', t)
+    if triple_u:
+        unit = 'cm' if 'cm' in triple_u.group(4) else 'in'
+        return _dims(float(triple_u.group(1)), float(triple_u.group(2)), float(triple_u.group(3)), unit)
+    pair = re.search(rf'{_NUM}\s*{_UNIT_IN}\s*[xby/]\s*{_NUM}\s*{_UNIT_IN}', t)
+    if pair and category in ('bed', 'rug', 'tv'):
+        height = DEFAULT_DIMS.get(category, DEFAULT_DIMS['other'])['height']
+        w, d = _to_metres(float(pair.group(1)), 'in'), _to_metres(float(pair.group(2)), 'in')
+        return {'width': round(w, 3), 'depth': round(d, 3), 'height': height}
+    return None
+
+
+def _dims(a: float, b: float, c: float, unit: str) -> dict | None:
+    w, d, h = _to_metres(a, unit), _to_metres(b, unit), _to_metres(c, unit)
+    if min(w, d, h) < 0.02 or max(w, d, h) > 6:
+        return None
+    # Listings sometimes send H×W×D; keep the smallest as height when it is clearly the short axis.
+    return {'width': round(w, 3), 'depth': round(d, 3), 'height': round(h, 3)}
+
+
+def _listing_text(item: dict) -> str:
+    bits = [item.get('title'), item.get('snippet')]
+    ext = item.get('extensions')
+    if isinstance(ext, list):
+        bits.extend(str(x) for x in ext)
+    for key in ('rich_snippet', 'tag', 'delivery'):
+        val = item.get(key)
+        if isinstance(val, str):
+            bits.append(val)
+        elif isinstance(val, list):
+            bits.extend(str(x) for x in val)
+        elif isinstance(val, dict):
+            bits.extend(str(v) for v in val.values() if isinstance(v, (str, int, float)))
+    return ' '.join(b for b in bits if b)
+
+
+def _product_specs(product_id: str) -> dict | None:
+    """SerpAPI google_product specifications, if the listing has a product id."""
+    if not product_id or not config.SHOPPING_API_KEY:
+        return None
+    try:
+        r = httpx.get('https://serpapi.com/search.json', timeout=8, params={
+            'engine': 'google_product', 'product_id': product_id, 'api_key': config.SHOPPING_API_KEY,
+            'gl': 'us', 'hl': 'en'})
+        r.raise_for_status()
+    except httpx.HTTPError:
+        return None
+    blob = []
+    data = r.json()
+    specs = (data.get('product_results') or {}).get('specifications') or data.get('specifications') or []
+    if isinstance(specs, dict):
+        specs = specs.get('specifications') or specs.get('items') or []
+    for block in specs if isinstance(specs, list) else []:
+        if isinstance(block, dict):
+            blob.append(str(block.get('name') or ''))
+            blob.append(str(block.get('value') or ''))
+            for row in block.get('specifications') or block.get('items') or []:
+                if isinstance(row, dict):
+                    blob.append(str(row.get('name') or ''))
+                    blob.append(str(row.get('value') or ''))
+        elif isinstance(block, str):
+            blob.append(block)
+    about = (data.get('product_results') or {}).get('description') or ''
+    blob.append(about)
+    return parse_listing_dimensions(' '.join(blob)) or parse_listing_dimensions(about)
+
+
+def infer_category(text: str) -> str:
+    t = (text or '').lower()
+    for cat, pat in _CATEGORY_WORDS:
+        if re.search(pat, t):
+            return cat
+    return 'other'
+
+
+def live_search(query: str, limit: int = 16) -> list[dict]:
+    """Google Shopping via SerpAPI, shaped like catalog products so they can be placed."""
     if not config.SHOPPING_API_KEY:
         return []
     try:
@@ -144,14 +282,94 @@ def live_search(query: str, limit: int = 8) -> list[dict]:
         r.raise_for_status()
     except httpx.HTTPError:
         return []
+    category = infer_category(query)
+    dims = DEFAULT_DIMS.get(category, DEFAULT_DIMS['other'])
     out = []
     for item in r.json().get('shopping_results', [])[:limit]:
+        title = item.get('title') or 'Item'
+        url = item.get('product_link') or item.get('link') or title
         price = item.get('extracted_price')
+        item_cat = infer_category(title)
+        if item_cat == 'other':
+            item_cat = category
+        listed = parse_listing_dimensions(_listing_text(item), item_cat)
+        if listed is None and item.get('product_id') and len(out) < 6:
+            listed = _product_specs(str(item.get('product_id')))
+        kind = 'assembled' if listed else 'estimated'
         out.append({
-            'title': item.get('title'), 'retailer': item.get('source'),
-            'price_cents': round(price * 100) if isinstance(price, (int, float)) else None,
-            'source_url': item.get('product_link') or item.get('link'), 'image_url': item.get('thumbnail'),
-            'dimensions_m': None, 'source_type': 'live', 'retrieved_at': db.now(),
-            'note': 'Live result: dimensions not confirmed, so it cannot enter the scale-aware layout.',
+            'id': 'live-' + hashlib.sha256(url.encode()).hexdigest()[:16],
+            'retailer': item.get('source') or 'Google',
+            'title': title,
+            'category': item_cat,
+            'description': item.get('snippet'),
+            'image_url': item.get('thumbnail'),
+            'source_url': item.get('product_link') or item.get('link'),
+            'price_cents': round(price * 100) if isinstance(price, (int, float)) else 0,
+            'currency': 'USD',
+            'dimensions_m': listed or DEFAULT_DIMS.get(item_cat, dims),
+            'dimension_kind': kind,
+            'source_type': 'live',
+            'retrieved_at': db.now(),
         })
     return out
+
+
+_STOP = {'the', 'and', 'for', 'a', 'an', 'of', 'with'}
+_CATEGORY_ALIASES = {
+    'sofa': {'sofa', 'sofas', 'couch', 'couches', 'sectional', 'sectionals', 'loveseat', 'loveseats'},
+    'bed': {'bed', 'beds', 'mattress'},
+    'nightstand': {'nightstand', 'nightstands', 'bedside'},
+    'dresser': {'dresser', 'dressers'},
+    'desk': {'desk', 'desks'},
+    'coffee_table': {'coffee', 'table', 'tables'},
+    'rug': {'rug', 'rugs', 'carpet', 'carpets'},
+    'tv': {'tv', 'tvs', 'television', 'televisions'},
+}
+
+
+def _hay(product: dict) -> str:
+    return ' '.join(str(product.get(k) or '') for k in ('title', 'category', 'retailer', 'description')).lower()
+
+
+def _score(product: dict, tokens: list[str]) -> int:
+    title = (product.get('title') or '').lower()
+    hay = _hay(product)
+    return sum(3 if t in title else 1 if t in hay else 0 for t in tokens)
+
+
+def search(query: str, limit: int = 20) -> list[dict]:
+    """Live shopping first when the query has style words; catalog otherwise. Deduped by title."""
+    q = (query or '').strip()
+    if not q:
+        return []
+    category = infer_category(q)
+    tokens = [t for t in re.findall(r"[a-z0-9']+", q.lower()) if t not in _STOP]
+    extras = [t for t in tokens if t not in _CATEGORY_ALIASES.get(category, set())]
+    local = []
+    for p in products():
+        if category != 'other' and p.get('category') != category:
+            continue
+        if category == 'other' and tokens and not any(t in _hay(p) for t in tokens):
+            continue
+        local.append(p)
+    local.sort(key=lambda p: (-_score(p, tokens), p.get('price_cents') or 0))
+    live = []
+    seen_titles = {(p.get('title') or '').lower() for p in local}
+    for p in live_search(q, limit=limit):
+        title = (p.get('title') or '').lower()
+        if title in seen_titles:
+            continue
+        seen_titles.add(title)
+        live.append(p)
+    live.sort(key=lambda p: -_score(p, tokens))
+    # "brown couch" should not bury shopping hits under IKEA sofas that never say brown.
+    head, tail = (live, local) if extras else (local, live)
+    merged, ids = [], set()
+    for p in head + tail:
+        if p['id'] in ids:
+            continue
+        ids.add(p['id'])
+        merged.append(p)
+        if len(merged) >= limit:
+            break
+    return merged

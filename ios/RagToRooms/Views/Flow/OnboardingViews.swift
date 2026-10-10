@@ -90,21 +90,27 @@ struct JoinGroupView: View {
     }
 
     private func submit() async {
-        let code = nav.joinCode.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard code.count == 6, code.allSatisfy({ "0123456789".contains($0) }) else {
-            error = "Enter six digits."; return
+        let code = nav.joinCode.filter(\.isNumber)
+        guard code.count == 6 else { error = "Enter six digits."; return }
+        if let client = model.client {
+            joining = true
+            error = nil
+            defer { joining = false }
+            do {
+                let group = try await client.joinGroup(code: code)
+                model.switchScope(to: group.household_id)
+                model.adoptInviteCode(group.group_code)
+                nav.groupName = group.group_name
+                nav.joinCode = group.group_code
+                nav.finishOnboarding()
+                nav.screen = .room
+            } catch { self.error = error.localizedDescription }
+            return
         }
-        guard let client = model.client else { error = "Connect to your group's backend first."; return }
-        joining = true; error = nil
-        defer { joining = false }
-        do {
-            let group = try await client.joinGroup(code: code)
-            model.switchScope(to: group.household_id)
-            nav.groupName = group.group_name
-            nav.joinCode = group.group_code
-            nav.finishOnboarding()
-            nav.screen = .room
-        } catch { self.error = error.localizedDescription }
+        error = nil
+        if nav.groupName.isEmpty { nav.groupName = "Shared apartment" }
+        model.adoptInviteCode(code)
+        nav.screen = .floorPlan
     }
 }
 

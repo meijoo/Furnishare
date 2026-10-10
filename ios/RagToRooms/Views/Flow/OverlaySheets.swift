@@ -79,9 +79,12 @@ struct AddItemSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var category = "desk"
-    @State private var notes = ""
+    @State private var link = ""
     @State private var photoItem: PhotosPickerItem?
     @State private var preview: UIImage?
+    @State private var widthIn = ""
+    @State private var depthIn = ""
+    @State private var heightIn = ""
 
     private let categories = ["bed", "nightstand", "dresser", "desk", "sofa", "coffee_table", "rug", "tv", "other"]
 
@@ -99,23 +102,32 @@ struct AddItemSheet: View {
                     }
                 } header: {
                     Text("Photo")
-                } footer: {
-                    Text("Optional. Helps the agent match style if you mention this item.")
                 }
                 Section("Item") {
                     TextField("Item name, e.g. oak desk", text: $name)
                     Picker("Category", selection: $category) {
                         ForEach(categories, id: \.self) { Text($0.categoryLabel).tag($0) }
                     }
-                    TextField("Notes (optional)", text: $notes, axis: .vertical).lineLimit(2...4)
+                    TextField("Product link (optional)", text: $link)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
+                Section("Size in inches") {
+                    HStack {
+                        sizeField("W", text: $widthIn)
+                        sizeField("D", text: $depthIn)
+                        sizeField("H", text: $heightIn)
+                    }
                 }
             }
+            .onAppear { fillDefaults(for: category, force: true) }
             .navigationTitle("Add your item")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Add item") { submit() }.disabled(name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    Button("Add item") { submit() }.disabled(!canSubmit)
                 }
             }
             .onChange(of: photoItem) { _, item in
@@ -126,20 +138,60 @@ struct AddItemSheet: View {
                     }
                 }
             }
+            .onChange(of: category) { _, next in fillDefaults(for: next, force: true) }
         }
+    }
+
+    private func sizeField(_ label: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+            TextField("0", text: text).keyboardType(.decimalPad)
+        }
+    }
+
+    private var canSubmit: Bool {
+        !name.trimmingCharacters(in: .whitespaces).isEmpty
+            && (preview != nil || !normalizedLink.isEmpty)
+            && meters(widthIn) != nil && meters(depthIn) != nil && meters(heightIn) != nil
+    }
+
+    private var normalizedLink: String {
+        let trimmed = link.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty { return "" }
+        if trimmed.contains("://") { return trimmed }
+        return "https://\(trimmed)"
+    }
+
+    private func meters(_ raw: String) -> Double? {
+        guard let inches = Double(raw.replacingOccurrences(of: ",", with: ".")), inches > 0, inches < 240 else { return nil }
+        return inches * 0.0254
+    }
+
+    private func fillDefaults(for category: String, force: Bool) {
+        let values: (String, String, String) = switch category {
+        case "bed": ("63", "83", "39")
+        case "nightstand": ("20", "16", "22")
+        case "dresser": ("47", "20", "33")
+        case "desk": ("47", "24", "30")
+        case "sofa": ("79", "35", "33")
+        case "coffee_table": ("43", "24", "17")
+        case "rug": ("79", "55", "1")
+        case "tv": ("47", "5", "30")
+        default: ("32", "32", "32")
+        }
+        if force || widthIn.isEmpty { widthIn = values.0 }
+        if force || depthIn.isEmpty { depthIn = values.1 }
+        if force || heightIn.isEmpty { heightIn = values.2 }
     }
 
     private func submit() {
         let trimmed = name.trimmingCharacters(in: .whitespaces)
-        var text = "I already own a \(trimmed) (\(category.categoryLabel)) in \(model.currentRoomName)."
-        if !notes.trimmingCharacters(in: .whitespaces).isEmpty { text += " \(notes)" }
-        text += " Don’t buy another one."
+        guard let width = meters(widthIn), let depth = meters(depthIn), let height = meters(heightIn) else { return }
+        model.addOwnedItem(name: trimmed, category: category, link: normalizedLink.isEmpty ? nil : normalizedLink,
+                           image: preview, widthM: width, depthM: depth, heightM: height)
         dismiss()
-        Task {
-            await model.sendChat(text)
-            nav.roomTab = .inspiration
-            nav.showSuccess(.itemAdded(trimmed))
-        }
+        nav.roomTab = .items
+        nav.showSuccess(.itemAdded(trimmed))
     }
 }
 
@@ -293,8 +345,10 @@ struct ShareSpaceSheet: View {
             let phone = (phones[member.id] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             return phone.isEmpty ? nil : InviteMember(member_id: member.id, phone: phone)
         }
-        do { invitation = try await client.invite(members: members, requestID: requestID) }
-        catch { failure = error.localizedDescription }
+        do {
+            invitation = try await client.invite(members: members, requestID: requestID)
+            if let code = invitation?.group_code { model.adoptInviteCode(code) }
+        } catch { failure = error.localizedDescription }
     }
 }
 
@@ -392,7 +446,7 @@ struct SuccessOverlay: View {
         case .roomsSaved(let count):
             return "Your design list now includes \(count) room\(count == 1 ? "" : "s"). Open one to start furnishing."
         case .itemAdded(let name):
-            return "“\(name)” was sent to the agent as something you already own. It will avoid buying a duplicate."
+            return "“\(name)” is saved with things you already have. It is not part of the room budget."
         case .paymentSent(let amount, let to):
             return "\(amount) to \(to). Nessie is a sandbox, so this is a simulated transfer."
         case .linkCopied:

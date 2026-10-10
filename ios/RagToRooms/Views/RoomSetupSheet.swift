@@ -1,12 +1,10 @@
 import SwiftUI
-import PhotosUI
 
-/// Manual room measurements (the baseline), optional RoomPlan capture, and inspiration upload.
+/// Manual room measurements (the baseline) and optional RoomPlan capture.
 struct RoomSetupSheet: View {
     @Environment(AppModel.self) private var model
     @Environment(\.dismiss) private var dismiss
     @State private var room: Room
-    @State private var photoItem: PhotosPickerItem?
     @State private var showCapture = false
     @State private var captureNote: String?
 
@@ -28,23 +26,7 @@ struct RoomSetupSheet: View {
                 } header: {
                     Text("Measurements (meters)")
                 } footer: {
-                    Text("Measure wall to wall with a tape. Openings and clearance zones are kept as they are: \(room.openings.count) opening(s), \(room.clearances.count) clearance zone(s).")
-                }
-
-                Section {
-                    let hasInspiration = model.state.room.inspirationImageURL != nil || model.inspirationPreview != nil
-                    PhotosPicker(selection: $photoItem, matching: .images) {
-                        Label(hasInspiration ? "Replace inspiration photo" : "Choose inspiration photo",
-                              systemImage: "photo.on.rectangle.angled")
-                    }
-                    if model.busy.contains("inspiration") {
-                        HStack { ProgressView(); Text("Uploading…") }
-                    }
-                    inspirationPreview
-                } header: {
-                    Text("Inspiration")
-                } footer: {
-                    Text("The agent ranks products by how well their color and style match this photo.")
+                    Text("Measure wall to wall with a tape. Openings and clearance zones are kept as they are: \(room.openings.count) opening(s), \(room.clearances.count) clearance zone(s). Inspiration photos live on the Inspiration tab.")
                 }
             }
             .navigationTitle("Room setup")
@@ -58,16 +40,6 @@ struct RoomSetupSheet: View {
                         dismiss()
                     }
                     .disabled(model.busy.contains("room"))
-                }
-            }
-            .onChange(of: photoItem) { _, item in
-                guard let item else { return }
-                Task {
-                    if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
-                        await model.uploadInspiration(image)
-                    } else {
-                        model.errorMessage = "Couldn't read that photo"
-                    }
                 }
             }
             .fullScreenCover(isPresented: $showCapture) {
@@ -93,18 +65,5 @@ struct RoomSetupSheet: View {
             }
         }
         .accessibilityValue(String(format: "%.2f meters", value.wrappedValue))
-    }
-
-    @ViewBuilder private var inspirationPreview: some View {
-        if let image = model.inspirationPreview {
-            Image(uiImage: image).resizable().scaledToFit().frame(maxHeight: 180)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-        } else if let url = model.client?.resolve(model.state.room.inspirationImageURL) {
-            AsyncImage(url: url) { image in
-                image.resizable().scaledToFit()
-            } placeholder: { ProgressView() }
-                .frame(maxHeight: 180)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-        }
     }
 }

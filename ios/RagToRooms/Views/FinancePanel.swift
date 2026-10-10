@@ -8,7 +8,7 @@ struct FinancePanel: View {
         let state = model.state
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                PanelHeader(title: "Purchase & reimbursements", symbol: "banknote")
+                PanelHeader(title: "Pay", symbol: "banknote")
                 if finance.isMock || model.isOfflineDemo {
                     StatusBadge(text: "Simulated (mock)", symbol: "theatermasks", tint: .aeroAmber)
                 } else if let simulator = finance.simulator {
@@ -20,8 +20,7 @@ struct FinancePanel: View {
                     Image(systemName: "checkmark.seal.fill").font(.title)
                     VStack(alignment: .leading) {
                         Text("Settled").font(.title3.bold())
-                        Text(model.isPrivateScope ? "The purchase is confirmed. Nobody owes anyone for this room."
-                             : "The purchase and every reimbursement are confirmed.").font(.subheadline)
+                        Text("Done").font(.subheadline)
                     }
                 }
                 .foregroundStyle(.white)
@@ -32,23 +31,17 @@ struct FinancePanel: View {
                 .accessibilityElement(children: .combine)
             }
             OperationRow(title: "Purchase",
-                         subtitle: "\(state.name(of: finance.payerID)) pays the retailer\(model.isPrivateScope ? " (100%, private room)" : "")",
+                         subtitle: state.name(of: finance.payerID),
                          amountCents: finance.purchase?.amountCents ?? state.proposal?.knownTotalCents, operation: finance.purchase)
-            if model.isPrivateScope {
-                Label("Private room: no reimbursements. The room is settled once the purchase is confirmed.", systemImage: "lock.fill")
-                    .font(.caption).foregroundStyle(.secondary)
-            } else {
+            if !model.isPrivateScope {
                 ForEach(finance.reimbursements, id: \.liabilityID) { r in
                     OperationRow(title: "Reimbursement", subtitle: "\(state.name(of: r.fromMember)) → \(state.name(of: r.toMember))",
                                  amountCents: r.amountCents, operation: r.operation)
                 }
-                if finance.reimbursements.isEmpty {
-                    Text("Reimbursements are created after the purchase is confirmed.").font(.caption).foregroundStyle(.secondary)
-                }
             }
             if Self.needsReconcile(finance) && !model.isOfflineDemo {
                 Button { Task { await model.reconcile() } } label: {
-                    Label("Re-check pending transfers", systemImage: "arrow.clockwise")
+                    Label("Refresh", systemImage: "arrow.clockwise")
                 }
                 .buttonStyle(GlassChipStyle())
                 .disabled(model.busy.contains("reconcile"))
@@ -78,9 +71,6 @@ private struct OperationRow: View {
                 Text(subtitle).font(.subheadline).foregroundStyle(.secondary)
                 if let error = operation?.error, !error.isEmpty {
                     Label(error, systemImage: "exclamationmark.bubble").font(.caption).foregroundStyle(Color.aeroRed)
-                }
-                if let id = operation?.externalID {
-                    Text("Ref \(id)").font(.caption2.monospaced()).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
             Spacer()

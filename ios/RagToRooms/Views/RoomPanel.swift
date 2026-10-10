@@ -2,14 +2,13 @@ import SwiftUI
 
 struct RoomPanel: View {
     @Environment(AppModel.self) private var model
+    @Environment(AppNavigation.self) private var nav
 
     var body: some View {
         let room = model.state.room
         let objects = model.displayedObjects
         let report = LayoutValidation.validate(objects: objects, room: room, name: model.displayName)
         VStack(alignment: .leading, spacing: 10) {
-            PanelHeader(title: model.currentRoomName, symbol: "cube.transparent",
-                        trailing: String(format: "%.1f × %.1f × %.1f m", room.widthM, room.depthM, room.heightM))
             ZStack(alignment: .topLeading) {
                 if model.arPresented {
                     Color.clear
@@ -26,18 +25,24 @@ struct RoomPanel: View {
                         .accessibilityLabel("3D room with \(objects.count) furniture objects")
                 }
                 HStack(spacing: 6) {
-                    if !model.previews.isEmpty { StatusBadge(text: "Preview (local only)", symbol: "eye", tint: .aeroAmber) }
-                    if !model.localPoses.isEmpty { StatusBadge(text: "Moved locally", symbol: "hand.draw", tint: .aeroInk) }
+                    if !model.previews.isEmpty { StatusBadge(text: "Preview", symbol: "eye", tint: .aeroAmber) }
+                    if !model.localPoses.isEmpty { StatusBadge(text: "Moved", symbol: "hand.draw", tint: .aeroInk) }
                 }
                 .padding(10)
             }
             .frame(minHeight: 260, maxHeight: .infinity)
 
+            HStack(spacing: 8) {
+                Button { nav.showRoomSetup = true } label: { Label("Room", systemImage: "ruler") }
+                    .buttonStyle(AeroButtonStyle(tint: .aeroGrass, compact: true))
+                Button { nav.showAR = true } label: { Label("AR", systemImage: "arkit") }
+                    .buttonStyle(AeroButtonStyle(compact: true))
+                Spacer()
+            }
+
             selectionBar
             if let object = model.selectedObject { ObjectPhotoRow(object: object, name: model.displayName(object)) }
             hints(report)
-            Text("Tap to select · drag furniture to move · drag empty space to orbit · pinch to zoom · two fingers to pan or rotate")
-                .font(.caption2).foregroundStyle(.secondary)
         }
         .glassPanel()
     }
@@ -55,33 +60,28 @@ struct RoomPanel: View {
                     .buttonStyle(GlassChipStyle())
                 Button { model.select(nil) } label: { Image(systemName: "xmark").accessibilityLabel("Deselect") }
                     .buttonStyle(GlassChipStyle())
-            } else {
-                Label("Tap a piece of furniture to select it", systemImage: "hand.tap").font(.subheadline).foregroundStyle(.secondary)
             }
             Spacer()
             Button { model.cameraResetToken += 1 } label: { Label("Recenter", systemImage: "scope") }
                 .buttonStyle(GlassChipStyle())
             if model.hasLocalEdits {
-                Button { model.resetLocalEdits() } label: { Label("Reset local", systemImage: "arrow.uturn.backward") }
+                Button { model.resetLocalEdits() } label: { Label("Reset", systemImage: "arrow.uturn.backward") }
                     .buttonStyle(GlassChipStyle())
             }
         }
     }
 
     @ViewBuilder private func hints(_ report: LayoutReport) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if report.hints.isEmpty {
-                Label("Fits: inside the room, no overlaps, clearances free", systemImage: "checkmark.circle")
-                    .font(.caption.weight(.semibold)).foregroundStyle(Color(red: 0.13, green: 0.5, blue: 0.2))
-            } else {
+        if !report.hints.isEmpty || (model.state.scene.validation?.ok == false) {
+            VStack(alignment: .leading, spacing: 4) {
                 ForEach(report.hints) { hint in
                     Label(hint.message, systemImage: hint.symbol)
-                        .font(.caption.weight(.semibold)).foregroundStyle(Color.aeroRed)
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(Color.aeroRed)
                 }
-            }
-            if let validation = model.state.scene.validation, !validation.ok {
-                ForEach(validation.issues, id: \.self) { issue in
-                    Label("Server: \(issue.message)", systemImage: "server.rack").font(.caption).foregroundStyle(Color.aeroInk)
+                if let validation = model.state.scene.validation, !validation.ok {
+                    ForEach(validation.issues, id: \.self) { issue in
+                        Label(issue.message, systemImage: "exclamationmark.triangle").font(.subheadline).foregroundStyle(Color.aeroInk)
+                    }
                 }
             }
         }

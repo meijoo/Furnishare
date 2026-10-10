@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(AppModel.self) private var model
-    @State private var nav = AppNavigation()
+    @Environment(AppNavigation.self) private var nav
     @State private var joinInvitation: RoomInvitation?
 
     var body: some View {
@@ -14,19 +14,18 @@ struct ContentView: View {
                 SuccessOverlay(kind: success)
             }
         }
-        .sheet(isPresented: $nav.showSettings) { SettingsSheet() }
-        .sheet(isPresented: $nav.showRoomSetup) { RoomSetupSheet(room: model.state.room) }
-        .sheet(isPresented: $nav.showCatalog) { CatalogSheet() }
-        .sheet(isPresented: $nav.showAddItem) { AddItemSheet() }
-        .sheet(isPresented: $nav.showSendMoney) { SendMoneySheet() }
-        .sheet(isPresented: $nav.showShare) { ShareSpaceSheet() }
+        .sheet(isPresented: $nav.showSettings) { SettingsSheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showRoomSetup) { RoomSetupSheet(room: model.state.room).environment(model) }
+        .sheet(isPresented: $nav.showCatalog) { CatalogSheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showAddItem) { AddItemSheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showSendMoney) { SendMoneySheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showShare) { ShareSpaceSheet().environment(model).environment(self.nav) }
         .fullScreenCover(isPresented: $nav.showAR) {
             ARPlacementScreen(room: model.state.room, objects: model.displayedObjects,
                               names: Dictionary(model.displayedObjects.map { ($0.objectID, model.displayName($0)) }, uniquingKeysWith: { a, _ in a }),
                               baseURL: model.baseURL, initialObjectID: model.selectedObjectID)
+                .environment(model)
         }
-        // Apply outside the presentation modifiers so sheets inherit navigation too.
-        .environment(nav)
         .onChange(of: nav.showAR) { _, presented in model.arPresented = presented }
         .task { model.start() }
         .onOpenURL { url in
@@ -38,7 +37,11 @@ struct ContentView: View {
         }
         .alert("Join this room?", isPresented: Binding(get: { joinInvitation != nil }, set: { if !$0 { joinInvitation = nil } })) {
             Button("Join") {
-                if let invitation = joinInvitation { model.switchScope(to: invitation.household_id); nav.screen = .room }
+                if let invitation = joinInvitation {
+                    model.switchScope(to: invitation.household_id)
+                    if let code = invitation.group_code { model.adoptInviteCode(code) }
+                    nav.screen = .room
+                }
                 joinInvitation = nil
             }
             Button("Cancel", role: .cancel) { joinInvitation = nil }
@@ -93,5 +96,5 @@ struct ErrorBanner: View {
 }
 
 #Preview(traits: .landscapeLeft) {
-    ContentView().environment(AppModel())
+    ContentView().environment(AppModel()).environment(AppNavigation())
 }

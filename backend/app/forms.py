@@ -81,6 +81,38 @@ def clean(category: str, raw: dict) -> dict:
     return out
 
 
+DIM_PROMPT = """Read the assembled furniture size from the title and photo if it is printed.
+Use inches. Omit a field when you cannot see it. Do not guess a typical size and do not use package size.
+Title: {title}."""
+
+
+def read_dimensions(product: dict) -> dict | None:
+    """Gemini W×D×H in metres from a listing title and local photo, or None."""
+    from google.genai import types
+
+    from . import agent
+    photo = config.STATIC_DIR / product['local_image']
+    mime = 'image/png' if photo.suffix.lower() == '.png' else 'image/jpeg'
+    resp = agent._gemini().models.generate_content(
+        model=config.GEMINI_MODEL,
+        contents=[types.Part.from_bytes(data=photo.read_bytes(), mime_type=mime),
+                  DIM_PROMPT.format(title=product.get('title', ''))],
+        config=types.GenerateContentConfig(
+            response_mime_type='application/json',
+            response_schema={'type': 'object', 'properties': {
+                'width_in': {'type': 'number'}, 'depth_in': {'type': 'number'}, 'height_in': {'type': 'number'}}},
+            temperature=0),
+    )
+    raw = json.loads(resp.text or '{}')
+    try:
+        w, d, h = float(raw['width_in']), float(raw['depth_in']), float(raw['height_in'])
+    except (KeyError, TypeError, ValueError):
+        return None
+    if min(w, d, h) <= 0 or max(w, d, h) > 240:
+        return None
+    return {'width': round(w * 0.0254, 3), 'depth': round(d * 0.0254, 3), 'height': round(h * 0.0254, 3)}
+
+
 def read_photo(product: dict) -> dict:
     """Gemini's form read for one product with a local photo."""
     from google.genai import types

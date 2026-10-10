@@ -12,10 +12,12 @@ struct ContentSignature: Hashable {
     var dimensions: Dimensions
     var colorHex: String?
     var assetURL: URL?
+    var photoURL: String?
 
     init(_ object: SceneObject, assetURL: URL?) {
         productID = object.productID; category = object.category
         dimensions = object.dimensionsM; colorHex = object.colorHex; self.assetURL = assetURL
+        photoURL = object.texture?.imageURL
     }
 }
 
@@ -34,6 +36,7 @@ final class FurnitureNode {
     private var footprint: ModelEntity
     private var highlight: FootprintHighlight = .none
     private var loadTask: Task<Void, Never>?
+    private var photoTask: Task<Void, Never>?
 
     init(object: SceneObject, assetURL: URL?) {
         objectID = object.objectID
@@ -47,6 +50,7 @@ final class FurnitureNode {
         updateCollision()
         setPose(x: object.x, z: object.z, angle: object.rotationYRad, animated: false)
         loadAssetIfNeeded()
+        applyPhotoIfNeeded()
     }
 
     var position2D: SIMD2<Double> { SIMD2(x, z) }
@@ -94,6 +98,7 @@ final class FurnitureNode {
             updateCollision()
         }
         loadAssetIfNeeded()
+        applyPhotoIfNeeded()
     }
 
     func setHighlight(_ value: FootprintHighlight) {
@@ -116,6 +121,7 @@ final class FurnitureNode {
 
     func disappear() {
         loadTask?.cancel()
+        photoTask?.cancel()
         content.move(to: Transform(scale: SIMD3(repeating: 0.01), rotation: content.orientation, translation: content.position),
                      relativeTo: root, duration: 0.25, timingFunction: .easeIn)
         let root = self.root
@@ -162,6 +168,36 @@ final class FurnitureNode {
             } catch {
                 // Keep the dimensioned placeholder; the asset is optional.
             }
+        }
+    }
+
+    private func applyPhotoIfNeeded() {
+        photoTask?.cancel()
+        guard let raw = signature.photoURL else { return }
+        let url = raw.hasPrefix("file:") || raw.hasPrefix("http")
+            ? URL(string: raw)
+            : URL(fileURLWithPath: raw)
+        guard let url else { return }
+        let expected = signature
+        photoTask = Task { @MainActor [weak self] in
+            do {
+                let data = url.isFileURL ? try Data(contentsOf: url) : (try await URLSession.shared.data(from: url)).0
+                guard let image = UIImage(data: data), let cg = image.cgImage else { return }
+                let resource = try TextureResource.generate(from: cg, options: .init(semantic: .color))
+                guard let self, !Task.isCancelled, self.signature == expected else { return }
+                var material = UnlitMaterial()
+                material.color = .init(tint: .white, texture: .init(resource))
+                Self.paint(self.content, with: material)
+            } catch {}
+        }
+    }
+
+    private static func paint(_ entity: Entity, with material: RealityKit.Material) {
+        if let model = entity as? ModelEntity {
+            model.model?.materials = [material]
+        }
+        for child in entity.children {
+            paint(child, with: material)
         }
     }
 }

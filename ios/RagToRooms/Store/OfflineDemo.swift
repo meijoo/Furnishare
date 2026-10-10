@@ -129,6 +129,11 @@ extension AppModel {
         appendActivity("\(state.name(of: member)) updated their limit")
     }
 
+    func offlineSetBudget(cents: Int) {
+        state.budgetCents = cents
+        appendActivity("Room budget set to \(dollars(cents))")
+    }
+
     func offlineSaveRoom(_ room: Room) {
         var updated = room
         updated.inspirationImageURL = state.room.inspirationImageURL

@@ -107,3 +107,39 @@ def test_partial_reimbursement_failure_shows_each_operation(client, monkeypatch)
     assert retry['op_key'].endswith('#2')
     wait(client, lambda s: s['finance']['settled'])
     assert len(db.all_("SELECT 1 FROM financial_ops WHERE kind = 'transfer' AND state = 'confirmed'")) >= 2
+
+
+def test_product_search_uses_catalog(client, monkeypatch):
+    monkeypatch.setattr(catalog, 'live_search', lambda *a, **k: [])
+    r = client.get('/products/search', params={'q': 'sofa'})
+    assert r.status_code == 200, r.text
+    ids = [p['id'] for p in r.json()]
+    assert ids
+    assert all(p['category'] == 'sofa' for p in r.json())
+    assert catalog.infer_category('oak queen bed') == 'bed'
+    assert catalog.infer_category('brown couch') == 'sofa'
+    assert client.get('/products/search', params={'q': ''}).status_code == 422
+
+
+def test_brown_couch_prefers_live_matches(client, monkeypatch):
+    monkeypatch.setattr(catalog, 'live_search', lambda *a, **k: [{
+        'id': 'live-brown-couch', 'retailer': 'Shop', 'title': 'Brown linen couch', 'category': 'sofa',
+        'price_cents': 49900, 'currency': 'USD', 'dimensions_m': catalog.DEFAULT_DIMS['sofa'],
+        'dimension_kind': 'estimated', 'source_type': 'live',
+    }])
+    r = client.get('/products/search', params={'q': 'brown couch'})
+    assert r.status_code == 200, r.text
+    titles = [p['title'] for p in r.json()]
+    assert titles[0] == 'Brown linen couch'
+    assert all(p['category'] == 'sofa' for p in r.json())
+
+
+def test_put_budget(client):
+    before = client.get(f'/households/{H}/state').json()
+    assert before['budget_cents'] != 175000
+    r = client.put(f'/households/{H}/budget', json={'budget_cents': 175000})
+    assert r.status_code == 200, r.text
+    assert r.json()['budget_cents'] == 175000
+    assert client.get(f'/households/{H}/state').json()['budget_cents'] == 175000
+    assert client.put(f'/households/{H}/budget', json={'budget_cents': -1}).status_code == 422
+    assert client.put('/households/nope/budget', json={'budget_cents': 1000}).status_code == 404

@@ -45,7 +45,7 @@ struct ObjectPhotoRow: View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 8) {
                 Button { showSheet = true } label: {
-                    Label(object.texture == nil ? "Put a photo on this \(object.category.categoryNoun)…" : "Change photo…",
+                    Label(object.texture == nil ? "Photo" : "Change photo",
                           systemImage: "photo.badge.plus")
                 }
                 .buttonStyle(GlassChipStyle())

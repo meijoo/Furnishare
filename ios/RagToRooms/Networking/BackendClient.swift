@@ -86,6 +86,36 @@ struct BackendClient: Sendable {
         return list.products
     }
 
+    func searchProducts(_ query: String) async throws -> [Product] {
+        let list: ProductList = try await send("GET", "/products/search", query: ["q": query], timeout: 20)
+        return list.products
+    }
+
+    func realizeProduct(_ product: Product, image: UploadImage? = nil) async throws -> RealizeStatus {
+        guard let dims = product.placeableDimensions else {
+            throw BackendError.decoding("product has no placeable dimensions")
+        }
+        if let image {
+            var fields = [
+                "id": product.id, "title": product.title, "category": product.category,
+                "width": String(dims.width), "depth": String(dims.depth), "height": String(dims.height),
+            ]
+            if let source = product.sourceURL { fields["source_url"] = source }
+            let data = try await upload("/products/realize/upload", file: image, fields: fields, timeout: 30)
+            do { return try Self.decoder.decode(RealizeStatus.self, from: data) }
+            catch let error as DecodingError { throw BackendError.decoding(Self.describe(error)) }
+        }
+        return try await send("POST", "/products/realize", body: RealizeRequest(
+            id: product.id, title: product.title, category: product.category,
+            imageURL: product.imageURL?.hasPrefix("http") == true ? product.imageURL : nil,
+            sourceURL: product.sourceURL, retailer: product.retailer, description: product.description,
+            priceCents: product.priceCents, dimensionsM: dims), timeout: 20)
+    }
+
+    func realizeStatus(_ productID: String) async throws -> RealizeStatus {
+        try await send("GET", "/products/realize/\(Self.pathEscaped(productID))", timeout: 12)
+    }
+
     func apartment(id: String) async throws -> Apartment {
         try await send("GET", "/apartments/\(id)")
     }
@@ -105,6 +135,10 @@ struct BackendClient: Sendable {
 
     func setLimit(memberID: String, cents: Int) async throws {
         try await sendIgnoringBody("PUT", "\(household)/members/\(memberID)/limit", body: LimitBody(limitCents: cents))
+    }
+
+    func setBudget(cents: Int) async throws {
+        try await sendIgnoringBody("PUT", "\(household)/budget", body: BudgetBody(budgetCents: cents))
     }
 
     func approve(version: Int, memberID: String) async throws {

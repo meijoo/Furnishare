@@ -7,6 +7,11 @@ struct Dimensions: Codable, Hashable, Sendable {
     var width: Double
     var depth: Double
     var height: Double
+
+    var listingLabel: String {
+        let inches: (Double) -> String = { String(format: "%.0f\"", $0 / 0.0254) }
+        return "\(inches(width)) × \(inches(depth)) × \(inches(height))"
+    }
 }
 
 struct Evidence: Codable, Hashable, Sendable {
@@ -86,9 +91,22 @@ struct Product: Codable, Hashable, Identifiable, Sendable {
         case assetURL = "asset_url"
     }
 
-    /// Only assembled, confirmed dimensions may be used in the scale-aware layout.
+    /// Assembled or estimated sizes can be placed; package measurements cannot.
     var placeableDimensions: Dimensions? {
-        dimensionKind == nil || dimensionKind == "assembled" ? dimensionsM : nil
+        switch dimensionKind {
+        case nil, "assembled", "estimated": dimensionsM
+        default: nil
+        }
+    }
+
+    static func placed(id: String, title: String, category: String, retailer: String = "Owned",
+                       imageURL: String? = nil, sourceURL: String? = nil, priceCents: Int = 0,
+                       dimensions: Dimensions, sourceType: String = "owned") -> Product {
+        Product(id: id, retailer: retailer, retailerProductID: nil, title: title, variant: nil,
+                category: category, description: nil, imageURL: imageURL, localImage: nil,
+                sourceURL: sourceURL, priceCents: priceCents, currency: "USD",
+                dimensionsM: dimensions, dimensionKind: "estimated", evidence: nil,
+                retrievedAt: nil, additionalCosts: nil, sourceType: sourceType, style: nil, assetURL: nil)
     }
 }
 
@@ -111,6 +129,12 @@ struct ObjectTexture: Codable, Hashable, Sendable {
     enum CodingKeys: String, CodingKey {
         case mode, status
         case imageURL = "image_url"
+    }
+
+    init(imageURL: String?, mode: String? = "print", status: TextureStatus = .ready) {
+        self.imageURL = imageURL
+        self.mode = mode
+        self.status = status
     }
 
     init(from decoder: Decoder) throws {
@@ -604,6 +628,38 @@ struct LimitBody: Encodable, Sendable {
     enum CodingKeys: String, CodingKey { case limitCents = "limit_cents" }
 }
 
+struct BudgetBody: Encodable, Sendable {
+    let budgetCents: Int
+    enum CodingKeys: String, CodingKey { case budgetCents = "budget_cents" }
+}
+
+struct GroupPerson: Identifiable, Codable, Hashable, Sendable {
+    var id: String
+    var name: String
+    var photoFilename: String?
+    /// True when they were invited locally and are not yet on the backend roster.
+    var invited: Bool
+}
+
+struct InspirationShot: Identifiable, Codable, Hashable, Sendable {
+    var id: UUID
+    var filename: String
+    var addedAt: Date
+}
+
+struct OwnedItem: Identifiable, Codable, Hashable, Sendable {
+    var id: UUID
+    var householdID: String
+    var name: String
+    var category: String
+    var link: String?
+    var imageFilename: String?
+    var widthM: Double?
+    var depthM: Double?
+    var heightM: Double?
+    var addedAt: Date
+}
+
 struct PurchaseAuthorizeBody: Encodable, Sendable {
     let memberID: String
     let proposalVersion: Int
@@ -645,6 +701,43 @@ struct StateEventPayload: Decodable, Sendable {
 /// Health response: only `status` is relied upon.
 struct HealthResponse: Decodable, Sendable {
     let status: String?
+}
+
+struct RealizeRequest: Encodable, Sendable {
+    var id: String
+    var title: String
+    var category: String
+    var imageURL: String?
+    var sourceURL: String?
+    var retailer: String?
+    var description: String?
+    var priceCents: Int
+    var dimensionsM: Dimensions
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, category, retailer, description
+        case imageURL = "image_url"
+        case sourceURL = "source_url"
+        case priceCents = "price_cents"
+        case dimensionsM = "dimensions_m"
+    }
+}
+
+struct RealizeStatus: Decodable, Sendable {
+    var id: String
+    var status: String
+    var assetURL: String?
+    var colorHex: String?
+    var dimensionsM: Dimensions?
+    var dimensionKind: String?
+
+    enum CodingKeys: String, CodingKey {
+        case id, status
+        case assetURL = "asset_url"
+        case colorHex = "color_hex"
+        case dimensionsM = "dimensions_m"
+        case dimensionKind = "dimension_kind"
+    }
 }
 
 extension String {

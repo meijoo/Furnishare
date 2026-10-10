@@ -297,6 +297,14 @@ The texture belongs to the object id, so it carries over when a revision swaps t
 
 `DELETE` on the same path removes the texture.
 
+## Product search and realize
+
+`GET /products/search?q=&limit=` mixes the verified catalog with live shopping results. Style tokens (e.g. “brown couch”) rank live listings first; a bare category keeps catalog first. Each live hit includes parsed `dimensions_m` when the listing has W×D×H, otherwise estimated defaults.
+
+`POST /products/realize` accepts a listing (`id`, `title`, `category`, `dimensions_m`, optional image/source URLs) and returns a generated USDZ plus form/dimension reads. `POST /products/realize/upload` is the same with a photo. `GET /products/realize/{id}` is the snapshot.
+
+`PUT /households/{hid}/budget` `{ "budget_cents" }` updates the room budget.
+
 ## Roommate invitations and group preferences
 
 `POST /households/{hid}/invitations`: `{ "members": [{"member_id", "phone"}], "request_id" }`.

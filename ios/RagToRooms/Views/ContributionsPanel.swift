@@ -10,20 +10,9 @@ struct ContributionsPanel: View {
     var body: some View {
         let state = model.state
         VStack(alignment: .leading, spacing: 12) {
-            PanelHeader(title: "Contributions", symbol: model.isPrivateScope ? "person.fill" : "person.3.fill",
-                        trailing: "Acting as \(model.actingMemberName)")
-            if model.isPrivateScope {
-                Label("Private room: \(state.name(of: model.scopeOwnerID)) pays 100% and approves alone.", systemImage: "lock.fill")
-                    .font(.subheadline).foregroundStyle(Color.aeroInk)
-            }
+            PanelHeader(title: "Contributions", symbol: model.isPrivateScope ? "person.fill" : "person.3.fill")
             if let proposal = state.proposal {
                 ForEach(state.members) { member in memberRow(member, proposal: proposal) }
-                let sum = proposal.shares.values.reduce(0, +)
-                Label(sum == proposal.knownTotalCents ? "Shares add up exactly to \(dollars(sum))" : "Shares total \(dollars(sum)) vs known total \(dollars(proposal.knownTotalCents))",
-                      systemImage: sum == proposal.knownTotalCents ? "equal.circle" : "exclamationmark.triangle")
-                    .font(.caption).foregroundStyle(.secondary)
-            } else {
-                Text("Shares appear once the agent makes a proposal.").foregroundStyle(.secondary)
             }
 
             Divider()
@@ -57,8 +46,6 @@ struct ContributionsPanel: View {
     private func readOnlyNote(_ note: String) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Label(note, systemImage: "eye").font(.subheadline.weight(.semibold)).foregroundStyle(Color.aeroInk)
-            Text("You're viewing as \(model.actingMemberName), who isn't a member of this room. Nothing here can be changed as \(model.actingMemberName).")
-                .font(.caption).foregroundStyle(.secondary)
             if let owner = model.state.members.first {
                 Button { model.setActingMember(owner.id) } label: { Label("Act as \(owner.name)", systemImage: "person.crop.circle") }
                     .buttonStyle(GlassChipStyle())
@@ -74,16 +61,15 @@ struct ContributionsPanel: View {
         let state = model.state
         let me = model.actingMemberID
         VStack(alignment: .leading, spacing: 12) {
-            Text("Your actions").font(.caption.weight(.bold)).foregroundStyle(.secondary)
             FlowButtons {
                 action("Approve", symbol: "hand.thumbsup.fill", tint: .aeroGrass, key: "approve", blocker: model.approvalBlocker) {
                     Task { await model.approve() }
                 }
-                action("Object…", symbol: "hand.raised.fill", tint: .aeroAmber, key: "object", blocker: model.objectionBlocker) {
+                action("Object", symbol: "hand.raised.fill", tint: .aeroAmber, key: "object", blocker: model.objectionBlocker) {
                     objectionReason = ""; showObjection = true
                 }
                 if !model.isPrivateScope {
-                    action("Set my limit…", symbol: "lock.fill", tint: .aeroSky, key: "limit", blocker: nil) {
+                    action("Limit", symbol: "lock.fill", tint: .aeroSky, key: "limit", blocker: nil) {
                         limitText = model.actingMember?.limitCents.map { String(format: "%.2f", Double($0) / 100) } ?? ""
                         showLimit = true
                     }
@@ -92,7 +78,7 @@ struct ContributionsPanel: View {
             blockerText(model.approvalBlocker.map { "Approve: \($0)" })
 
             FlowButtons {
-                action("Authorize purchase", symbol: "creditcard.fill", tint: .aeroSky, key: "purchase", blocker: model.purchaseBlocker) {
+                action("Buy", symbol: "creditcard.fill", tint: .aeroSky, key: "purchase", blocker: model.purchaseBlocker) {
                     Task { await model.authorizePurchase() }
                 }
             }
@@ -102,16 +88,12 @@ struct ContributionsPanel: View {
             ForEach(mine, id: \.liabilityID) { r in
                 let blocker = model.reimbursementBlocker(r)
                 FlowButtons {
-                    action("Authorize reimbursement \(dollars(r.amountCents)) to \(state.name(of: r.toMember))",
+                    action("Pay \(dollars(r.amountCents))",
                            symbol: "arrow.uturn.left.circle.fill", tint: .aeroGrass, key: "reimb-\(r.liabilityID)", blocker: blocker) {
                         Task { await model.authorizeReimbursement(r.liabilityID) }
                     }
                 }
                 blockerText(blocker)
-            }
-            if !model.isPrivateScope {
-                Text("Limits are private: only you can see your own limit. The server never shares it with the others.")
-                    .font(.caption2).foregroundStyle(.secondary)
             }
         }
     }
@@ -142,16 +124,9 @@ struct ContributionsPanel: View {
                             .accessibilityLabel(connected ? "iMessage linked" : "iMessage not linked")
                     }
                 }
-                HStack(spacing: 6) {
-                    if model.isPrivateScope {
-                        Label("Owner · pays 100%", systemImage: "person.fill.checkmark")
-                    } else if member.hasLimit == true {
-                        Label(member.limitCents.map { "Limit \(dollars($0)) (private)" } ?? "Limit set (private)", systemImage: "lock.fill")
-                    } else {
-                        Label("No limit set", systemImage: "lock.open")
-                    }
+                if let cents = member.limitCents {
+                    Text(dollars(cents)).font(.subheadline).foregroundStyle(Color.figmaMuted)
                 }
-                .font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
@@ -161,7 +136,7 @@ struct ContributionsPanel: View {
                 } else if objection != nil {
                     StatusBadge(text: "Objected", symbol: "hand.raised.fill", tint: .aeroRed)
                 } else {
-                    StatusBadge(text: "Not approved yet", symbol: "hourglass", tint: .aeroInk)
+                    StatusBadge(text: "Pending", symbol: "hourglass", tint: .aeroInk)
                 }
             }
         }

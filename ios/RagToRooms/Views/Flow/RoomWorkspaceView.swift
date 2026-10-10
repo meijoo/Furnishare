@@ -23,7 +23,7 @@ struct RoomWorkspaceView: View {
                             .frame(width: proxy.size.width * 0.55)
                             .frame(maxHeight: .infinity)
                         ScrollViewReader { reader in
-                            ScrollView { designSidePanels }
+                            ScrollView { ItemsPanel() }
                                 .scrollIndicators(.hidden)
                                 .task { await debugScroll(reader) }
                         }
@@ -47,12 +47,11 @@ struct RoomWorkspaceView: View {
 
     private var roomHeader: some View {
         VStack(alignment: .leading, spacing: 10) {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 12) { title; Spacer(minLength: 8); status; controls }
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack { title; Spacer(); status }
-                    HStack { Spacer(); controls }
-                }
+            HStack(spacing: 12) {
+                title
+                Spacer(minLength: 8)
+                Button { nav.showSettings = true } label: { Image(systemName: "gearshape.fill").accessibilityLabel("Settings") }
+                    .buttonStyle(GlassChipStyle())
             }
             RoomSwitcher()
         }
@@ -78,40 +77,7 @@ struct RoomWorkspaceView: View {
 
     private var sizeLine: String {
         let room = model.state.room
-        return "\(feetLabel(widthM: room.widthM, depthM: room.depthM))  ·  \(String(format: "%.1f × %.1f m", room.widthM, room.depthM))"
-    }
-
-    private var status: some View {
-        HStack(spacing: 8) {
-            ConnectionIndicator(status: model.connection, offlineDemo: model.isOfflineDemo)
-            if model.isOfflineDemo { StatusBadge(text: "Demo fixtures", symbol: "shippingbox", tint: .aeroAmber) }
-        }
-        .fixedSize()
-    }
-
-    private var controls: some View {
-        HStack(spacing: 8) {
-            Menu {
-                Picker("Acting as", selection: Binding(get: { model.actingMemberID }, set: { model.setActingMember($0) })) {
-                    ForEach(model.actingCandidates, id: \.id) { candidate in
-                        Text(pickerLabel(candidate.id, name: candidate.name)).tag(candidate.id)
-                    }
-                }
-            } label: {
-                Label("Acting as: \(model.actingMemberName)", systemImage: "person.crop.circle")
-            }
-            .buttonStyle(GlassChipStyle(selected: true))
-            Button { nav.showShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
-                .buttonStyle(GlassChipStyle())
-            Button { nav.showRoomSetup = true } label: { Label("Room", systemImage: "ruler") }
-                .buttonStyle(AeroButtonStyle(tint: .aeroGrass, compact: true))
-            Button { nav.showAR = true } label: { Label("View in AR", systemImage: "arkit") }
-                .buttonStyle(AeroButtonStyle(compact: true))
-            Button { nav.showSettings = true } label: { Image(systemName: "gearshape.fill").accessibilityLabel("Settings") }
-                .buttonStyle(GlassChipStyle())
-        }
-        .lineLimit(1)
-        .fixedSize()
+        return feetLabel(widthM: room.widthM, depthM: room.depthM)
     }
 
     private var tabPicker: some View {
@@ -130,74 +96,18 @@ struct RoomWorkspaceView: View {
         switch nav.roomTab {
         case .design:
             RoomPanel().frame(height: min(620, height * 0.55))
-            designSidePanels
+            ItemsPanel()
         case .items:
-            itemsIntro
-            GroupSuggestionsPanel()
-            ProposalPanel().id("proposal")
-            ProductDetailPanel().id("product")
+            ItemsPanel()
         case .budget:
-            budgetIntro
+            BudgetPanel()
             ContributionsPanel().id("contributions")
             FinancePanel().id("finance")
         case .inspiration:
+            InspirationPanel()
             GroupSuggestionsPanel()
             ChatPanel().id("chat")
-            ActivityPanel().id("activity")
         }
-    }
-
-    private var designSidePanels: some View {
-        VStack(spacing: 16) {
-            FloorPlanPanel().id("floorplan")
-            Text("Need a piece that isn’t in the room yet? Browse the catalog or tell the agent in Inspiration.")
-                .font(.caption).foregroundStyle(.secondary)
-            HStack {
-                Button { nav.showCatalog = true } label: { Label("Browse catalog", systemImage: "square.grid.2x2") }
-                    .buttonStyle(AeroButtonStyle(compact: true))
-                Spacer()
-            }
-        }
-        .padding(.bottom, 24)
-    }
-
-    private var itemsIntro: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Your items").font(.title2.bold()).foregroundStyle(Color.aeroInk)
-            Text("The agent’s proposal is what the group is deciding on. Add something you already own so it doesn’t buy a duplicate.")
-                .font(.subheadline).foregroundStyle(.secondary)
-            HStack {
-                Button { nav.showCatalog = true } label: { Label("Browse catalog", systemImage: "square.grid.2x2") }
-                    .buttonStyle(AeroButtonStyle(compact: true))
-                Button { nav.showAddItem = true } label: { Label("Add your item", systemImage: "plus") }
-                    .buttonStyle(AeroButtonStyle(tint: .aeroGrass, compact: true))
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassPanel()
-    }
-
-    private var budgetIntro: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text("Room budget").font(.title2.bold()).foregroundStyle(Color.aeroInk)
-                Spacer()
-                if let budget = model.state.budgetCents, let spent = model.state.proposal?.knownTotalCents {
-                    Text("\(dollars(spent)) / \(dollars(budget))").font(.title3.monospacedDigit().bold())
-                }
-            }
-            Text("Approve the proposal, then the payer buys. Everyone else reimburses their share. Limits stay private.")
-                .font(.subheadline).foregroundStyle(.secondary)
-            Button { nav.showSendMoney = true } label: { Label("Send money", systemImage: "paperplane.fill") }
-                .buttonStyle(AeroButtonStyle(compact: true))
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassPanel()
-    }
-
-    private func pickerLabel(_ id: String, name: String) -> String {
-        guard let member = model.state.member(id) else { return "\(name) (view only here)" }
-        return member.isPayer ? "\(name) (payer)" : name
     }
 
     private func debugScroll(_ reader: ScrollViewProxy) async {

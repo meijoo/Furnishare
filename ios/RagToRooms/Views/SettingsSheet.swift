@@ -15,6 +15,28 @@ struct SettingsSheet: View {
         NavigationStack {
             Form {
                 Section {
+                    Picker("Acting as", selection: Binding(get: { model.actingMemberID }, set: { model.setActingMember($0) })) {
+                        ForEach(model.actingCandidates, id: \.id) { candidate in
+                            Text(candidate.name).tag(candidate.id)
+                        }
+                    }
+                    Button {
+                        dismiss()
+                        nav.showShare = true
+                    } label: {
+                        Label("Share this space", systemImage: "square.and.arrow.up")
+                    }
+                    HStack(spacing: 8) {
+                        ConnectionIndicator(status: model.connection, offlineDemo: model.isOfflineDemo)
+                        if case .offline(let reason) = model.connection {
+                            Text(reason).font(.subheadline).foregroundStyle(Color.figmaMuted)
+                        }
+                    }
+                } header: {
+                    Text("Household")
+                }
+
+                Section {
                     HStack {
                         TextField("Mac IP, e.g. 192.168.1.20", text: $draftURL)
                             .keyboardType(.numbersAndPunctuation)
@@ -42,12 +64,6 @@ struct SettingsSheet: View {
                         .buttonBorderShape(.capsule)
                         Button("Use default") { draftURL = AppModel.defaultBaseURL }
                             .buttonStyle(.borderless)
-                    }
-                    HStack(spacing: 8) {
-                        ConnectionIndicator(status: model.connection, offlineDemo: model.isOfflineDemo)
-                        if case .offline(let reason) = model.connection {
-                            Text(reason).font(.caption).foregroundStyle(.secondary)
-                        }
                     }
                     Button {
                         Task { await checkHealth() }
