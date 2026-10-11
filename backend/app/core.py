@@ -151,7 +151,7 @@ def create_proposal(hid: str, items: list[dict], shares: dict[str, int], explana
         summary = ', '.join(f"{i['title']} ({dollars(i['price_cents'])})" for i in items)
         for mid, amount in (shares.items() if notify else []):
             queue_message(c, hid, mid, (
-                f"RAG to Rooms - proposal v{version}: {summary}. Total {dollars(total)}. "
+                f"Furnishare - proposal v{version}: {summary}. Total {dollars(total)}. "
                 f"{explanation} Your share: {dollars(amount)}. Reply YES to approve v{version} or NO to object."),
                 dedupe_key=f'approve-request:{hid}:v{version}:{mid}')
         db.bump(c, hid)

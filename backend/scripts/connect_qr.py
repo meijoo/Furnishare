@@ -24,7 +24,7 @@ def main() -> None:
     qr = segno.make(link, error='m')
     png = Path(tempfile.gettempdir()) / 'ragtorooms-connect.png'
     qr.save(png, scale=12, border=3)
-    print(f'Backend: {backend}\nScan with the iPad Camera app, then tap "Open in RagToRooms".\n')
+    print(f'Backend: {backend}\nScan with the iPad Camera app, then tap "Open in Furnishare".\n')
     qr.terminal(compact=True)
     subprocess.run(['open', str(png)], check=False)
 

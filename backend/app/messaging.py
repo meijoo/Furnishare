@@ -11,7 +11,7 @@ from .money import dollars
 HID = 'demo'
 CATEGORY_WORDS = {'sofa': 'sofa', 'couch': 'sofa', 'loveseat': 'sofa', 'table': 'coffee_table', 'tv': 'tv',
                   'television': 'tv', 'rug': 'rug', 'carpet': 'rug'}
-HELP = ('RAG to Rooms commands: YES / NO <reason> on a proposal, "my limit is $X", PAY (payer), SEND (reimburse), STATUS. '
+HELP = ('Furnishare commands: YES / NO <reason> on a proposal, "my limit is $X", PAY (payer), SEND (reimburse), STATUS. '
         'Or describe what you want, e.g. "furnish our living room for $1500 with light wood and blue".')
 
 LIMIT_RE = re.compile(r'(?:limit|max(?:imum)?|cap|only (?:afford|pay|do|spend)|can (?:afford|pay|do|spend)|up to|budget)'

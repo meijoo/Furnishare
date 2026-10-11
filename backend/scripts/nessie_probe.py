@@ -44,9 +44,9 @@ merchant = oid(call('POST', '/merchants', {'name': 'Probe Furniture', 'category'
                                            'geocode': {'lat': 38.88, 'lng': -77.1}}))
 today = date.today().isoformat()
 purchase = call('POST', f'/accounts/{pa}/purchases', {'merchant_id': merchant, 'medium': 'balance', 'purchase_date': today,
-                                                      'amount': 450, 'status': 'completed', 'description': 'RAG to Rooms probe purchase (USD cents)'})
+                                                      'amount': 450, 'status': 'completed', 'description': 'Furnishare probe purchase (USD cents)'})
 transfer = call('POST', f'/accounts/{da}/transfers', {'amount': 175, 'transaction_date': today, 'status': 'completed',
-                                                      'description': f'RAG to Rooms probe transfer to account {pa} (USD cents)'})
+                                                      'description': f'Furnishare probe transfer to account {pa} (USD cents)'})
 for i in range(2):
     time.sleep(5 if i else 1)
     print(f'\n--- observation {i + 1} ---')

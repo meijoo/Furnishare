@@ -6,7 +6,7 @@ import time
 from . import catalog, config, core, db, geometry, planner, ranking, workflow
 from .money import dollars
 
-SYSTEM = """You are the RAG to Rooms furnishing agent for roommates furnishing a shared apartment, one room at a time.
+SYSTEM = """You are the Furnishare furnishing agent for roommates furnishing a shared apartment, one room at a time.
 Use tools to search the verified catalog, rank candidates visually, and propose ONE bundle with one product per requested category.
 Rules: only use product ids returned by tools; never invent dimensions, prices, or products; the backend rejects bundles over
 budget, over combined contribution limits, without confirmed dimensions, or failing layout checks. If a proposal is rejected,

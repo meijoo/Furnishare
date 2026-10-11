@@ -33,7 +33,7 @@ def setup_accounts(hid: str) -> dict:
         existing.setdefault('members', {})[m['id']] = {'customer_id': customer, 'account_id': account}
         db.kv_set(key, existing)
     if 'merchant_id' not in existing:
-        existing['merchant_id'] = client.create_merchant('RAG to Rooms Furniture (simulated)')
+        existing['merchant_id'] = client.create_merchant('Furnishare Furniture (simulated)')
         db.kv_set(key, existing)
     return existing
 
@@ -151,7 +151,7 @@ def _execute(op: dict) -> None:
     if balance is not None and balance < op['amount_cents']:
         _set(op['op_key'], state='failed', error=f'Insufficient simulated balance ({dollars(balance)})')
         return
-    description = f"RAG to Rooms [{op['op_key']}]"
+    description = f"Furnishare [{op['op_key']}]"
     _set(op['op_key'], state='submitting')
     try:
         if op['kind'] == 'purchase':
@@ -182,7 +182,9 @@ def reconcile(hid: str | None = None) -> int:
         if not src:
             continue
         try:
-            found = client.find(op['kind'], src, op['external_id'], f"RAG to Rooms [{op['op_key']}]")
+            found = client.find(op['kind'], src, op['external_id'], f"Furnishare [{op['op_key']}]")
+            if found is None and not op['external_id']:
+                found = client.find(op['kind'], src, None, f"RAG to Rooms [{op['op_key']}]")
         except (nessie.Uncertain, nessie.Rejected) as e:
             log.warning('reconcile %s failed: %s', op['op_key'], e)
             continue

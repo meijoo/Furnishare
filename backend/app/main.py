@@ -36,7 +36,7 @@ async def lifespan(_app):
     worker.join(timeout=5)
 
 
-app = FastAPI(title='RAG to Rooms', lifespan=lifespan)
+app = FastAPI(title='Furnishare', lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])
 app.mount('/assets', StaticFiles(directory=config.ASSETS_DIR), name='assets')
 app.mount('/uploads', StaticFiles(directory=config.UPLOADS_DIR), name='uploads')
@@ -169,7 +169,7 @@ class RealizeBody(BaseModel):
 
 @app.get('/')
 def root():
-    return {'service': 'RAG to Rooms backend', 'health': '/health', 'apartment': '/apartments/demo',
+    return {'service': 'Furnishare backend', 'health': '/health', 'apartment': '/apartments/demo',
             'living_room': '/households/demo/state', 'docs': '/docs'}
 
 
