@@ -218,7 +218,7 @@ Plan coordinates are meters, top-down: `x_m` grows to the right, `z_m` grows tow
 ```json
 {
   "id": "demo", "name": "3 bed / 3 bath apartment", "width_m": 10.5, "depth_m": 9.5,
-  "members": [{"id": "emily", "name": "Emily"}, {"id": "maya", "name": "Maya"}, {"id": "alex", "name": "Alex"}],
+  "members": [{"id": "emily", "name": "Emily"}, {"id": "maya", "name": "Michelle"}, {"id": "alex", "name": "Annabel"}],
   "rooms": [
     {"id": "living", "name": "Living room", "kind": "living", "shared": true, "owner_id": null,
      "household_id": "demo", "x_m": 0.0, "z_m": 5.5, "width_m": 4.5, "depth_m": 4.0,

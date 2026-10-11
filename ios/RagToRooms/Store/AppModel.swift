@@ -1460,6 +1460,18 @@ final class AppModel {
         if connection == .connecting { connection = .polling }
         lastUpdated = Date()
         if changed { Task { await refreshApartment() } }
+        Task { await refreshMissingProducts(in: newState) }
+    }
+
+    /// Scene pieces from live search are not in the verified catalog until `/products` includes them.
+    private var catalogRefreshIDs = Set<String>()
+
+    private func refreshMissingProducts(in state: HouseholdState) async {
+        let missing = Set((state.proposal?.items.map(\.productID) ?? []) + state.scene.objects.map(\.productID))
+            .filter { product($0) == nil && !catalogRefreshIDs.contains($0) }
+        guard !missing.isEmpty, let client, source == .live else { return }
+        catalogRefreshIDs.formUnion(missing)
+        if let list = try? await client.products() { products = list }
     }
 
     private func markUnreachable(_ error: Error) {

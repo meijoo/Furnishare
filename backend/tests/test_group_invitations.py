@@ -72,7 +72,7 @@ def test_dm_preferences_from_roommates_accumulate(client, monkeypatch):
         client.post('/messages/inbound', json={'event_id': f'dm-pref-{i}', 'sender_handle': phone,
                     'conversation_id': f'any;-;{phone}', 'text': f'I like blue sofas https://example.com/sofa{i}'})
     records = invitations.suggestions('demo')
-    assert {r['member_name'] for r in records} == {'Emily', 'Maya'}
+    assert {r['member_name'] for r in records} == {'Emily', 'Michelle'}
     assert len(records) == 2
     assert all(r['links'] and r['products'] for r in records)
     assert all(db.one('SELECT conversation_id FROM outbound_jobs WHERE dedupe_key=?', f'reply:dm-pref-{i}')['conversation_id'] is None for i in range(2))
@@ -90,7 +90,7 @@ def test_group_preferences_saved_and_finances_private(client, monkeypatch):
     records = client.get('/households/demo/suggestions').json()['suggestions']
     assert len(records) == 1
     assert records[0]['links'] == ['https://example.com/sofa']
-    assert records[0]['member_name'] == 'Maya'
+    assert records[0]['member_name'] == 'Michelle'
     assert records[0]['products']
     assert client.get('/households/demo/state').json()['state_version'] > before
     prior_limit = db.one("SELECT limit_cents FROM members WHERE household_id='demo' AND id='maya'")['limit_cents']

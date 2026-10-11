@@ -3,8 +3,8 @@
   "state_version": 1,
   "members": [
     {"id": "emily", "name": "Emily", "is_payer": true, "has_limit": true, "connected": false, "contribution_budget_cents": 50000},
-    {"id": "maya", "name": "Maya", "is_payer": false, "has_limit": true, "connected": false, "contribution_budget_cents": 45000},
-    {"id": "alex", "name": "Alex", "is_payer": false, "has_limit": true, "connected": false, "contribution_budget_cents": 55000}
+    {"id": "maya", "name": "Michelle", "is_payer": false, "has_limit": true, "connected": false, "contribution_budget_cents": 45000},
+    {"id": "alex", "name": "Annabel", "is_payer": false, "has_limit": true, "connected": false, "contribution_budget_cents": 55000}
   ],
   "room": {
     "width_m": 4.5, "depth_m": 4.0, "height_m": 2.5,
@@ -32,7 +32,7 @@
     "shares": {"emily": 45000, "maya": 45000, "alex": 20000},
     "approvals": {"emily": true, "maya": false, "alex": false},
     "objections": {},
-    "explanation": "Offline demo proposal. Alex's limit is $200, so Emily and Maya split the remaining $900 evenly. Shipping and tax are unknown and are not included in the total.",
+    "explanation": "Offline demo proposal. Annabel's limit is $200, so Emily and Michelle split the remaining $900 evenly. Shipping and tax are unknown and are not included in the total.",
     "created_at": "2026-10-10T05:00:00Z"
   },
   "scene": {

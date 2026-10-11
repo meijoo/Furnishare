@@ -143,7 +143,7 @@ struct ItemsPanel: View {
                     ProductImage(urls: shown.map { model.imageURLs(for: $0) } ?? [], category: item.category)
                         .frame(width: 64, height: 64)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(shown?.title ?? item.title ?? item.productID)
+                        Text(shown?.title ?? item.title ?? item.category.categoryLabel)
                             .font(.headline).lineLimit(2)
                         HStack(spacing: 6) {
                             Text("\(item.category.categoryLabel) · Proposed").font(.caption).foregroundStyle(.secondary)

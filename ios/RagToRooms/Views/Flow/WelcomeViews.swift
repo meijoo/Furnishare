@@ -27,15 +27,15 @@ struct WelcomeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(32)
         .confirmationDialog("Choose who uses this iPad", isPresented: $choosingDemoMember, titleVisibility: .visible) {
-            ForEach(["emily", "maya", "alex"], id: \.self) { member in
-                Button(member.capitalized) {
+            ForEach([("emily", "Emily"), ("maya", "Michelle"), ("alex", "Annabel")], id: \.0) { member, name in
+                Button(name) {
                     Task {
                         await model.signOut()
                         model.setActingMember(member)
-                        nav.profileName = member.capitalized; nav.profileEmail = ""
+                        nav.profileName = name; nav.profileEmail = ""
                         nav.groupName = "Demo apartment"; nav.groupLocation = "Chapel Hill, NC"
                         nav.selectedRoomIDs = []
-                        nav.skipToDemo(apartment: model.apartment, actingName: member.capitalized)
+                        nav.skipToDemo(apartment: model.apartment, actingName: name)
                         if let living = model.apartment?.furnishableRooms.first(where: { $0.householdID == AppModel.defaultHouseholdID }) {
                             nav.enterRoom(living, model: model)
                         } else {

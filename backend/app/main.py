@@ -366,7 +366,8 @@ def health():
 def products(category: str | None = None):
     items = catalog.products()
     ids = {p['id'] for p in items}
-    items += [p for p in catalog.remembered() if p.get('source_type') == 'demo' and p['id'] not in ids]
+    # Live search hits placed in a room are remembered, but not in the verified catalog.
+    items += [p for p in catalog.remembered() if p['id'] not in ids]
     return [p for p in items if not category or p['category'] == category]
 
 

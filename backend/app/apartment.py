@@ -38,9 +38,9 @@ BEDROOM_STYLE = BEDROOM_STYLES['emily']
 ROOMS = [
     {'id': 'bed-emily', 'name': "Emily's bedroom", 'kind': 'bedroom', 'owner_id': 'emily', 'household_id': 'demo-bed-emily',
      'x_m': 0.0, 'z_m': 0.0, 'width_m': 3.5, 'depth_m': 3.5},
-    {'id': 'bed-maya', 'name': "Maya's bedroom", 'kind': 'bedroom', 'owner_id': 'maya', 'household_id': 'demo-bed-maya',
+    {'id': 'bed-maya', 'name': "Michelle's bedroom", 'kind': 'bedroom', 'owner_id': 'maya', 'household_id': 'demo-bed-maya',
      'x_m': 3.5, 'z_m': 0.0, 'width_m': 3.5, 'depth_m': 3.5},
-    {'id': 'bed-alex', 'name': "Alex's bedroom", 'kind': 'bedroom', 'owner_id': 'alex', 'household_id': 'demo-bed-alex',
+    {'id': 'bed-alex', 'name': "Annabel's bedroom", 'kind': 'bedroom', 'owner_id': 'alex', 'household_id': 'demo-bed-alex',
      'x_m': 7.0, 'z_m': 0.0, 'width_m': 3.5, 'depth_m': 3.5},
     {'id': 'bath-1', 'name': 'Bathroom', 'kind': 'bathroom', 'x_m': 0.0, 'z_m': 3.5, 'width_m': 2.5, 'depth_m': 2.0},
     {'id': 'bath-2', 'name': 'Bathroom', 'kind': 'bathroom', 'x_m': 2.5, 'z_m': 3.5, 'width_m': 2.5, 'depth_m': 2.0},
