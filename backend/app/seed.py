@@ -33,7 +33,7 @@ def demo_sofa() -> dict | None:
     return near[0] if near else None
 
 
-def reset(hid: str = HID, clear_handles: bool = False, room: dict | None = None,
+def reset(hid: str = HID, clear_handles: bool = True, room: dict | None = None,
           furnished: bool = True) -> dict:
     keep = {} if clear_handles else {
         m['id']: m['handle'] for m in db.all_('SELECT id, handle FROM members WHERE household_id = ?', hid)}
@@ -68,6 +68,6 @@ def reset(hid: str = HID, clear_handles: bool = False, room: dict | None = None,
     shares = solve_split(sofa['price_cents'], [m for m, _ in MEMBERS], SEED_LIMITS)
     p = core.create_proposal(hid, [sofa], shares,
                              f"The {sofa['title']} anchors the room; splitting it evenly.", scene=scene,
-                             activity='Sofa proposal shared with the household')
+                             activity='Sofa proposal shared with the household', notify=False)
     return {'ok': True, 'proposal_version': p['version'], 'sofa': sofa['id'], 'shares': shares,
             'scene': [o['product_id'] for o in scene]}

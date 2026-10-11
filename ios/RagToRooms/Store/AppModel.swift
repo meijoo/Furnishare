@@ -40,12 +40,18 @@ private struct LocalSceneExtras: Codable {
     var products: [Product] = []
     var applied: [String: String] = [:]
     var groups: [CandidateGroup] = []
+    var hiddenItems: Set<String> = []
+    var removedItems: Set<String> = []
+    var dismissedOptions: [String: Set<String>] = [:]
 
-    enum CodingKeys: String, CodingKey { case objects, products, applied, groups }
+    enum CodingKeys: String, CodingKey { case objects, products, applied, groups, hiddenItems, removedItems, dismissedOptions }
 
     init(objects: [SceneObject] = [], products: [Product] = [], applied: [String: String] = [:],
-         groups: [CandidateGroup] = []) {
+         groups: [CandidateGroup] = [], hiddenItems: Set<String> = [], removedItems: Set<String> = [],
+         dismissedOptions: [String: Set<String>] = [:]) {
         self.objects = objects; self.products = products; self.applied = applied; self.groups = groups
+        self.hiddenItems = hiddenItems; self.removedItems = removedItems
+        self.dismissedOptions = dismissedOptions
     }
 
     init(from decoder: Decoder) throws {
@@ -54,6 +60,9 @@ private struct LocalSceneExtras: Codable {
         products = try c.decodeIfPresent([Product].self, forKey: .products) ?? []
         applied = try c.decodeIfPresent([String: String].self, forKey: .applied) ?? [:]
         groups = try c.decodeIfPresent([CandidateGroup].self, forKey: .groups) ?? []
+        hiddenItems = try c.decodeIfPresent(Set<String>.self, forKey: .hiddenItems) ?? []
+        removedItems = try c.decodeIfPresent(Set<String>.self, forKey: .removedItems) ?? []
+        dismissedOptions = try c.decodeIfPresent([String: Set<String>].self, forKey: .dismissedOptions) ?? [:]
     }
 }
 
@@ -105,8 +114,6 @@ final class AppModel {
     var detailProductID: String?
     /// Local, unsynced moves keyed by object_id.
     var localPoses: [String: LocalPose] = [:]
-    /// Local "Preview" swaps: object_id -> alternative product id. Never sent to the server.
-    var previews: [String: String] = [:]
     var errorMessage: String?
     var chat: [ChatMessage] = []
     var busy: Set<String> = []
@@ -117,13 +124,19 @@ final class AppModel {
     var inspirationQuery = ""
     var inspirationResults: [Product] = []
     var candidateGroups: [CandidateGroup] = []
+    private(set) var hiddenDesignItems: Set<String> = []
+    private(set) var removedDesignItems: Set<String> = []
+    private var dismissedDesignOptions: [String: Set<String>] = [:]
     var inspirationCategory: String?
     var pendingInspirationQuery: String?
     var inspirationPicks: [String] { candidateGroups.flatMap(\.productIDs) }
+    private var enabledInspirationPicks: [String] {
+        candidateGroups.filter { isDesignItemEnabled($0.objectID) }.flatMap(\.productIDs)
+    }
     private var inspirationSearchID = 0
     var extraObjects: [SceneObject] = []
     var extraProducts: [Product] = []
-    /// Preview the user committed as the item they want in that slot.
+    /// The product the user chose for each item slot.
     var appliedPreviews: [String: String] = [:]
     var extraPeople: [GroupPerson] = []
     var memberPhotos: [String: String] = [:]
@@ -215,10 +228,15 @@ final class AppModel {
         return "\(actingMemberName) isn't a member of \(currentRoomName.lowercased())"
     }
 
+    var roomBudgetCents: Int {
+        guard let budget = state.budgetCents, budget > 0 else { return 100_000 }
+        return budget
+    }
+
     var chatSuggestion: String {
         isPrivateScope
-            ? "Furnish my bedroom for $1,000: a bed, nightstand, dresser and desk. Keep the door clear."
-            : "Furnish our \(currentRoomName.lowercased()) for $1,500. Light, cozy, and keep the door clear."
+            ? "Furnish my bedroom for \(dollars(roomBudgetCents)): a bed, nightstand, dresser and desk. Keep the door clear."
+            : "Furnish our \(currentRoomName.lowercased()) for \(dollars(roomBudgetCents)). Light, cozy, and keep the door clear."
     }
 
     /// Everyone you can act as: all roommates, even inside a bedroom whose scope only lists its owner.
@@ -286,7 +304,6 @@ final class AppModel {
         selectedObjectID = nil
         detailProductID = nil
         localPoses = [:]
-        previews = [:]
         errorMessage = nil
         scopeNotice = nil
         stateIsPlaceholder = false
@@ -412,9 +429,9 @@ final class AppModel {
     }
 
     var displayedObjects: [SceneObject] {
-        (state.scene.objects + extraObjects).map { original in
+        (state.scene.objects + extraObjects).filter { isDesignItemEnabled(designItemID(for: $0)) }.map { original in
             var object = original
-            let swapID = previews[object.objectID] ?? appliedPreviews[object.objectID]
+            let swapID = appliedPreviews[object.objectID]
             if let productID = swapID, let alt = product(productID), let dims = alt.placeableDimensions {
                 object.productID = alt.id
                 object.dimensionsM = dims
@@ -432,11 +449,53 @@ final class AppModel {
         }
     }
 
+    func designItemID(for item: ProposalItem) -> String {
+        "proposal-\(state.proposal?.version ?? 0)-\(item.productID)"
+    }
+
+    private func designItemID(for object: SceneObject) -> String {
+        if state.scene.objects.contains(where: { $0.objectID == object.objectID }),
+           let item = state.proposal?.items.first(where: { $0.productID == object.productID }) {
+            return designItemID(for: item)
+        }
+        return object.objectID
+    }
+
+    var designProposalItems: [ProposalItem] {
+        (state.proposal?.items ?? []).filter { !removedDesignItems.contains(designItemID(for: $0)) }
+    }
+
+    func isDesignItemEnabled(_ id: String) -> Bool {
+        !hiddenDesignItems.contains(id) && !removedDesignItems.contains(id)
+    }
+
+    func setDesignItemEnabled(_ id: String, enabled: Bool) {
+        if enabled { hiddenDesignItems.remove(id) } else { hiddenDesignItems.insert(id) }
+        select(nil)
+        detailProductID = nil
+        persistCurrentExtras()
+    }
+
+    func removeDesignProposalItem(_ item: ProposalItem) {
+        removedDesignItems.insert(designItemID(for: item))
+        select(nil)
+        detailProductID = nil
+        persistCurrentExtras()
+    }
+
+    func removeCandidateGroup(_ group: CandidateGroup) {
+        for productID in group.productIDs { removeFromGroup(group.id, productID: productID) }
+        hiddenDesignItems.remove(group.objectID)
+        select(nil)
+        detailProductID = nil
+        persistCurrentExtras()
+    }
+
     var layoutReport: LayoutReport {
         LayoutValidation.validate(objects: displayedObjects, room: state.room, name: displayName)
     }
 
-    var hasLocalEdits: Bool { !localPoses.isEmpty || !previews.isEmpty }
+    var hasLocalEdits: Bool { !localPoses.isEmpty }
 
     func product(_ id: String?) -> Product? {
         products.first { $0.id == id } ?? extraProducts.first { $0.id == id }
@@ -450,7 +509,7 @@ final class AppModel {
 
     var selectedObject: SceneObject? { displayedObjects.first { $0.objectID == selectedObjectID } }
 
-    /// Product shown in the detail panel: the selected object's (possibly previewed) product,
+    /// Product shown in the detail panel: the selected object's chosen product,
     /// otherwise whatever was tapped in the proposal list.
     var detailProduct: Product? {
         if let object = selectedObject { return product(object.productID) }
@@ -472,6 +531,49 @@ final class AppModel {
 
     func alternatives(for product: Product) -> [Product] {
         products.filter { $0.category == product.category && $0.id != product.id }
+    }
+
+    private func optionKey(_ objectID: String) -> String {
+        let original = (state.scene.objects + extraObjects).first { $0.objectID == objectID }
+        return original.map { designItemID(for: $0) } ?? objectID
+    }
+
+    func designOptions(for product: Product, objectID: String) -> [Product] {
+        let originalID = state.scene.objects.first { $0.objectID == objectID }?.productID
+        let pool = [originalID.flatMap { self.product($0) }].compactMap { $0 } + products + extraProducts + [product]
+        let dismissed = dismissedDesignOptions[optionKey(objectID)] ?? []
+        var seen = Set<String>()
+        return pool.filter {
+            $0.category == product.category && $0.placeableDimensions != nil &&
+            !dismissed.contains($0.id) && seen.insert($0.id).inserted
+        }
+    }
+
+    func chooseDesignOption(_ product: Product, objectID: String) {
+        guard product.placeableDimensions != nil else { return }
+        remember(product)
+        appliedPreviews[objectID] = product.id
+        if displayedObjects.contains(where: { $0.objectID == objectID }) {
+            select(objectID)
+        } else {
+            select(nil)
+            detailProductID = product.id
+        }
+        persistCurrentExtras()
+        realizeInBackground(product)
+    }
+
+    func removeDesignOption(_ product: Product, objectID: String, current: Product) {
+        dismissedDesignOptions[optionKey(objectID), default: []].insert(product.id)
+        if product.id == current.id {
+            if let next = designOptions(for: current, objectID: objectID).first {
+                chooseDesignOption(next, objectID: objectID)
+            } else if let original = state.scene.objects.first(where: { $0.objectID == objectID }),
+                      let item = state.proposal?.items.first(where: { $0.productID == original.productID }) {
+                removeDesignProposalItem(item)
+            }
+        }
+        persistCurrentExtras()
     }
 
     var currentOwnedItems: [OwnedItem] {
@@ -609,15 +711,7 @@ final class AppModel {
     }
 
     func displayedProduct(for object: SceneObject) -> Product? {
-        product(previews[object.objectID] ?? appliedPreviews[object.objectID] ?? object.productID)
-    }
-
-    func applyPreview(objectID: String) {
-        guard let productID = previews[objectID] else { return }
-        appliedPreviews[objectID] = productID
-        previews[objectID] = nil
-        persistCurrentExtras()
-        if let product = product(productID) { realizeInBackground(product) }
+        product(appliedPreviews[object.objectID] ?? object.productID)
     }
 
     private func realizeInBackground(_ product: Product, image: UIImage? = nil) {
@@ -692,10 +786,14 @@ final class AppModel {
         let searchID = inspirationSearchID
         guard !query.isEmpty else {
             inspirationResults = []
+            inspirationCategory = nil
+            busy.remove("inspiration-search")
             return
         }
         inspirationCategory = Self.category(from: query)
+        let budget = roomBudgetCents
         let local = Self.rank(products: products + extraProducts, query: query, category: inspirationCategory)
+            .filter { $0.priceCents > 0 && $0.priceCents <= budget }
         inspirationResults = local
         if inspirationCategory == nil {
             inspirationCategory = local.first.flatMap { Self.category(from: $0.title) } ?? local.first?.category
@@ -705,11 +803,12 @@ final class AppModel {
         Task {
             defer { if searchID == inspirationSearchID { busy.remove("inspiration-search") } }
             do {
-                let remote = try await client.searchProducts(query)
+                let remote = try await client.searchProducts(query, maxPriceCents: budget)
                 guard searchID == inspirationSearchID else { return }
                 var seen = Set<String>()
                 var merged: [Product] = []
                 for product in remote + local {
+                    guard product.priceCents > 0, product.priceCents <= budget else { continue }
                     let title = product.title.lowercased()
                     if seen.contains(product.id) || seen.contains(title) { continue }
                     seen.insert(product.id)
@@ -772,7 +871,6 @@ final class AppModel {
         if candidateGroups[index].productIDs.isEmpty {
             extraObjects.removeAll { $0.objectID == candidateGroups[index].objectID }
             appliedPreviews[candidateGroups[index].objectID] = nil
-            previews[candidateGroups[index].objectID] = nil
             candidateGroups.remove(at: index)
         } else if let next = candidateGroups[index].showingProductID {
             showInGroup(groupID, productID: next)
@@ -789,7 +887,6 @@ final class AppModel {
         let objectID = candidateGroups[index].objectID
         if extraObjects.contains(where: { $0.objectID == objectID }) {
             appliedPreviews[objectID] = productID
-            previews[objectID] = nil
             if let dims = product.placeableDimensions, let i = extraObjects.firstIndex(where: { $0.objectID == objectID }) {
                 extraObjects[i].productID = productID
                 extraObjects[i].dimensionsM = dims
@@ -940,7 +1037,8 @@ final class AppModel {
 
     private func persistCurrentExtras() {
         extrasByHousehold[currentHouseholdID] = LocalSceneExtras(
-            objects: extraObjects, products: extraProducts, applied: appliedPreviews, groups: candidateGroups)
+            objects: extraObjects, products: extraProducts, applied: appliedPreviews, groups: candidateGroups,
+            hiddenItems: hiddenDesignItems, removedItems: removedDesignItems, dismissedOptions: dismissedDesignOptions)
         if let data = try? JSONEncoder().encode(extrasByHousehold) {
             UserDefaults.standard.set(data, forKey: Self.extrasKey)
         }
@@ -952,6 +1050,9 @@ final class AppModel {
         extraProducts = extras.products
         appliedPreviews = extras.applied
         candidateGroups = extras.groups
+        hiddenDesignItems = extras.hiddenItems
+        removedDesignItems = extras.removedItems
+        dismissedDesignOptions = extras.dismissedOptions
     }
 
     private static func loadExtras() -> [String: LocalSceneExtras] {
@@ -1168,7 +1269,6 @@ final class AppModel {
         let ids = Set(newState.scene.objects.map(\.objectID))
         extraObjects.removeAll { ids.contains($0.objectID) }
         let kept = ids.union(extraObjects.map(\.objectID))
-        previews = previews.filter { kept.contains($0.key) }
         appliedPreviews = appliedPreviews.filter { kept.contains($0.key) }
         if let selected = selectedObjectID, !kept.contains(selected) { selectedObjectID = nil }
         if productsFromFixture { products = []; productsFromFixture = false } // fixture products don't exist on the server
@@ -1225,7 +1325,6 @@ final class AppModel {
 
     func resetLocalEdits() {
         localPoses = [:]
-        previews = [:]
     }
 
     /// Called at the end of a gesture. Persists the move only if the user enabled it in Settings.
@@ -1242,8 +1341,6 @@ final class AppModel {
         }
     }
 
-    func setPreview(objectID: String, productID: String) { previews[objectID] = productID }
-    func clearPreview(objectID: String) { previews[objectID] = nil }
 
     // MARK: Server actions
 
@@ -1365,7 +1462,7 @@ final class AppModel {
         busy.insert(resolved == "design" ? "design" : "chat")
         defer { busy.remove(resolved == "design" ? "design" : "chat") }
         do {
-            let reply = try await client.chat(memberID: member, text: trimmed, pickIds: inspirationPicks,
+            let reply = try await client.chat(memberID: member, text: trimmed, pickIds: enabledInspirationPicks,
                                              mode: resolved, skipCategories: skip)
             chat.append(ChatMessage(author: "Agent", text: reply, fromMe: false))
             try? await refresh(client)

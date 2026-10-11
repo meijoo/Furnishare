@@ -81,10 +81,21 @@ struct InspirationPanel: View {
         VStack(alignment: .leading, spacing: 14) {
             PanelHeader(title: "Look up a piece", symbol: "magnifyingglass",
                         trailing: model.inspirationCategory?.categoryLabel)
-            Text("Type a sofa, bed, or lamp to find one item. Search does not use your photos.")
+            Text("Find a sofa, bed, or lamp within your \(dollars(model.roomBudgetCents)) room budget. Search does not use your photos.")
                 .font(.subheadline)
                 .foregroundStyle(Color.figmaMuted)
             searchBar
+            if !draft.isEmpty || !model.inspirationResults.isEmpty {
+                HStack {
+                    Spacer()
+                    Button("Clear search") {
+                        draft = ""
+                        model.pendingInspirationQuery = nil
+                        model.searchInspiration("")
+                    }
+                    .buttonStyle(GlassChipStyle())
+                }
+            }
             results
         }
         .glassPanel()
@@ -160,7 +171,7 @@ struct InspirationPanel: View {
             if model.busy.contains("inspiration-search") {
                 ProgressView().frame(maxWidth: .infinity).padding(.vertical, 24)
             } else if !model.inspirationQuery.isEmpty {
-                Text("No matches").foregroundStyle(Color.figmaMuted)
+                Text("No matches within your room budget").foregroundStyle(Color.figmaMuted)
             } else {
                 Text("Search by name, then select pieces you want preferred in the room plan.")
                     .font(.subheadline)

@@ -99,7 +99,7 @@ def select_bundle(hid: str, categories: list[str], budget_cents: int, style_text
 
 
 def propose(hid: str, products: list[dict], explanation: str, activity: str | None = None,
-            replace_scene: bool = True) -> dict:
+            replace_scene: bool = True, notify: bool = True) -> dict:
     products = [catalog._rememberable(p) for p in products]
     h = core.household(hid)
     if len({p['category'] for p in products}) != len(products):
@@ -119,7 +119,7 @@ def propose(hid: str, products: list[dict], explanation: str, activity: str | No
         validation = geometry.validate_scene(h['room'], objs)
     if not validation['ok']:
         raise core.Conflict('Layout check failed: ' + '; '.join(i['message'] for i in validation['issues']))
-    return core.create_proposal(hid, products, shares, explanation, scene=objs, activity=activity)
+    return core.create_proposal(hid, products, shares, explanation, scene=objs, activity=activity, notify=notify)
 
 
 def recheck_prices(hid: str) -> dict | None:

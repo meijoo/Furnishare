@@ -128,7 +128,7 @@ def reset_bedroom(room: dict, furnished: bool = True) -> dict:
         return {'ok': False, 'household_id': hid, 'notes': pick.get('notes') or ['No bedroom products fit']}
     titles = ', '.join(p['title'] for p in pick['products'])
     p = planner.propose(hid, pick['products'], f"A starter bedroom for {name}: {titles}. {name} pays the whole amount.",
-                        activity='Bedroom plan proposed')
+                        activity='Bedroom plan proposed', notify=False)
     return {'ok': True, 'household_id': hid, 'proposal_version': p['version'], 'total_cents': p['known_total_cents']}
 
 
@@ -154,7 +154,7 @@ def _living_seed_room() -> dict:
     return {**seed.ROOM, 'width_m': size['width_m'], 'depth_m': size['depth_m']}
 
 
-def reset(clear_handles: bool = False, furnished: bool = True) -> dict:
+def reset(clear_handles: bool = True, furnished: bool = True) -> dict:
     out = {'living': seed.reset(seed.HID, clear_handles=clear_handles, room=_living_seed_room(),
                                 furnished=furnished)}
     for room in _owned_bedrooms():

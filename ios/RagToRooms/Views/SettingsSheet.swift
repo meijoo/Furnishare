@@ -118,7 +118,7 @@ struct SettingsSheet: View {
                 } footer: {
                     Text(model.isOfflineDemo
                          ? "Offline demo: reset reloads the bundled fixtures. Replay intro walks through signup and room selection again."
-                         : "Reset calls POST /demo/reset and reseeds the household for everyone. Replay intro only restarts the on-device walkthrough.")
+                         : "Reset clears saved demo contacts and queued messages, reloads seed contacts, and restores the demo without sending texts. Replay intro restarts the walkthrough.")
                 }
 
                 Section("About") {
@@ -138,7 +138,7 @@ struct SettingsSheet: View {
             .confirmationDialog("Reset the demo household?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Reset demo", role: .destructive) { Task { await model.resetDemo() } }
             } message: {
-                Text("Proposals, approvals and simulated payments go back to the starting point.")
+                Text("Proposals, approvals and simulated payments go back to the starting point. Saved demo contacts and queued messages are cleared; seed contacts are reloaded without sending texts.")
             }
         }
         .onAppear { draftURL = baseURL }

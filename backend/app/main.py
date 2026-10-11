@@ -8,7 +8,7 @@ import httpx
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
@@ -367,11 +367,11 @@ def products(category: str | None = None):
 
 
 @app.get('/products/search')
-def search_products(q: str, limit: int = 20):
+def search_products(q: str, limit: int = 20, max_price_cents: int | None = Query(default=None, ge=0)):
     q = (q or '').strip()
     if not q:
         raise HTTPException(422, 'q is required')
-    return catalog.search(q, limit=max(1, min(limit, 30)))
+    return catalog.search(q, limit=max(1, min(limit, 30)), max_price_cents=max_price_cents)
 
 
 @app.post('/products/realize')
@@ -599,7 +599,7 @@ def scene_preview(hid: str):
 
 
 @app.post('/demo/reset')
-def demo_reset(clear_handles: bool = False):
+def demo_reset(clear_handles: bool = True):
     return apartment.reset(clear_handles=clear_handles)
 
 

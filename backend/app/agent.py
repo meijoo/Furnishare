@@ -47,7 +47,7 @@ def thinking_off(model: str | None = None):
 
 def parse_request(text: str, allowed: list[str] | None = None) -> dict:
     """Budget and categories from free text, limited to the categories this room scope furnishes."""
-    budget = re.search(r'\$\s*(\d[\d,]*)', text)
+    budget = re.search(r'\$\s*(\d[\d,]*)(?:\.(\d{1,2})(?!\d))?', text)
     words = {'sofa': r'sofa|couch|loveseat', 'coffee_table': r'coffee table|table', 'tv': r'tv|television', 'rug': r'rug|carpet',
              'bed': r'bed|bed frame|mattress', 'nightstand': r'nightstand|night stand|bedside table',
              'dresser': r'dresser|chest of drawers|drawers', 'desk': r'desk|workspace',
@@ -58,7 +58,9 @@ def parse_request(text: str, allowed: list[str] | None = None) -> dict:
         found.remove('coffee_table')
     extras = {'chair', 'lamp'}
     cats = [c for c in found if c in allowed or c in extras] or allowed
-    return {'budget_cents': int(budget.group(1).replace(',', '')) * 100 if budget else None, 'categories': cats,
+    budget_cents = (int(budget.group(1).replace(',', '')) * 100
+                    + int((budget.group(2) or '').ljust(2, '0'))) if budget else None
+    return {'budget_cents': budget_cents, 'categories': cats,
             'style_text': text}
 
 
@@ -130,7 +132,8 @@ def _design(hid: str, text: str, pick_ids: list[str] | None, skip: list[str]) ->
     cats = [c for c in req['categories'] if c not in skip] or [c for c in room_categories(h) if c not in skip]
     with db.tx() as c:
         c.execute('UPDATE households SET budget_cents = COALESCE(?, budget_cents), needs_json = ?, style_text = ? WHERE id = ?',
-                  (req['budget_cents'], json.dumps(cats), text, hid))
+                  (req['budget_cents'] if req['budget_cents'] is not None else (h.get('budget_cents') or 100_000),
+                   json.dumps(cats), text, hid))
         db.bump(c, hid)
     picks = _resolve_picks(pick_ids)
     if available():

@@ -25,7 +25,6 @@ struct RoomPanel: View {
                         .accessibilityLabel("3D room with \(objects.count) furniture objects")
                 }
                 HStack(spacing: 6) {
-                    if !model.previews.isEmpty { StatusBadge(text: "Preview", symbol: "eye", tint: .aeroAmber) }
                     if !model.localPoses.isEmpty { StatusBadge(text: "Moved", symbol: "hand.draw", tint: .aeroInk) }
                 }
                 .padding(10)

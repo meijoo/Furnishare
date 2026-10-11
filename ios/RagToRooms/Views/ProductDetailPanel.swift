@@ -4,21 +4,11 @@ struct ProductDetailPanel: View {
     @Environment(AppModel.self) private var model
 
     var showAlternatives = true
+    var optionObjectID: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let product = model.detailProduct {
-                if let objectID = model.selectedObjectID, model.previews[objectID] != nil {
-                    HStack {
-                        Label("Preview", systemImage: "eye")
-                            .font(.subheadline.weight(.semibold)).foregroundStyle(Color.aeroInk)
-                        Spacer()
-                        Button("Clear") { model.clearPreview(objectID: objectID) }.buttonStyle(GlassChipStyle())
-                    }
-                    .padding(10)
-                    .background(RoundedRectangle(cornerRadius: 12).fill(Color.aeroAmber.opacity(0.2)))
-                    .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.aeroAmber.opacity(0.6)))
-                }
                 details(product)
                 if showAlternatives && product.sourceType != "owned" { alternatives(for: product) }
             } else if let object = model.selectedObject {
@@ -57,43 +47,52 @@ struct ProductDetailPanel: View {
     }
 
     @ViewBuilder private func alternatives(for product: Product) -> some View {
-        let options = model.alternatives(for: product)
-        let originalID = model.detailOriginalProductID
-        if !options.isEmpty {
+        if let objectID = optionObjectID ?? model.selectedObjectID {
+            let options = model.designOptions(for: product, objectID: objectID)
+            if !options.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text(product.category.categoryLabel).font(.headline).foregroundStyle(Color.aeroInk)
                 ScrollView(.horizontal) {
                     HStack(spacing: 10) {
-                        ForEach(options) { alt in alternativeCard(alt, originalID: originalID) }
+                        ForEach(options) { alt in alternativeCard(alt, current: product, objectID: objectID) }
                     }
                     .padding(2)
                 }
                 .scrollIndicators(.hidden)
             }
+            }
         }
     }
 
-    private func alternativeCard(_ alt: Product, originalID: String?) -> some View {
-        let objectID = model.selectedObjectID
-        let placeable = alt.placeableDimensions != nil
+    private func alternativeCard(_ alt: Product, current: Product, objectID: String) -> some View {
+        let showing = alt.id == current.id
         return VStack(alignment: .leading, spacing: 6) {
-            ProductImage(urls: model.imageURLs(for: alt), category: alt.category)
-                .frame(height: 80)
-            Text(alt.title).font(.subheadline.weight(.semibold)).lineLimit(1)
-            Text(dollars(alt.priceCents)).font(.caption.monospacedDigit())
-            if let objectID, placeable {
-                if alt.id == originalID {
-                    Button("Original") { model.clearPreview(objectID: objectID) }.buttonStyle(GlassChipStyle())
-                } else {
-                    Button { model.setPreview(objectID: objectID, productID: alt.id) } label: { Label("Preview", systemImage: "eye") }
-                        .buttonStyle(AeroButtonStyle(tint: .aeroAmber, compact: true))
+            ZStack(alignment: .topTrailing) {
+                ProductImage(urls: model.imageURLs(for: alt), category: alt.category)
+                    .frame(width: 120, height: 88)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Button {
+                    model.removeDesignOption(alt, objectID: objectID, current: current)
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(.white).shadow(radius: 1)
                 }
+                .buttonStyle(.plain)
+                .padding(4)
+                .accessibilityLabel("Remove \(alt.title)")
             }
+            Text(alt.title).font(.caption.weight(.semibold)).lineLimit(2).foregroundStyle(Color.aeroInk)
+            Text(dollars(alt.priceCents)).font(.caption.monospacedDigit()).foregroundStyle(Color.figmaMuted)
+            Text(showing ? "Showing" : "Show")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(showing ? Color.aeroSky : Color.aeroInk)
         }
-        .foregroundStyle(Color.aeroInk)
-        .padding(10)
-        .frame(width: 170)
-        .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.45)))
+        .frame(width: 120, alignment: .leading)
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color.white))
+        .overlay(RoundedRectangle(cornerRadius: 14)
+            .strokeBorder(showing ? Color.aeroSky : Color.black.opacity(0.06), lineWidth: showing ? 2 : 1))
+        .onTapGesture { model.chooseDesignOption(alt, objectID: objectID) }
+        .accessibilityLabel("Show \(alt.title)")
     }
 
     private func format(_ d: Dimensions) -> String {

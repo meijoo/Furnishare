@@ -15,7 +15,7 @@ struct ItemsPanel: View {
 
             if let proposal = model.state.proposal {
                 VStack(spacing: 6) {
-                    ForEach(proposal.items, id: \.productID) { item in itemRow(item) }
+                    ForEach(model.designProposalItems, id: \.productID) { item in itemRow(item) }
                 }
                 if !proposal.objections.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
@@ -40,13 +40,12 @@ struct ItemsPanel: View {
     }
 
     private var isEmpty: Bool {
-        model.currentOwnedItems.isEmpty && (model.state.proposal?.items.isEmpty ?? true) && model.candidateGroups.isEmpty
+        model.currentOwnedItems.isEmpty && model.designProposalItems.isEmpty && model.candidateGroups.isEmpty
     }
 
     private var header: some View {
         VStack(alignment: .leading, spacing: 10) {
-            PanelHeader(title: "In this room", symbol: "square.stack.3d.up",
-                        trailing: model.state.proposal.map { "v\($0.version)" })
+            PanelHeader(title: "In this room", symbol: "square.stack.3d.up")
             HStack {
                 if let proposal = model.state.proposal {
                     StatusBadge(text: proposal.status.label, symbol: proposal.status.symbol)
@@ -69,13 +68,15 @@ struct ItemsPanel: View {
     }
 
     private var bundleTotal: Int {
-        let proposed = model.state.proposal?.items.reduce(0) { sum, item in
+        let proposed = model.designProposalItems.reduce(0) { sum, item in
+            guard model.isDesignItemEnabled(model.designItemID(for: item)) else { return sum }
             let object = proposalObject(item)
             let price = object.flatMap { model.displayedProduct(for: $0)?.priceCents }
                 ?? model.product(item.productID)?.priceCents ?? item.priceCents
             return sum + (price ?? 0)
-        } ?? 0
+        }
         let extras = model.candidateGroups.reduce(0) { sum, group in
+            guard model.isDesignItemEnabled(group.objectID) else { return sum }
             let id = group.showingProductID ?? group.productIDs.first
             return sum + (id.flatMap { model.product($0)?.priceCents } ?? 0)
         }
@@ -83,11 +84,13 @@ struct ItemsPanel: View {
     }
 
     private var hasUnknownPrices: Bool {
-        let proposedUnknown = model.state.proposal?.items.contains { item in
+        let proposedUnknown = model.designProposalItems.contains { item in
+            model.isDesignItemEnabled(model.designItemID(for: item)) &&
             (proposalObject(item).flatMap { model.displayedProduct(for: $0)?.priceCents }
                 ?? model.product(item.productID)?.priceCents ?? item.priceCents) == nil
-        } ?? false
+        }
         return proposedUnknown || model.candidateGroups.contains { group in
+            model.isDesignItemEnabled(group.objectID) &&
             model.product(group.showingProductID ?? group.productIDs.first)?.priceCents == nil
         }
     }
@@ -95,11 +98,19 @@ struct ItemsPanel: View {
     private func ownedRow(_ item: OwnedItem) -> some View {
         let productID = "owned-\(item.id.uuidString)"
         let objectID = "local-\(productID)"
-        let open = model.selectedObjectID == objectID
+        let open = model.selectedObjectID == objectID || model.detailProductID == productID
         return VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
                 Button {
-                    if open { model.select(nil) } else { model.select(objectID) }
+                    if open {
+                        model.select(nil)
+                        model.detailProductID = nil
+                    } else if model.isDesignItemEnabled(objectID) {
+                        model.select(objectID)
+                    } else {
+                        model.select(nil)
+                        model.detailProductID = productID
+                    }
                 } label: {
                     HStack(spacing: 12) {
                         ownedThumb(item)
@@ -119,12 +130,9 @@ struct ItemsPanel: View {
                 .buttonStyle(.plain)
 
             }
+            itemControls(id: objectID, name: item.name) { model.removeOwnedItem(item.id) }
             if open {
                 ProductDetailPanel()
-                Button { model.removeOwnedItem(item.id) } label: {
-                    Label("Remove from room", systemImage: "trash")
-                }
-                .buttonStyle(GlassChipStyle())
             }
         }
         .padding(8)
@@ -135,20 +143,20 @@ struct ItemsPanel: View {
 
     private func itemRow(_ item: ProposalItem) -> some View {
         let object = proposalObject(item)
-        let shown = object.flatMap { model.displayedProduct(for: $0) } ?? model.product(item.productID)
-        let previewing = object.flatMap { model.previews[$0.objectID] }
-        let open = object.map { model.selectedObjectID == $0.objectID }
-            ?? (model.selectedObjectID == nil && model.detailProductID == item.productID)
+        let chosen = object.flatMap { model.appliedPreviews[$0.objectID] }
+        let shown = model.product(chosen) ?? object.flatMap { model.displayedProduct(for: $0) } ?? model.product(item.productID)
+        let open = object.map { model.selectedObjectID == $0.objectID } == true
+            || (model.selectedObjectID == nil && model.detailProductID == (shown?.id ?? item.productID))
         return VStack(alignment: .leading, spacing: 6) {
             Button {
                 if open {
                     model.select(nil)
                     model.detailProductID = nil
-                } else if let object {
+                } else if let object, model.isDesignItemEnabled(model.designItemID(for: item)) {
                     model.select(object.objectID)
                 } else {
                     model.select(nil)
-                    model.detailProductID = item.productID
+                    model.detailProductID = shown?.id ?? item.productID
                 }
             } label: {
                 HStack(spacing: 10) {
@@ -159,9 +167,7 @@ struct ItemsPanel: View {
                             .font(.headline).lineLimit(2)
                         HStack(spacing: 6) {
                             Text("\(item.category.categoryLabel) · Proposed").font(.caption).foregroundStyle(.secondary)
-                            if previewing != nil {
-                                Text("Preview").font(.caption.weight(.semibold)).foregroundStyle(Color.aeroAmber)
-                            } else if object.flatMap({ model.appliedPreviews[$0.objectID] }) != nil {
+                            if object.flatMap({ model.appliedPreviews[$0.objectID] }) != nil {
                                 Text("Chosen").font(.caption.weight(.semibold)).foregroundStyle(Color.aeroGrass)
                             }
                         }
@@ -173,28 +179,23 @@ struct ItemsPanel: View {
                     Image(systemName: open ? "chevron.up" : "chevron.down").foregroundStyle(Color.figmaMuted)
                 }
                 .foregroundStyle(Color.aeroInk)
-                .padding(8)
-                .background(RoundedRectangle(cornerRadius: 12).fill(open ? Color.aeroSky.opacity(0.18) : Color.figmaWash.opacity(0.6)))
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
-            if open { ProductDetailPanel().padding(.horizontal, 8) }
-            if let object, previewing != nil {
-                HStack {
-                    Button("Use this in the room") { model.applyPreview(objectID: object.objectID) }
-                        .buttonStyle(AeroButtonStyle(tint: .aeroGrass, compact: true))
-                    Button("Clear preview") { model.clearPreview(objectID: object.objectID) }
-                        .buttonStyle(GlassChipStyle())
-                }
-                .padding(.leading, 38)
+            itemControls(id: model.designItemID(for: item), name: shown?.title ?? item.title ?? item.productID) {
+                model.removeDesignProposalItem(item)
             }
+            if open { ProductDetailPanel(optionObjectID: object?.objectID).padding(.horizontal, 8) }
         }
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .fill(open ? Color.aeroSky.opacity(0.18) : Color.figmaWash.opacity(0.6)))
     }
 
     private func proposalObject(_ item: ProposalItem) -> SceneObject? {
         // Resolve the original identity before looking up its displayed replacement.
         guard let original = model.state.scene.objects.first(where: { $0.productID == item.productID }) else { return nil }
-        return model.displayedObjects.first { $0.objectID == original.objectID }
+        return model.displayedObjects.first { $0.objectID == original.objectID } ?? original
     }
 
     private func groupBlock(_ group: CandidateGroup) -> some View {
@@ -233,17 +234,12 @@ struct ItemsPanel: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            itemControls(id: group.objectID, name: product?.title ?? group.name) {
+                model.removeCandidateGroup(group)
+            }
             if open {
                 ProductDetailPanel(showAlternatives: false)
-                HStack {
-                    Text("Options for \(group.name)").font(.subheadline.weight(.semibold))
-                    Spacer()
-                    Button("Find more") {
-                        model.editCandidateGroup(group)
-                        nav.roomTab = .inspiration
-                    }
-                    .buttonStyle(GlassChipStyle())
-                }
+                Text("Options for \(group.name)").font(.subheadline.weight(.semibold))
                 ScrollView(.horizontal) {
                     HStack(spacing: 10) {
                         ForEach(group.productIDs, id: \.self) { id in
@@ -258,6 +254,28 @@ struct ItemsPanel: View {
         .padding(8)
         .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
             .fill(open ? Color.aeroSky.opacity(0.18) : Color.figmaWash.opacity(0.6)))
+    }
+
+    private func itemControls(id: String, name: String, remove: @escaping () -> Void) -> some View {
+        HStack(spacing: 12) {
+            Spacer()
+            Toggle(isOn: Binding(
+                get: { model.isDesignItemEnabled(id) },
+                set: { model.setDesignItemEnabled(id, enabled: $0) })) {
+                    Text("Include \(name) in room")
+                }
+                .labelsHidden()
+                .fixedSize()
+                .toggleStyle(.switch)
+                .accessibilityLabel("Include \(name) in room")
+            Button(role: .destructive, action: remove) {
+                Image(systemName: "trash")
+                    .frame(minWidth: 24, minHeight: 24)
+            }
+            .buttonStyle(GlassChipStyle())
+            .accessibilityLabel("Remove \(name)")
+        }
+        .padding(.horizontal, 8)
     }
 
     private func itemCard(_ group: CandidateGroup, _ product: Product) -> some View {

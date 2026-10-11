@@ -537,7 +537,7 @@ def _local_matches(query: str, category: str, tokens: list[str]) -> list[dict]:
     return local
 
 
-def search(query: str, limit: int = 20) -> list[dict]:
+def search(query: str, limit: int = 20, max_price_cents: int | None = None) -> list[dict]:
     """Live shopping first, then catalog items that actually match the query (same type / all tokens)."""
     q = (query or '').strip()
     if not q:
@@ -546,6 +546,8 @@ def search(query: str, limit: int = 20) -> list[dict]:
     tokens = [t for t in re.findall(r"[a-z0-9']+", q.lower()) if t not in _STOP]
     live, seen = [], set()
     for p in live_search(q, limit=limit):
+        if max_price_cents is not None and not (0 < (p.get('price_cents') or 0) <= max_price_cents):
+            continue
         title = (p.get('title') or '').lower()
         if not p.get('id') or title in seen or p['id'] in seen:
             continue
@@ -557,6 +559,8 @@ def search(query: str, limit: int = 20) -> list[dict]:
     live.sort(key=lambda p: -_score(p, tokens))
     chosen = list(live)
     for p in _local_matches(q, category, tokens):
+        if max_price_cents is not None and not (0 < (p.get('price_cents') or 0) <= max_price_cents):
+            continue
         title = (p.get('title') or '').lower()
         if not p.get('id') or p['id'] in seen or title in seen:
             continue

@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app import catalog, realize
+from app import agent, catalog, core, db, realize, workflow
 from app.main import app
 
 H = 'demo'
@@ -60,6 +60,38 @@ def test_search_remembers_live_ids(client, monkeypatch):
     assert found is not None
     assert found['title'] == 'Brown linen couch'
     assert catalog.placeable(found)
+
+
+def test_search_budget_filters_before_limit(client, monkeypatch):
+    expensive = {**LIVE, 'id': 'live-expensive', 'title': 'Expensive sofa', 'price_cents': 100001}
+    affordable = {**LIVE, 'id': 'live-affordable', 'title': 'Affordable sofa', 'price_cents': 100000}
+    unknown = {**LIVE, 'id': 'live-unknown', 'title': 'Unpriced sofa', 'price_cents': 0}
+    monkeypatch.setattr(catalog, 'live_search', lambda *a, **k: [expensive, unknown, affordable])
+    monkeypatch.setattr(catalog, '_local_matches', lambda *a: [expensive, unknown, affordable])
+    response = client.get('/products/search', params={'q': 'sofa', 'max_price_cents': 100000, 'limit': 1})
+    assert response.status_code == 200
+    assert [p['id'] for p in response.json()] == ['live-affordable']
+    assert client.get('/products/search', params={'q': 'sofa', 'max_price_cents': -1}).status_code == 422
+
+
+@pytest.mark.parametrize('saved,expected', [(123456, 123456), (0, 100000)])
+def test_design_preserves_room_budget_or_defaults(client, monkeypatch, saved, expected):
+    with db.tx() as connection:
+        connection.execute('UPDATE households SET budget_cents=? WHERE id=?', (saved, H))
+    budgets = []
+
+    def plan(hid, cats, budget, *args, **kwargs):
+        budgets.append(budget)
+        return {'message': 'Test plan'}
+
+    monkeypatch.setattr(workflow, 'run', plan)
+    agent.furnish(H, 'emily', 'Furnish the room. Keep the door clear.', mode='design')
+    assert budgets == [expected]
+    assert core.household(H)['budget_cents'] == expected
+
+
+def test_design_prompt_preserves_budget_cents():
+    assert agent.parse_request('Furnish our room for $1,234.56.')['budget_cents'] == 123456
 
 
 def test_sparse_live_listing_can_be_proposed(client, monkeypatch):

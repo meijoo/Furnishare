@@ -104,8 +104,9 @@ struct BackendClient: Sendable {
         return list.products
     }
 
-    func searchProducts(_ query: String) async throws -> [Product] {
-        let list: ProductList = try await send("GET", "/products/search", query: ["q": query], timeout: 10)
+    func searchProducts(_ query: String, maxPriceCents: Int) async throws -> [Product] {
+        let list: ProductList = try await send("GET", "/products/search",
+                                             query: ["q": query, "max_price_cents": String(maxPriceCents)], timeout: 10)
         return list.products
     }
 
