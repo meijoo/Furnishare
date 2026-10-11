@@ -14,6 +14,19 @@ struct SettingsSheet: View {
     var body: some View {
         NavigationStack {
             Form {
+                if let account = model.account {
+                    Section("Account") {
+                        Text(account.name)
+                        Text(account.email).foregroundStyle(.secondary)
+                        Button("Sign out", role: .destructive) {
+                            Task {
+                                await model.signOut()
+                                nav.replayIntro()
+                                dismiss()
+                            }
+                        }
+                    }
+                }
                 Section {
                     Picker("Acting as", selection: Binding(get: { model.actingMemberID }, set: { model.setActingMember($0) })) {
                         ForEach(model.actingCandidates, id: \.id) { candidate in
@@ -92,7 +105,7 @@ struct SettingsSheet: View {
                     Button("Reset demo household", systemImage: "arrow.counterclockwise.circle", role: .destructive) {
                         confirmReset = true
                     }
-                    .disabled(model.busy.contains("reset"))
+                    .disabled(model.currentGroupID != nil || model.busy.contains("reset"))
                     Button("Clear downloaded 3D assets", systemImage: "trash") {
                         Task { await AssetCache.shared.clear() }
                     }

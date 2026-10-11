@@ -42,7 +42,7 @@ def reset(hid: str = HID, clear_handles: bool = False, room: dict | None = None,
         for table in ('proposals', 'proposal_items', 'shares', 'decisions', 'scene_objects', 'liabilities',
                       'financial_ops', 'activity', 'members'):
             c.execute(f'DELETE FROM {table} WHERE household_id = ?', (hid,))
-        c.execute("DELETE FROM outbound_jobs WHERE household_id = ? OR status IN ('pending', 'leased')", (hid,))
+        c.execute("DELETE FROM outbound_jobs WHERE household_id = ?", (hid,))
         c.execute('DELETE FROM households WHERE id = ?', (hid,))
         c.execute('INSERT INTO households (id, name, budget_cents, payer_id, state_version, room_json, needs_json, style_text) '
                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, 'Our living room', BUDGET_CENTS, 'emily', version + 1,

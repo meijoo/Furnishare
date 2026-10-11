@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
 
     var body: some View {
@@ -17,6 +18,15 @@ struct WelcomeView: View {
                 .buttonStyle(AeroWideButtonStyle())
                 Button("Log in") { nav.screen = .login }
                     .buttonStyle(AeroWideButtonStyle(outlined: true))
+                Button("Try demo") {
+                    Task {
+                        await model.signOut()
+                        nav.profileName = "Emily"; nav.profileEmail = ""
+                        nav.groupName = "Demo apartment"; nav.groupLocation = "Chapel Hill, NC"
+                        nav.selectedRoomIDs = []
+                        nav.skipToDemo(apartment: model.apartment, actingName: "Emily")
+                    }
+                }
             }
             .frame(maxWidth: 320)
             Spacer()
@@ -31,6 +41,8 @@ struct LoginView: View {
     @Environment(AppNavigation.self) private var nav
     @State private var email = ""
     @State private var password = ""
+    @State private var error: String?
+    @State private var signingIn = false
 
     var body: some View {
         FlowScreen(maxWidth: 440) {
@@ -43,9 +55,11 @@ struct LoginView: View {
                 VStack(alignment: .leading, spacing: 14) {
                     FlowField(title: "Email", symbol: "envelope", prompt: "you@example.com", text: $email, keyboard: .emailAddress)
                     FlowField(title: "Password", symbol: "lock", prompt: "Enter your password", text: $password, secure: true)
-                    Button("Log in") { continueIn() }
+                    if let error { Text(error).font(.caption).foregroundStyle(.red) }
+                    Button("Connection settings") { nav.showSettings = true }
+                    Button(signingIn ? "Signing in…" : "Log in") { Task { await continueIn() } }
                         .buttonStyle(AeroWideButtonStyle())
-                        .disabled(email.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(signingIn || email.trimmingCharacters(in: .whitespaces).isEmpty || password.isEmpty)
                 }
                 .padding(22)
                 .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.white))
@@ -55,21 +69,32 @@ struct LoginView: View {
         }
     }
 
-    private func continueIn() {
-        if nav.profileName.isEmpty { nav.profileName = model.actingMemberName }
-        nav.profileEmail = email
-        if UserDefaults.standard.bool(forKey: AppNavigation.completedKey) {
-            nav.screen = .spaces
-        } else {
-            nav.screen = .livingSituation
-        }
-        nav.persistProfile()
+    private func continueIn() async {
+        guard let client = model.client else { error = "Configure your backend connection first."; return }
+        signingIn = true; error = nil
+        defer { signingIn = false }
+        do {
+            let session = try await client.login(email: email, password: password)
+            try model.acceptAccount(session)
+            nav.profileName = session.user.name; nav.profileEmail = session.user.email
+            nav.profilePhone = session.user.phone; nav.profileUsername = session.user.username
+            nav.persistProfile()
+            if let group = session.groups.first {
+                await model.useGroup(id: group.id, householdID: group.household_id, code: group.group_code)
+                nav.groupName = group.name; nav.groupLocation = group.location
+                nav.selectedRoomIDs = Set(model.apartment?.furnishableRooms.map(\.id) ?? [])
+                nav.finishOnboarding()
+            } else { nav.screen = .livingSituation }
+            password = ""
+        } catch { self.error = error.localizedDescription }
     }
 }
 
 struct SignUpView: View {
+    @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
     @State private var error: String?
+    @State private var saving = false
 
     var body: some View {
         ZStack {
@@ -100,14 +125,16 @@ struct SignUpView: View {
                         if let error {
                             Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(Color.aeroRed)
                         }
-                        Button { submit() } label: {
+                        Button { Task { await submit() } } label: {
                             HStack(spacing: 8) {
-                                Text("Create account")
+                                Text(saving ? "Creating…" : "Create account")
                                 Image(systemName: "arrow.right")
                                     .accessibilityHidden(true)
                             }
                         }
                             .buttonStyle(AeroWideButtonStyle())
+                            .disabled(saving)
+                        Button("Connection settings") { nav.showSettings = true }
                         Button("Already have an account? Log in") { nav.screen = .login }
                             .font(.subheadline)
                             .foregroundStyle(Color.aeroSky)
@@ -122,7 +149,34 @@ struct SignUpView: View {
         }
     }
 
-    private func submit() {
+    private var signupDecor: some View {
+        GeometryReader { proxy in
+            HStack {
+                VStack {
+                    Spacer()
+                    RoomIllustration(scene: .createGroup)
+                        .frame(width: 220, height: 160)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .padding(.leading, 24)
+                        .padding(.bottom, 40)
+                }
+                Spacer()
+                VStack {
+                    Spacer()
+                    RoomIllustration(scene: .solo)
+                        .frame(width: 180, height: 140)
+                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                        .padding(.trailing, 24)
+                        .padding(.bottom, 80)
+                }
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+        }
+        .opacity(0.55)
+        .allowsHitTesting(false)
+    }
+
+    private func submit() async {
         let name = nav.profileName.trimmingCharacters(in: .whitespacesAndNewlines)
         let email = nav.profileEmail.trimmingCharacters(in: .whitespacesAndNewlines)
         let phone = nav.profilePhone.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -132,8 +186,18 @@ struct SignUpView: View {
         if phone.isEmpty { error = "Enter your phone number."; return }
         if username.isEmpty { error = "Enter your username."; return }
         if nav.password.count < 8 { error = "Use at least 8 characters for the password field."; return }
-        error = nil
-        nav.persistProfile()
-        nav.screen = .livingSituation
+        guard let client = model.client else { error = "Configure your backend connection first."; return }
+        saving = true; error = nil
+        defer { saving = false }
+        do {
+            let session = try await client.signup(name: name, email: email, phone: phone, username: username, password: nav.password)
+            try model.acceptAccount(session)
+            nav.profilePhone = session.user.phone
+            nav.password = ""
+            nav.selectedRoomIDs = []
+            nav.groupName = ""; nav.groupLocation = ""
+            nav.persistProfile()
+            nav.screen = .livingSituation
+        } catch { self.error = error.localizedDescription }
     }
 }

@@ -287,6 +287,7 @@ struct ShareSpaceSheet: View {
     @State private var requestID = UUID().uuidString
     @State private var sending = false
     @State private var failure: String?
+    @State private var inviteePhones: [String] = [""]
 
     var body: some View {
         NavigationStack {
@@ -299,6 +300,16 @@ struct ShareSpaceSheet: View {
                             set: { phones[member.id] = $0; requestID = UUID().uuidString; invitation = nil }
                         ))
                         .keyboardType(.phonePad)
+                    }
+                    if model.currentGroupID != nil {
+                        ForEach(inviteePhones.indices, id: \.self) { index in
+                            TextField("New roommate: +15551234567", text: Binding(
+                                get: { inviteePhones[index] },
+                                set: { inviteePhones[index] = $0; requestID = UUID().uuidString; invitation = nil }
+                            ))
+                            .keyboardType(.phonePad)
+                        }
+                        Button("Add another roommate") { inviteePhones.append("") }
                     }
                     Button(sending ? "Queuing…" : "Text invitations") {
                         Task { await invite() }
@@ -334,6 +345,9 @@ struct ShareSpaceSheet: View {
             .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
         .presentationDetents([.large])
+        .onAppear {
+            if let account = model.account { phones[account.id] = account.phone }
+        }
     }
 
     private func invite() async {
@@ -341,9 +355,15 @@ struct ShareSpaceSheet: View {
         if invitation?.status == "failed" || invitation?.status == "partial" { requestID = UUID().uuidString }
         sending = true; failure = nil
         defer { sending = false }
-        let members = model.state.members.compactMap { member -> InviteMember? in
+        var members = model.state.members.compactMap { member -> InviteMember? in
             let phone = (phones[member.id] ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             return phone.isEmpty ? nil : InviteMember(member_id: member.id, phone: phone)
+        }
+        if model.currentGroupID != nil {
+            members += inviteePhones.compactMap { phone in
+                let trimmed = phone.trimmingCharacters(in: .whitespacesAndNewlines)
+                return trimmed.isEmpty ? nil : InviteMember(phone: trimmed)
+            }
         }
         do {
             invitation = try await client.invite(members: members, requestID: requestID)

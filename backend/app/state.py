@@ -12,7 +12,7 @@ def snapshot(hid: str, viewer: str | None = None) -> dict:
     members = []
     for m in ms:
         entry = {'id': m['id'], 'name': m['name'], 'is_payer': m['id'] == h['payer_id'], 'has_limit': m['limit_cents'] is not None,
-                 'connected': bool(m['handle'])}
+                 'connected': bool(m['handle'] or db.one('SELECT phone FROM users WHERE id=?', m['id']))}
         if viewer == m['id']:
             entry['limit_cents'] = m['limit_cents']
         members.append(entry)

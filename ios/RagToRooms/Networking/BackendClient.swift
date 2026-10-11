@@ -63,6 +63,24 @@ struct BackendClient: Sendable {
 
     // MARK: Endpoints
 
+    var authToken: String? { AccountSessionStore.token(for: baseURL) }
+
+    func signup(name: String, email: String, phone: String, username: String, password: String) async throws -> AccountSession {
+        try await send("POST", "/auth/signup", body: SignupRequest(name: name, email: email, phone: phone, username: username, password: password), timeout: 30)
+    }
+
+    func login(email: String, password: String) async throws -> AccountSession {
+        try await send("POST", "/auth/login", body: LoginRequest(email: email, password: password), timeout: 30)
+    }
+
+    func accountStatus() async throws -> AccountStatus { try await send("GET", "/auth/me") }
+
+    func logout() async throws { try await sendIgnoringBody("POST", "/auth/logout") }
+
+    func createGroup(name: String, location: String, requestID: String) async throws -> StoredGroup {
+        try await send("POST", "/groups", body: CreateGroupRequest(name: name, location: location, request_id: requestID))
+    }
+
     func invite(members: [InviteMember], requestID: String) async throws -> RoomInvitation {
         try await send("POST", "\(household)/invitations", body: InviteRequest(members: members, request_id: requestID))
     }
@@ -223,6 +241,7 @@ struct BackendClient: Sendable {
         if !query.isEmpty { components.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) } }
         var request = URLRequest(url: components.url!)
         request.httpMethod = method
+        if let token = authToken { request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization") }
         request.timeoutInterval = timeout
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         return request
@@ -312,7 +331,14 @@ struct BackendClient: Sendable {
     }
 }
 
-struct InviteMember: Encodable { let member_id: String; let phone: String }
+struct InviteMember: Encodable {
+    let member_id: String?
+    let phone: String
+    let name: String
+    init(member_id: String? = nil, phone: String, name: String = "") {
+        self.member_id = member_id; self.phone = phone; self.name = name
+    }
+}
 struct InviteRequest: Encodable { let members: [InviteMember]; let request_id: String }
 struct InvitationRecipient: Decodable { let member_name: String; let status: String; let error: String? }
 struct RoomInvitation: Decodable {
@@ -338,4 +364,8 @@ struct SuggestedFurniture: Decodable {
 }
 
 struct JoinGroupRequest: Encodable { let code: String }
-struct JoinedGroup: Decodable { let household_id: String; let group_name: String; let group_code: String }
+struct JoinedGroup: Decodable { let household_id: String; let group_name: String; let group_code: String; let group_id: String? }
+
+struct SignupRequest: Encodable { let name: String; let email: String; let phone: String; let username: String; let password: String }
+struct LoginRequest: Encodable { let email: String; let password: String }
+struct CreateGroupRequest: Encodable { let name: String; let location: String; let request_id: String }

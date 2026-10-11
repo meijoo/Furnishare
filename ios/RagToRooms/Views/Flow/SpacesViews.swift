@@ -188,7 +188,13 @@ struct MembersView: View {
                 HStack {
                     Text("People").font(.title3.bold()).foregroundStyle(Color.aeroInk)
                     Spacer()
-                    Button { showAdd = true } label: { Label("Add", systemImage: "plus") }
+                    Button {
+                        if model.currentGroupID != nil {
+                            nav.showShare = true
+                        } else {
+                            showAdd = true
+                        }
+                    } label: { Label("Add", systemImage: "plus") }
                         .buttonStyle(AeroButtonStyle(compact: true))
                 }
                 ForEach(model.groupRoster) { person in

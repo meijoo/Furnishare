@@ -15,6 +15,7 @@ for d in (DATA_DIR, ASSETS_DIR, UPLOADS_DIR, STATIC_DIR / 'product_images'):
     d.mkdir(parents=True, exist_ok=True)
 
 DB_PATH = Path(os.getenv('RTR_DB_PATH', DATA_DIR / 'app.db'))
+SEED_DEMO = os.getenv('RTR_SEED_DEMO', '1').strip().lower() in ('1', 'true', 'yes')
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
 GEMINI_MODEL = os.getenv('GEMINI_MODEL', '').strip() or 'gemini-flash-latest'

@@ -11,6 +11,31 @@ LOCK = threading.RLock()
 _local = threading.local()
 
 SCHEMA = """
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
+  phone TEXT NOT NULL UNIQUE, username TEXT NOT NULL UNIQUE,
+  password_hash TEXT NOT NULL, created_at TEXT NOT NULL, active_group_id TEXT
+);
+CREATE TABLE IF NOT EXISTS sessions (
+  token_hash TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id),
+  expires_at REAL NOT NULL, created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS groups (
+  id TEXT PRIMARY KEY, name TEXT NOT NULL, location TEXT NOT NULL,
+  owner_id TEXT NOT NULL REFERENCES users(id), group_code TEXT NOT NULL UNIQUE,
+  request_id TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(owner_id, request_id)
+);
+CREATE TABLE IF NOT EXISTS group_members (
+  group_id TEXT NOT NULL REFERENCES groups(id), user_id TEXT NOT NULL REFERENCES users(id),
+  role TEXT NOT NULL, joined_at TEXT NOT NULL, PRIMARY KEY(group_id, user_id)
+);
+CREATE TABLE IF NOT EXISTS group_rooms (
+  household_id TEXT PRIMARY KEY, group_id TEXT NOT NULL REFERENCES groups(id)
+);
+CREATE TABLE IF NOT EXISTS group_invitees (
+  group_id TEXT NOT NULL REFERENCES groups(id), phone TEXT NOT NULL, name TEXT NOT NULL,
+  PRIMARY KEY(group_id, phone)
+);
 CREATE TABLE IF NOT EXISTS households (
   id TEXT PRIMARY KEY, name TEXT NOT NULL, budget_cents INTEGER NOT NULL,
   payer_id TEXT, state_version INTEGER NOT NULL DEFAULT 0,

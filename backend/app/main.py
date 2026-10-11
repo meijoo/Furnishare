@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from . import (agent, apartment, assets, blender_mcp_client, catalog, config, core, db, finance, floorplan, messaging,
-               nessie, planner, ranking, realize, seed, state, textures, invitations)
+               nessie, planner, ranking, realize, seed, state, textures, invitations, accounts)
 from .core import Conflict, Forbidden
 from .money import dollars
 
@@ -24,9 +24,10 @@ from .money import dollars
 @asynccontextmanager
 async def lifespan(_app):
     db.init()
-    if not db.one('SELECT 1 FROM households WHERE id = ?', seed.HID):
+    if config.SEED_DEMO and not db.one('SELECT 1 FROM households WHERE id = ?', seed.HID):
         seed.reset()
-    apartment.ensure()
+    if config.SEED_DEMO:
+        apartment.ensure()
     finance.recover_on_startup()
     stop = threading.Event()
     worker = threading.Thread(target=finance.worker_loop, args=(stop,), name='finance', daemon=True)
@@ -43,6 +44,42 @@ app.add_middleware(CORSMiddleware, allow_origins=['*'], allow_methods=['*'], all
 app.mount('/assets', StaticFiles(directory=config.ASSETS_DIR), name='assets')
 app.mount('/uploads', StaticFiles(directory=config.UPLOADS_DIR), name='uploads')
 app.mount('/product_images', StaticFiles(directory=config.STATIC_DIR / 'product_images'), name='product_images')
+
+
+@app.middleware('http')
+async def account_access(request: Request, call_next):
+    parts = request.url.path.strip('/').split('/')
+    gid = None
+    if len(parts) >= 2 and parts[0] == 'households':
+        gid = accounts.group_for_room(parts[1])
+    elif len(parts) >= 2 and parts[0] == 'apartments' and parts[1].startswith('grp_'):
+        gid = parts[1]
+    if gid:
+        try:
+            user = accounts.authenticate(request.headers.get('authorization'))
+            accounts.require_member(gid, user['id'])
+            if parts[0] == 'households':
+                core.member(parts[1], user['id'])
+                if len(parts) > 3 and parts[2] == 'members' and parts[3] != user['id']:
+                    raise Forbidden('You may only update your own member settings.')
+                viewer = request.query_params.get('member_id')
+                if viewer and viewer != user['id']:
+                    raise Forbidden('Private member data belongs to the signed-in user.')
+                if request.method in ('POST', 'PUT', 'PATCH') and 'application/json' in request.headers.get('content-type', ''):
+                    try:
+                        body = await request.json()
+                    except ValueError:
+                        return JSONResponse({'detail': 'Invalid JSON body.'}, status_code=422)
+                    if not isinstance(body, dict):
+                        return JSONResponse({'detail': 'Expected a JSON object.'}, status_code=422)
+                    if body.get('member_id') and body['member_id'] != user['id']:
+                        raise Forbidden('Member actions must use your own account.')
+            request.state.user = user
+        except HTTPException as e:
+            return JSONResponse({'detail': e.detail}, status_code=e.status_code)
+        except Forbidden as e:
+            return JSONResponse({'detail': str(e)}, status_code=403)
+    return await call_next(request)
 
 
 @app.exception_handler(Forbidden)
@@ -138,17 +175,37 @@ class ClaimBody(BaseModel):
     max: int = Field(default=10, ge=1, le=50)
 
 
+class SignupBody(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    email: str = Field(min_length=1, max_length=254)
+    phone: str = Field(min_length=1, max_length=30)
+    username: str = Field(min_length=3, max_length=40)
+    password: str = Field(min_length=8, max_length=256)
+
+
+class LoginBody(BaseModel):
+    email: str = Field(max_length=254)
+    password: str = Field(min_length=1, max_length=256)
+
+
+class GroupBody(BaseModel):
+    name: str = Field(min_length=1, max_length=100)
+    location: str = Field(default='', max_length=200)
+    request_id: str = Field(min_length=1, max_length=100)
+
+
 class JoinGroupBody(BaseModel):
     code: str = Field(pattern=r"^[0-9]{6}$")
 
 
 class InviteMember(BaseModel):
-    member_id: str
+    member_id: str | None = None
     phone: str
+    name: str = Field(default="", max_length=100)
 
 
 class InviteBody(BaseModel):
-    members: list[InviteMember] = Field(min_length=2, max_length=20)
+    members: list[InviteMember] = Field(min_length=1, max_length=20)
     request_id: str = Field(min_length=1, max_length=100)
 
 
@@ -178,8 +235,52 @@ def root():
             'living_room': '/households/demo/state', 'docs': '/docs'}
 
 
+@app.post('/auth/signup', status_code=201)
+def signup(body: SignupBody):
+    return accounts.signup(**body.model_dump())
+
+
+@app.post('/auth/login')
+def login(body: LoginBody):
+    return accounts.login(body.email, body.password)
+
+
+@app.get('/auth/me')
+def me(request: Request):
+    user = accounts.authenticate(request.headers.get('authorization'))
+    return {'user': accounts.public_user(user), 'groups': accounts.groups_for(user['id'])}
+
+
+@app.post('/auth/logout')
+def logout(request: Request):
+    accounts.logout(request.headers.get('authorization'))
+    return {'status': 'signed_out'}
+
+
+@app.post('/groups', status_code=201)
+def create_group(body: GroupBody, request: Request):
+    user = accounts.authenticate(request.headers.get('authorization'))
+    return accounts.create_group(user['id'], body.name, body.location, body.request_id)
+
+
+@app.get('/groups')
+def list_groups(request: Request):
+    user = accounts.authenticate(request.headers.get('authorization'))
+    return {'groups': accounts.groups_for(user['id'])}
+
+
+@app.get('/groups/{gid}')
+def get_group(gid: str, request: Request):
+    user = accounts.authenticate(request.headers.get('authorization'))
+    accounts.require_member(gid, user['id'])
+    return accounts.snapshot(gid)
+
+
 @app.post('/groups/join')
-def join_group(body: JoinGroupBody):
+def join_group(body: JoinGroupBody, request: Request):
+    if db.one('SELECT 1 FROM groups WHERE group_code=?', body.code):
+        user = accounts.authenticate(request.headers.get('authorization'))
+        return accounts.join_group(user['id'], body.code)
     return invitations.join(body.code)
 
 
@@ -189,8 +290,12 @@ def invite(hid: str, body: InviteBody):
 
 
 @app.get('/invitations/{token}')
-def invitation(token: str):
-    return invitations.get(token)
+def invitation(token: str, request: Request):
+    result = invitations.get(token)
+    gid = accounts.group_for_room(result['household_id'])
+    if gid:
+        accounts.require_member(gid, accounts.authenticate(request.headers.get('authorization'))['id'])
+    return result
 
 
 @app.get('/households/{hid}/suggestions')
@@ -442,14 +547,14 @@ def demo_blank():
 @app.get('/apartments/{aid}')
 def get_apartment(aid: str):
     try:
-        return apartment.snapshot(aid)
+        return accounts.apartment_snapshot(aid) if aid.startswith('grp_') else apartment.snapshot(aid)
     except KeyError as e:
         raise HTTPException(404, str(e)) from e
 
 
 @app.post('/apartments/{aid}/floorplan')
 async def import_floorplan(aid: str, file: UploadFile = File(...), width_m: float | None = Form(None)):
-    if aid != apartment.AID:
+    if aid != apartment.AID and not db.one('SELECT 1 FROM groups WHERE id=?', aid):
         raise HTTPException(404, f'Unknown apartment {aid}')
     if not agent.available():
         raise HTTPException(503, 'Floor-plan import needs Gemini; set up Vertex AI or GEMINI_API_KEY')
@@ -457,6 +562,8 @@ async def import_floorplan(aid: str, file: UploadFile = File(...), width_m: floa
         raise HTTPException(422, 'width_m must be between 2 and 60')
     data, mime, path = await _save_image(file)
     try:
+        if aid != apartment.AID:
+            return await asyncio.to_thread(accounts.import_plan, aid, data, mime, f'/uploads/{path.name}', width_m)
         return await asyncio.to_thread(apartment.import_plan, data, mime, f'/uploads/{path.name}', width_m)
     except floorplan.PlanError as e:
         raise HTTPException(422, str(e)) from e
@@ -466,9 +573,9 @@ async def import_floorplan(aid: str, file: UploadFile = File(...), width_m: floa
 
 @app.delete('/apartments/{aid}/floorplan')
 def reset_floorplan(aid: str):
-    if aid != apartment.AID:
+    if aid != apartment.AID and not db.one('SELECT 1 FROM groups WHERE id=?', aid):
         raise HTTPException(404, f'Unknown apartment {aid}')
-    return apartment.restore_built_in()
+    return accounts.restore_plan(aid) if aid != apartment.AID else apartment.restore_built_in()
 
 
 @app.post('/messages/inbound', status_code=202)
