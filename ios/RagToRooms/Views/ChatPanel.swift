@@ -7,36 +7,42 @@ struct ChatPanel: View {
     var body: some View {
         let suggestion = model.chatSuggestion
         let canSend = model.actingMemberInScope
-        VStack(alignment: .leading, spacing: 10) {
-            PanelHeader(title: "Refine", symbol: "bubble.left.and.text.bubble.right.fill", trailing: model.currentRoomName)
-            if model.chat.isEmpty {
-                Button { draft = suggestion } label: { Label(suggestion, systemImage: "sparkles").multilineTextAlignment(.leading) }
-                    .buttonStyle(GlassChipStyle())
-                    .disabled(!canSend)
-            } else {
-                VStack(alignment: .leading, spacing: 8) {
-                    ForEach(model.chat.suffix(12)) { message in bubble(message) }
+        if model.state.proposal == nil {
+            EmptyView()
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                PanelHeader(title: "Refine the plan", symbol: "bubble.left.and.text.bubble.right.fill", trailing: model.currentRoomName)
+                Text("Tweaks one piece of the current layout — cheaper sofa, more oak — without starting over.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.figmaMuted)
+                if model.chat.isEmpty {
+                    Button { draft = suggestion } label: { Label(suggestion, systemImage: "sparkles").multilineTextAlignment(.leading) }
+                        .buttonStyle(GlassChipStyle())
+                        .disabled(!canSend)
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(model.chat.suffix(12)) { message in bubble(message) }
+                    }
+                }
+                HStack(spacing: 8) {
+                    TextField("Cheaper sofa, more oak…", text: $draft, axis: .vertical)
+                        .lineLimit(1...4)
+                        .padding(10)
+                        .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.75)))
+                        .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.white, lineWidth: 1))
+                        .onSubmit(send)
+                    Button(action: send) {
+                        if model.busy.contains("chat") { ProgressView().tint(.white) } else { Label("Send", systemImage: "paperplane.fill") }
+                    }
+                    .buttonStyle(AeroButtonStyle(compact: true))
+                    .disabled(!canSend || draft.trimmingCharacters(in: .whitespaces).isEmpty || model.busy.contains("chat"))
+                }
+                if let note = model.notInScopeNote {
+                    Label(note, systemImage: "eye").font(.caption).foregroundStyle(.secondary)
                 }
             }
-            HStack(spacing: 8) {
-                TextField(model.state.proposal == nil ? "Describe the room…" : "Cheaper sofa, more oak…",
-                          text: $draft, axis: .vertical)
-                    .lineLimit(1...4)
-                    .padding(10)
-                    .background(RoundedRectangle(cornerRadius: 14).fill(.white.opacity(0.75)))
-                    .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(.white, lineWidth: 1))
-                    .onSubmit(send)
-                Button(action: send) {
-                    if model.busy.contains("chat") { ProgressView().tint(.white) } else { Label("Send", systemImage: "paperplane.fill") }
-                }
-                .buttonStyle(AeroButtonStyle(compact: true))
-                .disabled(!canSend || draft.trimmingCharacters(in: .whitespaces).isEmpty || model.busy.contains("chat"))
-            }
-            if let note = model.notInScopeNote {
-                Label(note, systemImage: "eye").font(.caption).foregroundStyle(.secondary)
-            }
+            .glassPanel()
         }
-        .glassPanel()
     }
 
     private func send() {

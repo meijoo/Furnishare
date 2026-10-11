@@ -8,20 +8,10 @@ struct InspirationPanel: View {
     @State private var photoItem: PhotosPickerItem?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            PanelHeader(title: "Inspiration", symbol: "sparkles",
-                        trailing: model.inspirationCategory?.categoryLabel)
-            if !model.state.room.inspirationDescription.isEmpty {
-                Text(model.state.room.inspirationDescription)
-                    .font(.subheadline).foregroundStyle(Color.aeroInk)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            photos
-            searchBar
-            results
-            design
+        VStack(alignment: .leading, spacing: 16) {
+            lookupSection
+            designSection
         }
-        .glassPanel()
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
             Task {
@@ -70,9 +60,39 @@ struct InspirationPanel: View {
         .background(RoundedRectangle(cornerRadius: 14).fill(Color.figmaWash))
     }
 
+    private var designSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            PanelHeader(title: "Design this room", symbol: "wand.and.stars")
+            Text("Use your inspiration photos and room description to guide a full room plan.")
+                .font(.subheadline)
+                .foregroundStyle(Color.figmaMuted)
+            if !model.state.room.inspirationDescription.isEmpty {
+                Text(model.state.room.inspirationDescription)
+                    .font(.subheadline).foregroundStyle(Color.aeroInk)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            photos
+            design
+        }
+        .glassPanel()
+    }
+
+    private var lookupSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            PanelHeader(title: "Look up a piece", symbol: "magnifyingglass",
+                        trailing: model.inspirationCategory?.categoryLabel)
+            Text("Type a sofa, bed, or lamp to find one item. Search does not use your photos.")
+                .font(.subheadline)
+                .foregroundStyle(Color.figmaMuted)
+            searchBar
+            results
+        }
+        .glassPanel()
+    }
+
     private var photos: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Photos").font(.headline).foregroundStyle(Color.aeroInk)
+            Text("Inspiration photos").font(.headline).foregroundStyle(Color.aeroInk)
             ScrollView(.horizontal) {
                 HStack(spacing: 10) {
                     PhotosPicker(selection: $photoItem, matching: .images) {
@@ -142,7 +162,7 @@ struct InspirationPanel: View {
             } else if !model.inspirationQuery.isEmpty {
                 Text("No matches").foregroundStyle(Color.figmaMuted)
             } else {
-                Text("Search for a piece. Everything you select joins the proposal on Design.")
+                Text("Search by name, then select pieces you want preferred in the room plan.")
                     .font(.subheadline)
                     .foregroundStyle(Color.figmaMuted)
             }
@@ -216,7 +236,7 @@ struct InspirationPanel: View {
     private var design: some View {
         let designing = model.busy.contains("design")
         return VStack(alignment: .leading, spacing: 8) {
-            Text("Design this room").font(.headline).foregroundStyle(Color.aeroInk)
+            Text("Describe the room").font(.headline).foregroundStyle(Color.aeroInk)
             TextField(model.chatSuggestion, text: $designDraft, axis: .vertical)
                 .lineLimit(2...4)
                 .padding(12)
@@ -226,7 +246,8 @@ struct InspirationPanel: View {
                 if designing {
                     ProgressView().tint(.white)
                 } else {
-                    Label("Design this room", systemImage: "wand.and.stars")
+                    Label(model.state.proposal == nil ? "Design this room" : "Redesign this room",
+                          systemImage: "wand.and.stars")
                 }
             }
             .buttonStyle(AeroButtonStyle(compact: true))
