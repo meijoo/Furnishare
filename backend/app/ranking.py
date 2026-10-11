@@ -6,6 +6,8 @@ import httpx
 
 from . import config, db
 
+_ranker_skip_until = 0.0
+
 
 def _hex_rgb(h: str) -> tuple[float, float, float]:
     h = (h or '#888888').lstrip('#')
@@ -38,16 +40,17 @@ def rank(products: list[dict], room_image: Path | None, reference: dict | None =
         return [], 'none'
     started = time.perf_counter()
     scores, mode = None, 'heuristic'
-    if room_image is not None:
+    global _ranker_skip_until
+    if room_image is not None and time.monotonic() >= _ranker_skip_until:
         try:
-            r = httpx.post(f'{config.RANKER_URL}/score', timeout=8, json={
+            r = httpx.post(f'{config.RANKER_URL}/score', timeout=1.5, json={
                 'room_image_path': str(room_image), 'product_ids': [p['id'] for p in products]})
             r.raise_for_status()
             body = r.json()
             if body.get('mode') in ('learned', 'cosine'):
                 scores, mode = body['scores'], body['mode']
         except (httpx.HTTPError, ValueError, KeyError):
-            pass
+            _ranker_skip_until = time.monotonic() + 60
     if scores is None:
         scores = {p['id']: heuristic_similarity(p, reference, style_text) for p in products}
     ranked = sorted(products, key=lambda p: (-(scores.get(p['id']) or 0.0), p['price_cents']))

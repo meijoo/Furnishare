@@ -19,6 +19,31 @@ def client():
         yield c
 
 
+def test_live_search_caches_serp_calls(monkeypatch):
+    calls = []
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {'shopping_results': [
+                {'title': 'Green accent chair', 'extracted_price': 89, 'link': 'https://shop.example/chair'}]}
+
+    class FakeClient:
+        def get(self, url, params=None, **kwargs):
+            calls.append(params.get('q') if params else url)
+            return FakeResponse()
+
+    monkeypatch.setattr(catalog, '_http', FakeClient())
+    monkeypatch.setattr(catalog.config, 'SHOPPING_API_KEY', 'test-key')
+    catalog._live_cache.clear()
+    first = catalog.live_search('green chair', limit=8)
+    second = catalog.live_search('green chair', limit=8)
+    assert calls == ['green chair']
+    assert first and first == second
+
+
 def test_search_uses_live_only_when_api_hits(client, monkeypatch):
     monkeypatch.setattr(catalog, 'live_search', lambda *a, **k: [dict(LIVE)])
     ids = [p['id'] for p in client.get('/products/search', params={'q': 'sofa'}).json()]

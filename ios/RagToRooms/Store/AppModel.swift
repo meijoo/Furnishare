@@ -99,6 +99,7 @@ final class AppModel {
     var inspirationResults: [Product] = []
     var inspirationPicks: [String] = []
     var inspirationCategory: String?
+    private var inspirationSearchID = 0
     var extraObjects: [SceneObject] = []
     var extraProducts: [Product] = []
     /// Preview the user committed as the item they want in that slot.
@@ -612,29 +613,43 @@ final class AppModel {
     func searchInspiration(_ raw: String) {
         let query = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         inspirationQuery = query
+        inspirationSearchID += 1
+        let searchID = inspirationSearchID
         guard !query.isEmpty else {
             inspirationResults = []
             return
         }
         inspirationCategory = Self.category(from: query)
+        let local = Self.rank(products: products + extraProducts, query: query, category: inspirationCategory)
+        inspirationResults = local
+        if inspirationCategory == nil {
+            inspirationCategory = local.first.flatMap { Self.category(from: $0.title) } ?? local.first?.category
+        }
+        guard let client, source == .live else { return }
         busy.insert("inspiration-search")
         Task {
-            defer { busy.remove("inspiration-search") }
-            var results: [Product] = []
-            if let client, source == .live {
-                do {
-                    results = try await client.searchProducts(query)
-                } catch {
-                    errorMessage = Self.message(error)
+            defer { if searchID == inspirationSearchID { busy.remove("inspiration-search") } }
+            do {
+                let remote = try await client.searchProducts(query)
+                guard searchID == inspirationSearchID else { return }
+                var seen = Set<String>()
+                var merged: [Product] = []
+                for product in remote + local {
+                    let title = product.title.lowercased()
+                    if seen.contains(product.id) || seen.contains(title) { continue }
+                    seen.insert(product.id)
+                    seen.insert(title)
+                    merged.append(product)
                 }
-            } else {
-                results = Self.rank(products: products + extraProducts, query: query, category: inspirationCategory)
+                merged.forEach(remember)
+                inspirationResults = merged
+                if inspirationCategory == nil {
+                    inspirationCategory = merged.first.flatMap { Self.category(from: $0.title) } ?? merged.first?.category
+                }
+            } catch {
+                guard searchID == inspirationSearchID else { return }
+                errorMessage = Self.message(error)
             }
-            if inspirationCategory == nil {
-                inspirationCategory = results.first.flatMap { Self.category(from: $0.title) } ?? results.first?.category
-            }
-            results.forEach(remember)
-            inspirationResults = results
         }
     }
 
