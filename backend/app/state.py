@@ -9,6 +9,9 @@ def snapshot(hid: str, viewer: str | None = None) -> dict:
     scene = core.scene_objects(hid)
     room = dict(h['room'])
     room['inspiration_image_url'] = '/uploads/' + h['inspiration_path'].rsplit('/', 1)[-1] if h['inspiration_path'] else None
+    room['inspiration_description'] = (db.one('SELECT description FROM room_inspiration WHERE household_id=?', hid) or {}).get('description', '')
+    room['inspiration_images'] = [{'id': r['id'], 'url': '/uploads/' + r['path'].rsplit('/', 1)[-1]}
+                                  for r in db.all_('SELECT id,path FROM room_inspiration_images WHERE household_id=? ORDER BY created_at,id', hid)]
     members = []
     for m in ms:
         entry = {'id': m['id'], 'name': m['name'], 'is_payer': m['id'] == h['payer_id'], 'has_limit': m['limit_cents'] is not None,

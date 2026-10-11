@@ -217,6 +217,18 @@ struct BackendClient: Sendable {
         try await sendIgnoringBody("DELETE", "/apartments/\(apartmentID)/floorplan", timeout: 60)
     }
 
+    func setupPreferences(apartmentID: String, memberID: String) async throws -> SetupPreferences {
+        try await send("GET", "/apartments/\(apartmentID)/setup", query: ["member_id": memberID])
+    }
+
+    func saveSetup(apartmentID: String, body: SetupPreferencesRequest) async throws {
+        try await sendIgnoringBody("PUT", "/apartments/\(apartmentID)/setup", body: body)
+    }
+
+    func uploadRoomInspiration(householdID: String, image: UploadImage) async throws {
+        _ = try await upload("/households/\(householdID)/inspiration", file: image, timeout: 30)
+    }
+
     /// `mode` is `print` or `tile`; `tileM` only applies to `tile`.
     func putTexture(objectID: String, image: UploadImage, mode: String, tileM: Double?) async throws {
         var fields = ["mode": mode]
@@ -368,4 +380,18 @@ struct JoinedGroup: Decodable { let household_id: String; let group_name: String
 
 struct SignupRequest: Encodable { let name: String; let email: String; let phone: String; let username: String; let password: String }
 struct LoginRequest: Encodable { let username: String; let password: String }
+struct SetupRoomPreference: Decodable { let household_id: String; let description: String }
+struct SetupPreferences: Decodable {
+    let group_budget_cents: Int?
+    let individual_budget_cents: Int?
+    let solo: Bool
+    let rooms: [SetupRoomPreference]
+}
+struct SetupPreferencesRequest: Encodable {
+    let member_id: String
+    let group_budget_cents: Int
+    let individual_budget_cents: Int?
+    let solo: Bool
+    let rooms: [String: String]
+}
 struct CreateGroupRequest: Encodable { let name: String; let location: String; let request_id: String }

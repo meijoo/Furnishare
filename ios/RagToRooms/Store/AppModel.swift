@@ -297,6 +297,12 @@ final class AppModel {
         restartConnection()
     }
 
+    func refreshSetupState() async {
+        scopeCache = [:]
+        await refreshApartment(force: true)
+        if let client { try? await refresh(client) }
+    }
+
     /// `force` skips the in-flight check (after an import); an older fetch that finishes later is discarded.
     func refreshApartment(force: Bool = false) async {
         guard reachedBackend, let client, force || !apartmentLoading else { return }

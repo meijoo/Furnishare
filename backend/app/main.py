@@ -20,6 +20,7 @@ from sse_starlette.sse import EventSourceResponse
 from . import (agent, apartment, assets, blender_mcp_client, catalog, config, core, db, finance, floorplan, messaging,
                nessie, planner, ranking, realize, seed, state, textures, invitations, accounts)
 from .core import Conflict, Forbidden
+from . import setup_preferences
 from .money import dollars
 
 
@@ -141,6 +142,37 @@ class LimitBody(BaseModel):
 
 class BudgetBody(BaseModel):
     budget_cents: int = Field(ge=0, le=50_000_000)
+
+
+class SetupPreferencesBody(BaseModel):
+    member_id: str
+    group_budget_cents: int = Field(gt=0, le=50_000_000)
+    individual_budget_cents: int | None = Field(default=None, ge=0, le=50_000_000)
+    solo: bool = False
+    rooms: dict[str, str]
+
+
+def _setup_member(request, aid, member_id):
+    if aid.startswith('grp_') and request.state.user['id'] != member_id:
+        raise Forbidden('Only save your own individual budget.')
+    core.member(aid, member_id)
+    return member_id
+
+
+@app.get('/apartments/{aid}/setup')
+def get_setup(aid: str, member_id: str, request: Request):
+    return setup_preferences.snapshot(aid, _setup_member(request, aid, member_id))
+
+
+@app.put('/apartments/{aid}/setup')
+def put_setup(aid: str, body: SetupPreferencesBody, request: Request):
+    uid = _setup_member(request, aid, body.member_id)
+    if any(len(text) > 5000 for text in body.rooms.values()):
+        raise ValueError('Room descriptions must be 5,000 characters or fewer.')
+    individual = body.group_budget_cents if body.solo else body.individual_budget_cents
+    if individual is None:
+        raise ValueError('Enter your individual budget.')
+    return setup_preferences.save(aid, uid, body.group_budget_cents, individual, body.solo, body.rooms)
 
 
 class HandleBody(BaseModel):
@@ -429,6 +461,8 @@ async def inspiration(hid: str, file: UploadFile = File(...)):
     _, _, path = await _save_image(file)
     with db.tx() as c:
         c.execute('UPDATE households SET inspiration_path = ? WHERE id = ?', (str(path), hid))
+        image_id = hashlib.sha256(f'{hid}:{path.name}'.encode()).hexdigest()[:24]
+        c.execute('INSERT OR IGNORE INTO room_inspiration_images VALUES (?,?,?,?)', (image_id, hid, str(path), db.now()))
         db.log(c, hid, 'Inspiration image updated')
         db.bump(c, hid)
     return {'inspiration_image_url': f'/uploads/{path.name}'}

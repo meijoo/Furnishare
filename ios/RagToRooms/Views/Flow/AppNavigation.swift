@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum AppScreen: String, Hashable {
-    case welcome, login, signUp, livingSituation, joinGroup, groupSetup, floorPlan, roomSelect, room
+    case welcome, login, signUp, livingSituation, joinGroup, groupSetup, floorPlan, roomSelect, budgetInspiration, room
 }
 
 enum RoomTab: String, CaseIterable, Identifiable {

@@ -45,6 +45,14 @@ CREATE TABLE IF NOT EXISTS members (
   household_id TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, handle TEXT,
   limit_cents INTEGER, limit_note TEXT, PRIMARY KEY (household_id, id)
 );
+CREATE TABLE IF NOT EXISTS room_inspiration (
+  household_id TEXT PRIMARY KEY REFERENCES households(id) ON DELETE CASCADE,
+  description TEXT NOT NULL DEFAULT ''
+);
+CREATE TABLE IF NOT EXISTS room_inspiration_images (
+  id TEXT PRIMARY KEY, household_id TEXT NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+  path TEXT NOT NULL, created_at TEXT NOT NULL, UNIQUE(household_id, path)
+);
 CREATE UNIQUE INDEX IF NOT EXISTS members_handle ON members(handle) WHERE handle IS NOT NULL;
 CREATE TABLE IF NOT EXISTS proposals (
   household_id TEXT NOT NULL, version INTEGER NOT NULL, status TEXT NOT NULL,

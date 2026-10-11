@@ -94,6 +94,10 @@ struct SignUpView: View {
     @Environment(AppNavigation.self) private var nav
     @State private var error: String?
     @State private var saving = false
+    @State private var signupName = ""
+    @State private var signupPhone = ""
+    @State private var signupUsername = ""
+    @State private var signupPassword = ""
 
     var body: some View {
         VStack(spacing: 0) {
@@ -109,14 +113,14 @@ struct SignUpView: View {
                         .foregroundStyle(Color.black)
                     VStack(alignment: .leading, spacing: 12) {
                         FlowField(title: "Full name", symbol: "person", prompt: "Your name",
-                                  text: Binding(get: { nav.profileName }, set: { nav.profileName = $0 }))
+                                  text: $signupName)
                         FlowField(title: "Phone number", symbol: "phone", prompt: "Enter your phone number",
-                                  text: Binding(get: { nav.profilePhone }, set: { nav.profilePhone = $0 }),
+                                  text: $signupPhone,
                                   keyboard: .phonePad)
                         FlowField(title: "Username", symbol: "at", prompt: "Enter your username",
-                                  text: Binding(get: { nav.profileUsername }, set: { nav.profileUsername = $0 }), username: true)
+                                  text: $signupUsername, username: true)
                         FlowField(title: "Password", symbol: "lock", prompt: "At least 8 characters",
-                                  text: Binding(get: { nav.password }, set: { nav.password = $0 }),
+                                  text: $signupPassword,
                                   secure: true)
                         if let error {
                             Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(Color.aeroRed)
@@ -174,23 +178,25 @@ struct SignUpView: View {
     }
 
     private func submit() async {
-        let name = nav.profileName.trimmingCharacters(in: .whitespacesAndNewlines)
-        let phone = nav.profilePhone.trimmingCharacters(in: .whitespacesAndNewlines)
-        let username = nav.profileUsername.trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = signupName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let phone = signupPhone.trimmingCharacters(in: .whitespacesAndNewlines)
+        let username = signupUsername.trimmingCharacters(in: .whitespacesAndNewlines)
         if name.isEmpty { error = "Add a name so housemates know who you are."; return }
         if phone.isEmpty { error = "Enter your phone number."; return }
         if username.count < 3 { error = "Username needs at least 3 characters."; return }
-        if nav.password.count < 8 { error = "Password needs at least 8 characters."; return }
+        if signupPassword.count < 8 { error = "Password needs at least 8 characters."; return }
         guard let client = model.client else { error = "Configure your backend connection first."; return }
         saving = true; error = nil
         defer { saving = false }
         do {
-            let session = try await client.signup(name: name, email: "", phone: phone, username: username, password: nav.password)
+            let session = try await client.signup(name: name, email: "", phone: phone, username: username, password: signupPassword)
             try model.acceptAccount(session)
+            nav.profileName = session.user.name
             nav.profilePhone = session.user.phone
             nav.profileEmail = session.user.email
             nav.profileUsername = session.user.username
             nav.password = ""
+            signupPassword = ""
             nav.selectedRoomIDs = []
             nav.groupName = ""; nav.groupLocation = ""
             nav.persistProfile()

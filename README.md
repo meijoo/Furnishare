@@ -96,6 +96,14 @@ Passwords are salted scrypt hashes; session tokens are hashed in SQLite, expire
 after 30 days, and are stored in the iOS Keychain. Phone/email verification is not
 yet implemented. Account and group creation require the backend to be running.
 
+**Select rooms** continues to **Budget and inspiration**. Set an overall group
+budget and your individual spending cap in USD (solo setup shows one budget),
+then optionally add photos and descriptions for each selected room. Submit saves
+these preferences before opening roommate invitations. Budget totals are split
+across selected room scopes; descriptions and photo records are stored in SQLite,
+and photo files are stored in `backend/static/uploads/`. Saved inspiration appears
+in each room’s Inspiration tab. Back up both the database and uploads folder.
+
 Use **Try demo** on the welcome screen for Emily, Maya, and Alex. Demo resets
 preserve real users, groups, memberships, and their invitation jobs. Set
 `RTR_SEED_DEMO=0` to disable automatic demo seeding on backend startup; existing

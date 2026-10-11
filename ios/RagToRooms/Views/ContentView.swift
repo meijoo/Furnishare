@@ -72,6 +72,7 @@ struct ContentView: View {
         case .groupSetup: GroupSetupView()
         case .floorPlan: FloorPlanUploadView()
         case .roomSelect: RoomSelectView()
+        case .budgetInspiration: BudgetInspirationView()
         case .room: RoomWorkspaceView()
         }
     }

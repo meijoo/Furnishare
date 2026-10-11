@@ -236,6 +236,11 @@ struct Clearance: Codable, Hashable, Sendable {
     }
 }
 
+struct SavedInspirationImage: Codable, Hashable, Sendable, Identifiable {
+    let id: String
+    let url: String
+}
+
 struct Room: Codable, Hashable, Sendable {
     var widthM: Double
     var depthM: Double
@@ -243,6 +248,8 @@ struct Room: Codable, Hashable, Sendable {
     var openings: [Opening]
     var clearances: [Clearance]
     var inspirationImageURL: String?
+    var inspirationDescription = ""
+    var inspirationImages: [SavedInspirationImage] = []
 
     enum CodingKeys: String, CodingKey {
         case openings, clearances
@@ -250,6 +257,8 @@ struct Room: Codable, Hashable, Sendable {
         case depthM = "depth_m"
         case heightM = "height_m"
         case inspirationImageURL = "inspiration_image_url"
+        case inspirationDescription = "inspiration_description"
+        case inspirationImages = "inspiration_images"
     }
 
     init(widthM: Double, depthM: Double, heightM: Double, openings: [Opening] = [], clearances: [Clearance] = [],
@@ -266,6 +275,8 @@ struct Room: Codable, Hashable, Sendable {
         openings = (try? c.decode([Opening].self, forKey: .openings)) ?? []
         clearances = (try? c.decode([Clearance].self, forKey: .clearances)) ?? []
         inspirationImageURL = try? c.decode(String.self, forKey: .inspirationImageURL)
+        inspirationDescription = (try? c.decode(String.self, forKey: .inspirationDescription)) ?? ""
+        inspirationImages = (try? c.decode([SavedInspirationImage].self, forKey: .inspirationImages)) ?? []
     }
 }
 

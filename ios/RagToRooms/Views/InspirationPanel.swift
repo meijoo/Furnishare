@@ -11,6 +11,11 @@ struct InspirationPanel: View {
         VStack(alignment: .leading, spacing: 14) {
             PanelHeader(title: "Inspiration", symbol: "sparkles",
                         trailing: model.inspirationCategory?.categoryLabel)
+            if !model.state.room.inspirationDescription.isEmpty {
+                Text(model.state.room.inspirationDescription)
+                    .font(.subheadline).foregroundStyle(Color.aeroInk)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
             photos
             searchBar
             results
@@ -100,11 +105,21 @@ struct InspirationPanel: View {
                             .accessibilityLabel("Remove photo")
                         }
                     }
-                    if let preview = model.inspirationPreview, model.inspirationShots.isEmpty {
+                    ForEach(model.state.room.inspirationImages) { photo in
+                        AsyncImage(url: model.client?.resolve(photo.url)) { phase in
+                            switch phase {
+                            case .success(let image): image.resizable().scaledToFill()
+                            default: Color.figmaWash
+                            }
+                        }
+                        .frame(width: 88, height: 88)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                    }
+                    if let preview = model.inspirationPreview, model.inspirationShots.isEmpty, model.state.room.inspirationImages.isEmpty {
                         Image(uiImage: preview).resizable().scaledToFill()
                             .frame(width: 88, height: 88)
                             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    } else if let url = model.client?.resolve(model.state.room.inspirationImageURL), model.inspirationShots.isEmpty {
+                    } else if let url = model.client?.resolve(model.state.room.inspirationImageURL), model.inspirationShots.isEmpty, model.state.room.inspirationImages.isEmpty {
                         AsyncImage(url: url) { phase in
                             switch phase {
                             case .success(let image): image.resizable().scaledToFill()

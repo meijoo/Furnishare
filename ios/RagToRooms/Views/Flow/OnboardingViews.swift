@@ -31,7 +31,7 @@ struct LivingSituationView: View {
         HStack {
             BrandMark(compact: true)
             Spacer()
-            FlowStepBar(current: 1, total: 3, captions: ["Group setup", "Floor plan", "Select rooms"])
+            FlowStepBar(current: 1, total: 4)
             Spacer()
             OnboardingBackButton { nav.screen = .welcome }
             Color.clear.frame(width: SettingsGearButton.reservedWidth, height: 1)
@@ -81,11 +81,12 @@ struct JoinGroupView: View {
 
     var body: some View {
         @Bindable var nav = nav
-        FlowScreen(maxWidth: 480) {
+        OnboardingPage(step: 1, back: .livingSituation, maxWidth: 520) {
             VStack(alignment: .leading, spacing: 18) {
-                onboardingChrome(step: 1, back: .livingSituation)
-                SplitHeadline(lead: "Join a ", accent: "group")
-                Text("Enter the six-digit code sent to you by Furnishare.")
+                Text("Join a group")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.black)
+                Text("Enter the six-digit code sent to you.")
                     .foregroundStyle(Color.figmaMuted)
                 FlowField(title: "Group code", symbol: "number", prompt: "123456",
                           text: $nav.joinCode, keyboard: .numberPad)
@@ -227,7 +228,6 @@ struct FloorPlanUploadView: View {
 struct RoomSelectView: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
-    @State private var submitting = false
 
     var body: some View {
         @Bindable var nav = nav
@@ -238,9 +238,9 @@ struct RoomSelectView: View {
                 RoomSelectionContent(selection: $nav.selectedRoomIDs)
                 HStack {
                     Spacer()
-                    Button(action: finish) { continueLabel(submitting ? "Setting up…" : "Submit") }
+                    Button { nav.persistProfile(); nav.screen = .budgetInspiration } label: { continueLabel("Continue") }
                         .buttonStyle(AeroButtonStyle())
-                        .disabled(submitting || nav.selectedRoomIDs.isEmpty)
+                        .disabled(nav.selectedRoomIDs.isEmpty)
                 }
             }
         }
@@ -263,16 +263,7 @@ struct RoomSelectView: View {
         nav.selectedRoomIDs = Set(rooms.map(\.id))
     }
 
-    private func finish() {
-        guard !submitting else { return }
-        submitting = true
-        nav.persistProfile()
-        Task {
-            await model.startBlankApartment()
-            nav.finishSetupAfterInvites = true
-            nav.showShare = true
-        }
-    }
+
 }
 
 private func continueLabel(_ title: String) -> some View {
@@ -287,7 +278,7 @@ func onboardingChrome(step: Int, back: AppScreen) -> some View {
     OnboardingChrome(step: step, back: back)
 }
 
-private struct OnboardingPage<Content: View>: View {
+struct OnboardingPage<Content: View>: View {
     let step: Int
     let back: AppScreen
     var maxWidth: CGFloat = 720
@@ -314,7 +305,7 @@ private struct OnboardingChrome: View {
         HStack {
             BrandMark(compact: true)
             Spacer()
-            FlowStepBar(current: step, total: 3, captions: ["Group setup", "Floor plan", "Select rooms"])
+            FlowStepBar(current: step, total: 4)
             Spacer()
             OnboardingBackButton { nav.screen = back }
             Color.clear.frame(width: SettingsGearButton.reservedWidth, height: 1)
