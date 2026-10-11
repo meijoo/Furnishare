@@ -1,145 +1,948 @@
 [
   {
-    "id": "sofa-blue", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Cloud sofa", "variant": "Sky blue", "category": "sofa",
+    "id": "sofa-blue",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Cloud sofa",
+    "variant": "Sky blue",
+    "category": "sofa",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 60000, "currency": "USD",
-    "dimensions_m": {"width": 2.1, "depth": 0.9, "height": 0.85}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 2.10 × 0.90 × 0.85 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 60000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.1,
+      "depth": 0.9,
+      "height": 0.85
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 2.10 × 0.90 × 0.85 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#86B9D6", "material": "fabric", "tags": ["light", "airy"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#86B9D6",
+      "material": "fabric",
+      "tags": [
+        "light",
+        "airy"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "sofa-compact", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Cove loveseat", "variant": "Mist blue", "category": "sofa",
+    "id": "sofa-compact",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Cove loveseat",
+    "variant": "Mist blue",
+    "category": "sofa",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 45000, "currency": "USD",
-    "dimensions_m": {"width": 1.65, "depth": 0.85, "height": 0.8}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.65 × 0.85 × 0.80 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 45000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.65,
+      "depth": 0.85,
+      "height": 0.8
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.65 × 0.85 × 0.80 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#87B4D1", "material": "fabric", "tags": ["compact"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#87B4D1",
+      "material": "fabric",
+      "tags": [
+        "compact"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "sofa-green", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Meadow sofa", "variant": "Fern green", "category": "sofa",
+    "id": "sofa-green",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Meadow sofa",
+    "variant": "Fern green",
+    "category": "sofa",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 52000, "currency": "USD",
-    "dimensions_m": {"width": 1.9, "depth": 0.88, "height": 0.85}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.90 × 0.88 × 0.85 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 52000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.9,
+      "depth": 0.88,
+      "height": 0.85
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.90 × 0.88 × 0.85 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#8FD18A", "material": "fabric", "tags": ["green"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#8FD18A",
+      "material": "fabric",
+      "tags": [
+        "green"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "sofa-sectional", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Dune sectional", "variant": "Sand (package size only)", "category": "sofa",
+    "id": "sofa-sectional",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Dune sectional",
+    "variant": "Sand (package size only)",
+    "category": "sofa",
     "description": "Fictional fixture whose assembled size is not confirmed, so it cannot be placed.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 89000, "currency": "USD",
-    "dimensions_m": null, "dimension_kind": "package",
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 89000,
+    "currency": "USD",
+    "dimensions_m": null,
+    "dimension_kind": "package",
     "evidence": [],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": null},
-    "source_type": "demo", "style": {"color_hex": "#D8C7A8", "material": "fabric", "tags": []},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#D8C7A8",
+      "material": "fabric",
+      "tags": []
+    },
     "asset_url": null
   },
   {
-    "id": "table", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Pebble table", "variant": "Oak", "category": "coffee_table",
+    "id": "table",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Pebble table",
+    "variant": "Oak",
+    "category": "coffee_table",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 12000, "currency": "USD",
-    "dimensions_m": {"width": 1.0, "depth": 0.55, "height": 0.42}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.00 × 0.55 × 0.42 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 12000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.0,
+      "depth": 0.55,
+      "height": 0.42
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.00 × 0.55 × 0.42 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#D1B48C", "material": "wood", "tags": ["warm"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#D1B48C",
+      "material": "wood",
+      "tags": [
+        "warm"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "rug", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Lagoon rug", "variant": "Teal", "category": "rug",
+    "id": "rug",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Lagoon rug",
+    "variant": "Teal",
+    "category": "rug",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 8000, "currency": "USD",
-    "dimensions_m": {"width": 2.3, "depth": 1.6, "height": 0.015}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 2.30 × 1.60 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 8000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.3,
+      "depth": 1.6,
+      "height": 0.015
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 2.30 × 1.60 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#86D1C8", "material": "wool", "tags": ["teal"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#86D1C8",
+      "material": "wool",
+      "tags": [
+        "teal"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "tv", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Horizon television", "variant": "50 inch", "category": "tv",
+    "id": "tv",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Horizon television",
+    "variant": "50 inch",
+    "category": "tv",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 30000, "currency": "USD",
-    "dimensions_m": {"width": 1.12, "depth": 0.22, "height": 0.7}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.12 × 0.22 × 0.70 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 30000,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.12,
+      "depth": 0.22,
+      "height": 0.7
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.12 × 0.22 × 0.70 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#8C9FD1", "material": "plastic", "tags": []},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#8C9FD1",
+      "material": "plastic",
+      "tags": []
+    },
     "asset_url": null
   },
   {
-    "id": "bed-queen", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Drift queen bed", "variant": "Oat linen", "category": "bed",
+    "id": "bed-queen",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Drift queen bed",
+    "variant": "Oat linen",
+    "category": "bed",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 49900, "currency": "USD",
-    "dimensions_m": {"width": 1.6, "depth": 2.1, "height": 1.0}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.60 × 2.10 × 1.00 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 49900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.6,
+      "depth": 2.1,
+      "height": 1.0
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.60 × 2.10 × 1.00 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#D8CBB6", "material": "fabric", "tags": ["light"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#D8CBB6",
+      "material": "fabric",
+      "tags": [
+        "light"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "nightstand", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Pebble nightstand", "variant": "Birch", "category": "nightstand",
+    "id": "nightstand",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Pebble nightstand",
+    "variant": "Birch",
+    "category": "nightstand",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 7900, "currency": "USD",
-    "dimensions_m": {"width": 0.45, "depth": 0.4, "height": 0.55}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 0.45 × 0.40 × 0.55 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 7900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.45,
+      "depth": 0.4,
+      "height": 0.55
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 0.45 × 0.40 × 0.55 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#D1B48C", "material": "wood", "tags": ["warm"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#D1B48C",
+      "material": "wood",
+      "tags": [
+        "warm"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "dresser", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Tide dresser", "variant": "6 drawers, white", "category": "dresser",
+    "id": "dresser",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Tide dresser",
+    "variant": "6 drawers, white",
+    "category": "dresser",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 19900, "currency": "USD",
-    "dimensions_m": {"width": 1.0, "depth": 0.5, "height": 0.8}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.00 × 0.50 × 0.80 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 19900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.0,
+      "depth": 0.5,
+      "height": 0.8
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.00 × 0.50 × 0.80 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#E6E9EC", "material": "wood", "tags": ["white"]},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#E6E9EC",
+      "material": "wood",
+      "tags": [
+        "white"
+      ]
+    },
     "asset_url": null
   },
   {
-    "id": "desk", "retailer": "Demo fixture", "retailer_product_id": null,
-    "title": "Cirrus desk", "variant": "Ash", "category": "desk",
+    "id": "desk",
+    "retailer": "Demo fixture",
+    "retailer_product_id": null,
+    "title": "Cirrus desk",
+    "variant": "Ash",
+    "category": "desk",
     "description": "Fictional demo product with procedural geometry.",
-    "image_url": null, "local_image": null, "source_url": null,
-    "price_cents": 12900, "currency": "USD",
-    "dimensions_m": {"width": 1.0, "depth": 0.55, "height": 0.75}, "dimension_kind": "assembled",
-    "evidence": [{"field": "dimensions_m", "quote": "Fictional fixture: 1.00 × 0.55 × 0.75 m", "source_url": null}],
+    "image_url": null,
+    "local_image": null,
+    "source_url": null,
+    "price_cents": 12900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.0,
+      "depth": 0.55,
+      "height": 0.75
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "dimensions_m",
+        "quote": "Fictional fixture: 1.00 × 0.55 × 0.75 m",
+        "source_url": null
+      }
+    ],
     "retrieved_at": "2026-10-10T05:00:00Z",
-    "additional_costs": {"shipping_cents": null, "tax_cents": null, "assembly_cents": 0},
-    "source_type": "demo", "style": {"color_hex": "#C9B79C", "material": "wood", "tags": []},
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": 0
+    },
+    "source_type": "demo",
+    "style": {
+      "color_hex": "#C9B79C",
+      "material": "wood",
+      "tags": []
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue",
+    "retailer": "IKEA",
+    "retailer_product_id": "s79599939",
+    "title": "SALTSJÖBADEN 3-seat sofa",
+    "variant": "Fridtuna dark gray-blue",
+    "category": "sofa",
+    "description": "SALTSJÖBADEN 3-seat sofa - Fridtuna dark gray-blue. The innovative construction of the pocket springs maximizes comfort while minimizing the amount of foam. Pocket springs in the seat, soft yet supportive back cushions and well-balanced dimensions make for truly comfortable seating. _",
+    "image_url": "https://www.ikea.com/us/en/images/products/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue__1578243_pe1033911_s5.jpg",
+    "local_image": "product_images/ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/",
+    "price_cents": 59900,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.051,
+      "depth": 0.879,
+      "height": 0.899
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"599\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 80 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 34 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height including back cushions 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/saltsjoebaden-3-seat-sofa-fridtuna-dark-gray-blue-s79599939/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#667F88",
+      "material": "fabric",
+      "tags": [
+        "blue",
+        "light wood",
+        "light wood legs",
+        "modern",
+        "scandinavian",
+        "theme-match",
+        "demo-primary"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-holmerud-coffee-table-oak-effect",
+    "retailer": "IKEA",
+    "retailer_product_id": "90540706",
+    "title": "HOLMERUD Coffee table",
+    "variant": "oak effect 35 3/8x21 5/8 \"",
+    "category": "coffee_table",
+    "description": "HOLMERUD Coffee table - oak effect 35 3/8x21 5/8 \". The clean and stylish architectural shape adds character to the room and makes the coffee table an eye-catcher. The design of this coffee table gives you easily accessible open storage spaces for you to organize and display your items.",
+    "image_url": "https://www.ikea.com/us/en/images/products/holmerud-coffee-table-oak-effect__1193663_pe901563_s5.jpg",
+    "local_image": "product_images/ikea-holmerud-coffee-table-oak-effect.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/",
+    "price_cents": 8999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.899,
+      "depth": 0.549,
+      "height": 0.4
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"89.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 35 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 21 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 15 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/holmerud-coffee-table-oak-effect-90540706/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#9C8467",
+      "material": "particleboard, oak effect",
+      "tags": [
+        "light wood",
+        "oak",
+        "budget",
+        "rectangular",
+        "theme-match"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-hotellrum-rug-high-pile-blue-green-yellow",
+    "retailer": "IKEA",
+    "retailer_product_id": "40571154",
+    "title": "HOTELLRUM Rug, high pile",
+    "variant": "blue/green yellow 5 ' 3 \"x7 ' 7 \"",
+    "category": "rug",
+    "description": "HOTELLRUM Rug, high pile - blue/green yellow 5 ' 3 \"x7 ' 7 \". The rug is a real eye-catcher thanks to the gradient pattern. The light sheen creates variations in the surface. The high pile dampens sound and provides a soft surface to walk on. This product has been tested for domestic use.",
+    "image_url": "https://www.ikea.com/us/en/images/products/hotellrum-rug-high-pile-blue-green-yellow__1242451_pe920247_s5.jpg",
+    "local_image": "product_images/ikea-hotellrum-rug-high-pile-blue-green-yellow.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/",
+    "price_cents": 19999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 2.311,
+      "depth": 1.6,
+      "height": 0.019
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"199.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Length 7 ' 7 \"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Width 5 ' 3 \"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Thickness ¾ \"",
+        "source_url": "https://www.ikea.com/us/en/p/hotellrum-rug-high-pile-blue-green-yellow-40571154/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#DFB81F",
+      "material": "high pile",
+      "tags": [
+        "blue",
+        "green",
+        "yellow",
+        "pattern",
+        "high pile",
+        "playful"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "abt-samsung-u8000h-55-un55u8000hfxza",
+    "retailer": "Abt Electronics",
+    "retailer_product_id": "243864",
+    "title": "Samsung Crystal UHD U8000H 55-Inch 4K Smart TV in Black",
+    "variant": "55\" (UN55U8000HFXZA)",
+    "category": "tv",
+    "description": "55-Inch 4K LED Smart TV. 60Hz Refresh Rate. Crystal Processor 4K. Samsung Knox Security. Endless Free Content",
+    "image_url": "https://content.abt.com/media/images/products/BDP_Images/samsung-4k-smart-tv-UN58U8000HFXZA-front.jpg",
+    "local_image": "product_images/abt-samsung-u8000h-55-un55u8000hfxza.jpg",
+    "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html",
+    "price_cents": 29799,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.224,
+      "depth": 0.198,
+      "height": 0.759
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "Your Price: $297.99",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width With Stand (in) 48.2 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth With Stand (in) 7.8 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height With Stand (in) 29.9 (TV with stand)",
+        "source_url": "https://www.abt.com/Samsung-Crystal-UHD-U8000H-55-Inch-4K-Smart-TV-in-Black-UN55U8000HFXZA/p/243864.html"
+      }
+    ],
+    "retrieved_at": "2026-10-10T05:00:03Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#16171A",
+      "material": "plastic/metal",
+      "tags": [
+        "black",
+        "tv",
+        "55-inch",
+        "budget",
+        "samsung"
+      ]
+    },
+    "asset_url": null
+  },
+  {
+    "id": "walmart-renwick-channel-tufted-bed-queen-navy",
+    "retailer": "Walmart",
+    "retailer_product_id": "20616613199",
+    "title": "Renwick Queen Upholstered Platform Bed Frame with Channel Tufted Headboard",
+    "variant": "Navy Blue, Queen",
+    "category": "bed",
+    "description": "Add comfort and style to your bedroom with this Renwick upholstered platform bed. Featuring clean lines, classic tufted details, and durable linen fabric, it brings a refined look to modern spaces. The upholstered headboard creates a cozy and inviting feel, while sturdy wood slats and center…",
+    "image_url": "https://i5.walmartimages.com/seo/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue_22728938-26ef-413c-931b-44f01ad45418.b16f479afa122e26bf7bef9b97d627f3.png",
+    "local_image": "product_images/walmart-renwick-channel-tufted-bed-queen-navy.jpg",
+    "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199",
+    "price_cents": 10999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.575,
+      "depth": 2.096,
+      "height": 1.143
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"priceString\":\"$109.99\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"82.50 x 62.00 x 45.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"82.50 x 62.00 x 45.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "\"name\":\"Dimensions\",\"value\":\"82.50 x 62.00 x 45.00 in\"",
+        "source_url": "https://www.walmart.com/ip/Renwick-Queen-Upholstered-Bed-Frame-with-Channel-Tufted-Headboard-Navy-Blue/20616613199"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#2C3A55",
+      "material": "linen blend fabric, wood frame",
+      "tags": [
+        "navy",
+        "blue",
+        "upholstered",
+        "channel tufted",
+        "modern",
+        "budget",
+        "queen"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-grafjallet-nightstand-anthracite",
+    "retailer": "IKEA",
+    "retailer_product_id": "20570221",
+    "title": "GRÅFJÄLLET Nightstand",
+    "variant": "anthracite",
+    "category": "nightstand",
+    "description": "GRÅFJÄLLET Nightstand - anthracite. GRÅFJÄLLET nightstand, anthracite, 173/4x141/8x231/4\" The GRÅFJÄLLET series combines industrial influences with clean and bold lines that create a timeless look. The bedside table has open storage on two levels and a generous hidden area behind the door.",
+    "image_url": "https://www.ikea.com/us/en/images/products/grafjaellet-nightstand-anthracite__1327638_pe944536_s5.jpg",
+    "local_image": "product_images/ikea-grafjallet-nightstand-anthracite.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/",
+    "price_cents": 4999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 0.451,
+      "depth": 0.359,
+      "height": 0.591
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"49.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 17 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 14 1/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 23 1/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/grafjaellet-nightstand-anthracite-20570221/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#3A3B3D",
+      "material": "particleboard, anthracite",
+      "tags": [
+        "dark",
+        "anthracite",
+        "gray",
+        "budget",
+        "modern",
+        "theme-contrast"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-rast-6-drawer-dresser-pine",
+    "retailer": "IKEA",
+    "retailer_product_id": "00582164",
+    "title": "RAST 6-drawer dresser",
+    "variant": "pine",
+    "category": "dresser",
+    "description": "RAST 6-drawer dresser - pine. RAST 6-drawer dresser, pine, 487/8x263/4\" A tribute to traditional Scandinavian design! Love the RAST chest of drawers as it is – or make it more personal by painting it. The generous storage in a compact size makes it ideal for smaller spaces.",
+    "image_url": "https://www.ikea.com/us/en/images/products/rast-6-drawer-dresser-pine__1291248_pe934862_s5.jpg",
+    "local_image": "product_images/ikea-rast-6-drawer-dresser-pine.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/",
+    "price_cents": 12999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.241,
+      "depth": 0.349,
+      "height": 0.679
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"129.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 48 7/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 13 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 26 3/4 \"",
+        "source_url": "https://www.ikea.com/us/en/p/rast-6-drawer-dresser-pine-00582164/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#E3CDA4",
+      "material": "solid pine (untreated)",
+      "tags": [
+        "light wood",
+        "pine",
+        "budget",
+        "low",
+        "scandinavian",
+        "theme-match"
+      ],
+      "shape": "rect"
+    },
+    "asset_url": null
+  },
+  {
+    "id": "ikea-micke-desk-white",
+    "retailer": "IKEA",
+    "retailer_product_id": "80213074",
+    "title": "MICKE Desk",
+    "variant": "white, 41 3/8x19 5/8\"",
+    "category": "desk",
+    "description": "MICKE Desk - white, 41 3/8x19 5/8\". MICKE desk, white, 413/8x195/8\" A clean and simple look that fits just about anywhere. You can combine it with other desks or drawer units in the MICKE series to extend your work space. The clever design at the back hides messy cables. Drawer stops prevent the drawers from being pulled out too far.",
+    "image_url": "https://www.ikea.com/us/en/images/products/micke-desk-white__0736018_pe740345_s5.jpg",
+    "local_image": "product_images/ikea-micke-desk-white.jpg",
+    "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/",
+    "price_cents": 10999,
+    "currency": "USD",
+    "dimensions_m": {
+      "width": 1.051,
+      "depth": 0.498,
+      "height": 0.749
+    },
+    "dimension_kind": "assembled",
+    "evidence": [
+      {
+        "field": "price_cents",
+        "quote": "\"price\":\"109.99\",\"priceCurrency\":\"USD\"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      },
+      {
+        "field": "dimensions_m.width",
+        "quote": "Width 41 3/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      },
+      {
+        "field": "dimensions_m.depth",
+        "quote": "Depth 19 5/8 \"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      },
+      {
+        "field": "dimensions_m.height",
+        "quote": "Height 29 1/2 \"",
+        "source_url": "https://www.ikea.com/us/en/p/micke-desk-white-80213074/"
+      }
+    ],
+    "retrieved_at": "2026-10-10T17:29:58Z",
+    "additional_costs": {
+      "shipping_cents": null,
+      "tax_cents": null,
+      "assembly_cents": null
+    },
+    "source_type": "verified",
+    "style": {
+      "color_hex": "#F2F2F0",
+      "material": "particleboard, white",
+      "tags": [
+        "white",
+        "budget",
+        "minimalist",
+        "compact",
+        "modern"
+      ],
+      "shape": "rect"
+    },
     "asset_url": null
   }
 ]

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct ProductDetailPanel: View {
     @Environment(AppModel.self) private var model
@@ -109,14 +110,18 @@ struct ProductImage: View {
         ZStack {
             RoundedRectangle(cornerRadius: 12).fill(.white.opacity(0.7))
             if attempt < urls.count {
-                AsyncImage(url: urls[attempt]) { phase in
-                    switch phase {
-                    case .success(let image): image.resizable().scaledToFit().padding(4)
-                    case .failure: ProgressView().onAppear { attempt += 1 }
-                    default: ProgressView()
+                if urls[attempt].isFileURL, let image = UIImage(contentsOfFile: urls[attempt].path) {
+                    Image(uiImage: image).resizable().scaledToFit().padding(4)
+                } else {
+                    AsyncImage(url: urls[attempt]) { phase in
+                        switch phase {
+                        case .success(let image): image.resizable().scaledToFit().padding(4)
+                        case .failure: ProgressView().onAppear { attempt += 1 }
+                        default: ProgressView()
+                        }
                     }
+                    .id(urls[attempt])
                 }
-                .id(urls[attempt])
             } else {
                 fallback
             }

@@ -11,7 +11,7 @@ ROOM = {
                  {'kind': 'window', 'wall': 'left', 'offset_m': 0.0, 'width_m': 1.4}],
     'clearances': [{'label': 'door swing', 'x_m': 1.8, 'z_m': 1.2, 'width_m': 0.9, 'depth_m': 0.9}],
 }
-MEMBERS = [('emily', 'Emily'), ('maya', 'Michelle'), ('alex', 'Annabel')]
+MEMBERS = [('emily', 'Emily'), ('maya', 'Maya'), ('alex', 'Alex')]
 # Private contribution caps for the shared living room (USD cents).
 SEED_LIMITS = {'emily': 20000, 'maya': 25000, 'alex': 30000}
 # Scene staging budget keeps the full demo layout; the room budget sums contributions.
@@ -24,17 +24,32 @@ def _handles() -> dict:
     return json.loads(path.read_text()) if path.exists() else {}
 
 
+SEED_PRODUCT_IDS = {
+    'sofa': 'ikea-saltsjobaden-3seat-fridtuna-dark-gray-blue',
+    'coffee_table': 'ikea-holmerud-coffee-table-oak-effect',
+    'rug': 'ikea-hotellrum-rug-high-pile-blue-green-yellow',
+    'tv': 'abt-samsung-u8000h-55-un55u8000hfxza',
+    'bed': 'walmart-renwick-channel-tufted-bed-queen-navy',
+    'nightstand': 'ikea-grafjallet-nightstand-anthracite',
+    'dresser': 'ikea-rast-6-drawer-dresser-pine',
+    'desk': 'ikea-micke-desk-white',
+}
+
+
 def demo_sofa() -> dict | None:
-    return next((p for p in catalog._demo_products() if p['id'] == 'sofa-blue'), None)
+    return mock_furniture(['sofa'])[0]
 
 
 def mock_furniture(categories: list[str]) -> list[dict]:
-    """Fixed fictional furniture; seeding never searches shopping or calls Gemini."""
+    """Fixed catalog furniture with photos and listing details; no shopping or Gemini calls.
+    Fictional fixtures remain the fallback when the verified catalog is unavailable.
+    """
     chosen = {'sofa': 'sofa-blue', 'coffee_table': 'demo-pebble-table', 'rug': 'demo-lagoon-rug',
               'tv': 'demo-horizon-tv', 'bed': 'demo-fjord-bed', 'nightstand': 'demo-pine-nightstand',
               'dresser': 'demo-harbor-dresser', 'desk': 'demo-studio-desk'}
     pool = {p['id']: p for p in catalog._demo_products()}
-    furniture = [pool[chosen[category]] for category in categories]
+    verified = {p['id']: p for p in catalog.products()}
+    furniture = [verified.get(SEED_PRODUCT_IDS[category]) or pool[chosen[category]] for category in categories]
     catalog.remember(furniture)
     return furniture
 

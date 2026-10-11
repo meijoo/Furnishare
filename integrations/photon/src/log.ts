@@ -24,7 +24,7 @@ export const log = {
   error: (msg: string, fields?: Record<string, unknown>) => emit("error", msg, fields),
 };
 
-/** `+15551234567` -> `+1555***4567`, `alex@icloud.com` -> `al***@icloud.com`. */
+/** `+15551234567` -> `+1555***4567`, `alex@icloud.com` -> `an***@icloud.com`. */
 export function maskHandle(handle: string | undefined | null): string {
   if (!handle) return "<none>";
   const at = handle.indexOf("@");

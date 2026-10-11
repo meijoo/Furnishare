@@ -520,6 +520,21 @@ async def inspiration(hid: str, file: UploadFile = File(...)):
     return {'inspiration_image_url': f'/uploads/{path.name}'}
 
 
+@app.delete('/households/{hid}/inspiration/{image_id}')
+def delete_inspiration(hid: str, image_id: str):
+    core.household(hid)
+    with db.tx() as c:
+        photo = c.execute('SELECT path FROM room_inspiration_images WHERE household_id=? AND id=?', (hid, image_id)).fetchone()
+        if not photo:
+            raise HTTPException(404, 'Inspiration photo not found in this room')
+        c.execute('DELETE FROM room_inspiration_images WHERE household_id=? AND id=?', (hid, image_id))
+        latest = c.execute('SELECT path FROM room_inspiration_images WHERE household_id=? ORDER BY created_at DESC,rowid DESC LIMIT 1', (hid,)).fetchone()
+        c.execute('UPDATE households SET inspiration_path=? WHERE id=?', (latest['path'] if latest else None, hid))
+        db.log(c, hid, 'Inspiration image removed')
+        db.bump(c, hid)
+    return {'ok': True}
+
+
 @app.post('/households/{hid}/chat')
 def chat(hid: str, body: ChatBody):
     core.household(hid)

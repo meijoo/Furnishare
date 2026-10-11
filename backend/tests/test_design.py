@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app import agent, catalog, core, db, realize, workflow
+from app import agent, catalog, core, db, planner, realize, workflow
 from app.main import app
 
 H = 'demo'
@@ -202,3 +202,54 @@ def test_chat_without_mode_refines_existing_proposal(client):
     r = client.post(f'/households/{H}/chat', json={'member_id': 'emily', 'text': 'swap the sofa'})
     assert r.status_code == 200, r.text
     assert client.get(f'/households/{H}/state').json()['proposal']['version'] >= version
+
+
+def test_gemini_receives_only_current_rooms_photos_and_saved_description(client, monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    own_image = tmp_path / 'own.png'
+    other_image = tmp_path / 'other.jpg'
+    own_image.write_bytes(b'current-room-photo')
+    other_image.write_bytes(b'other-room-photo')
+    with db.tx() as connection:
+        connection.execute('INSERT INTO room_inspiration_images VALUES (?,?,?,?)', ('own', H, str(own_image), db.now()))
+        connection.execute('INSERT INTO room_inspiration_images VALUES (?,?,?,?)', ('other', 'demo-bed-maya', str(other_image), db.now()))
+        connection.execute('INSERT INTO room_inspiration VALUES (?,?)', (H, 'Warm oak with blue accents'))
+    requests = []
+
+    def generate_content(**kwargs):
+        requests.append(kwargs)
+        # Publish via the real tool so the test covers the normal Gemini success path.
+        result = kwargs['config'].tools[-1](['sofa-blue'], 'Matches the uploaded inspiration.')
+        assert result['ok'], result
+        return SimpleNamespace(text='The inspired plan is ready.')
+
+    monkeypatch.setattr(agent, '_gemini', lambda: SimpleNamespace(models=SimpleNamespace(generate_content=generate_content)))
+    monkeypatch.setattr(agent, 'available', lambda: True)
+    result = client.post(f'/households/{H}/chat', json={'member_id': 'emily', 'text': 'Just a sofa for $1000', 'mode': 'design'})
+    assert result.status_code == 200 and result.json()['engine'] == 'gemini'
+    contents = requests[0]['contents']
+    assert 'Warm oak with blue accents' in contents[0]
+    photos = [part.inline_data for part in contents[1:]]
+    assert len(photos) == 1
+    assert photos[0].data == b'current-room-photo' and photos[0].mime_type == 'image/png'
+    assert not db.all_('SELECT job_id FROM outbound_jobs')
+
+
+def test_remove_inspiration_updates_reference_and_cannot_remove_another_rooms_photo(client, tmp_path):
+    paths = [tmp_path / name for name in ('first.png', 'second.png', 'other.png')]
+    for path in paths:
+        path.write_bytes(b'photo')
+    with db.tx() as connection:
+        for image_id, hid, path in [('first', H, paths[0]), ('second', H, paths[1]), ('other', 'demo-bed-maya', paths[2])]:
+            connection.execute('INSERT INTO room_inspiration_images VALUES (?,?,?,?)', (image_id, hid, str(path), db.now()))
+        connection.execute('UPDATE households SET inspiration_path=? WHERE id=?', (str(paths[1]), H))
+    assert client.delete(f'/households/{H}/inspiration/other').status_code == 404
+    assert client.delete(f'/households/{H}/inspiration/second').status_code == 200
+    state = client.get(f'/households/{H}/state').json()
+    assert [p['id'] for p in state['room']['inspiration_images']] == ['first']
+    assert planner.room_image(core.household(H)) == paths[0]
+    assert client.delete(f'/households/{H}/inspiration/first').status_code == 200
+    assert planner.room_image(core.household(H)) is None
+    assert client.get(f'/households/{H}/state').json()['room']['inspiration_images'] == []
+    assert db.one('SELECT id FROM room_inspiration_images WHERE id=?', 'other')

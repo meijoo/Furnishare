@@ -218,7 +218,7 @@ Plan coordinates are meters, top-down: `x_m` grows to the right, `z_m` grows tow
 ```json
 {
   "id": "demo", "name": "3 bed / 3 bath apartment", "width_m": 10.5, "depth_m": 9.5,
-  "members": [{"id": "emily", "name": "Emily"}, {"id": "maya", "name": "Michelle"}, {"id": "alex", "name": "Annabel"}],
+  "members": [{"id": "emily", "name": "Emily"}, {"id": "maya", "name": "Maya"}, {"id": "alex", "name": "Alex"}],
   "rooms": [
     {"id": "living", "name": "Living room", "kind": "living", "shared": true, "owner_id": null,
      "household_id": "demo", "x_m": 0.0, "z_m": 5.5, "width_m": 4.5, "depth_m": 4.0,
@@ -393,3 +393,7 @@ A demo reset issues a new epoch and clears edits. Patches using an old epoch
 return 409 so a reconnecting device cannot undo the reset. The iOS reset sends
 `POST /demo/reset?clear_handles=true&furnished=true&full_reset=true` to restore the
 furnished demo while clearing prior edits, photos, decisions, and demo messages.
+
+Uploaded inspiration images and the saved room description are sent directly to Gemini for room designs, including when the visual ranker is offline. Text product search does not use inspiration images.
+
+`DELETE /households/{hid}/inspiration/{image_id}` removes a photo from that room's inspiration and updates the visual-ranker reference to the latest remaining photo (or clears it). IDs belonging to another room return 404.

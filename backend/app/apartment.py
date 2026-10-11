@@ -38,9 +38,9 @@ BEDROOM_STYLE = BEDROOM_STYLES['emily']
 ROOMS = [
     {'id': 'bed-emily', 'name': "Emily's bedroom", 'kind': 'bedroom', 'owner_id': 'emily', 'household_id': 'demo-bed-emily',
      'x_m': 0.0, 'z_m': 0.0, 'width_m': 3.5, 'depth_m': 3.5},
-    {'id': 'bed-maya', 'name': "Michelle's bedroom", 'kind': 'bedroom', 'owner_id': 'maya', 'household_id': 'demo-bed-maya',
+    {'id': 'bed-maya', 'name': "Maya's bedroom", 'kind': 'bedroom', 'owner_id': 'maya', 'household_id': 'demo-bed-maya',
      'x_m': 3.5, 'z_m': 0.0, 'width_m': 3.5, 'depth_m': 3.5},
-    {'id': 'bed-alex', 'name': "Annabel's bedroom", 'kind': 'bedroom', 'owner_id': 'alex', 'household_id': 'demo-bed-alex',
+    {'id': 'bed-alex', 'name': "Alex's bedroom", 'kind': 'bedroom', 'owner_id': 'alex', 'household_id': 'demo-bed-alex',
      'x_m': 7.0, 'z_m': 0.0, 'width_m': 3.5, 'depth_m': 3.5},
     {'id': 'bath-1', 'name': 'Bathroom', 'kind': 'bathroom', 'x_m': 0.0, 'z_m': 3.5, 'width_m': 2.5, 'depth_m': 2.0},
     {'id': 'bath-2', 'name': 'Bathroom', 'kind': 'bathroom', 'x_m': 2.5, 'z_m': 3.5, 'width_m': 2.5, 'depth_m': 2.0},
@@ -67,7 +67,7 @@ def _name_owned_rooms(rooms: list[dict]) -> list[dict]:
 
 
 def built_in_plan() -> dict:
-    """Default demo layout from Annabel's recorded 3-bed read, through the same builder as an upload."""
+    """Default demo layout from Alex's recorded 3-bed read, through the same builder as an upload."""
     if not DEFAULT_PLAN_PATH.exists():
         return {'name': NAME, 'source': 'built_in', 'width_m': WIDTH_M, 'depth_m': DEPTH_M, 'rooms': copy.deepcopy(ROOMS),
                 'image_url': None, 'image_frame_m': None, 'warnings': []}

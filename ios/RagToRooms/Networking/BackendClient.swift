@@ -225,6 +225,10 @@ struct BackendClient: Sendable {
                              timeout: 60)
     }
 
+    func deleteInspiration(imageID: String) async throws {
+        try await sendIgnoringBody("DELETE", "\(household)/inspiration/\(imageID)")
+    }
+
     /// Reading the plan with Gemini takes 10-30 s.
     func importFloorplan(apartmentID: String, image: UploadImage, widthM: Double?) async throws -> FloorplanImportResponse {
         let fields = widthM.map { ["width_m": String(format: "%.3f", $0)] } ?? [:]

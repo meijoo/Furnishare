@@ -6,7 +6,7 @@ extension AppModel {
     static func loadFixtures() -> (state: HouseholdState, products: [Product]) {
         do {
             let decoder = JSONDecoder()
-            var state = try decoder.decode(HouseholdState.self, from: try fixtureData("demo_state"))
+            let state = try decoder.decode(HouseholdState.self, from: try fixtureData("demo_state"))
             let products = try decoder.decode(ProductList.self, from: try fixtureData("demo_products")).products
             return (state, products)
         } catch {
@@ -30,24 +30,29 @@ extension AppModel {
         var state = blankState(forScope: householdID, apartment: fixtureApartment)
         guard let owner = fixtureApartment?.room(forHousehold: householdID)?.ownerID else { return state }
         let ownerName = fixtureApartment?.name(of: owner) ?? owner.capitalized
-        let pieces: [(id: String, category: String, title: String, cents: Int, x: Double, z: Double, rotation: Double,
-                      size: Dimensions, hex: String)] = [
-            ("bed-queen", "bed", "Drift queen bed", 49900, 0, -0.7, 0, Dimensions(width: 1.6, depth: 2.1, height: 1.0), "#D8CBB6"),
-            ("nightstand", "nightstand", "Pebble nightstand", 7900, -1.075, -1.55, 0, Dimensions(width: 0.45, depth: 0.4, height: 0.55), "#D1B48C"),
-            ("dresser", "dresser", "Tide dresser", 19900, -1.5, 0.7, .pi / 2, Dimensions(width: 1.0, depth: 0.5, height: 0.8), "#E6E9EC"),
-            ("desk", "desk", "Cirrus desk", 12900, 1.475, -0.2, -.pi / 2, Dimensions(width: 1.0, depth: 0.55, height: 0.75), "#C9B79C")
+        let products = loadFixtures().products
+        let placements: [(id: String, x: Double, z: Double, rotation: Double)] = [
+            ("walmart-renwick-channel-tufted-bed-queen-navy", 0, -0.7, 0),
+            ("ikea-grafjallet-nightstand-anthracite", -1.075, -1.55, 0),
+            ("ikea-rast-6-drawer-dresser-pine", -1.5, 0.7, .pi / 2),
+            ("ikea-micke-desk-white", 1.475, -0.2, -.pi / 2)
         ]
-        let total = pieces.map(\.cents).reduce(0, +)
+        let pieces = placements.compactMap { placement -> (product: Product, x: Double, z: Double, rotation: Double, size: Dimensions)? in
+            guard let product = products.first(where: { $0.id == placement.id }),
+                  let size = product.placeableDimensions else { return nil }
+            return (product, placement.x, placement.z, placement.rotation, size)
+        }
+        let total = pieces.map { $0.product.priceCents }.reduce(0, +)
         state.budgetCents = 100000
         state.proposal = Proposal(
             version: 1, status: .awaitingApproval,
-            items: pieces.map { ProposalItem(productID: $0.id, category: $0.category, priceCents: $0.cents, title: $0.title, sourceType: "demo") },
+            items: pieces.map { ProposalItem(productID: $0.product.id, category: $0.product.category, priceCents: $0.product.priceCents, title: $0.product.title, sourceType: $0.product.sourceType) },
             knownTotalCents: total, unknownCosts: ["shipping", "tax"], shares: [owner: total], approvals: [owner: false],
             explanation: "Offline demo proposal. This is \(ownerName)'s private room, so \(ownerName) pays 100% and approves alone. Furniture is placed with the door clear.",
             createdAt: "2026-10-10T05:00:00Z")
         state.scene = SceneState(objects: pieces.map {
-            SceneObject(objectID: "obj-\($0.category)", productID: $0.id, category: $0.category, positionM: [$0.x, 0, $0.z],
-                        rotationYRad: $0.rotation, dimensionsM: $0.size, colorHex: $0.hex, assetURL: nil, proposalVersion: 1)
+            SceneObject(objectID: "obj-\($0.product.category)", productID: $0.product.id, category: $0.product.category, positionM: [$0.x, 0, $0.z],
+                        rotationYRad: $0.rotation, dimensionsM: $0.size, colorHex: $0.product.style?.colorHex, assetURL: nil, proposalVersion: 1)
         }, validation: nil)
         state.activity.insert(ActivityEntry(at: "2026-10-10T05:01:00Z", text: "Agent proposed version 1 for \(dollars(total)) (shipping and tax unknown)"), at: 0)
         return state

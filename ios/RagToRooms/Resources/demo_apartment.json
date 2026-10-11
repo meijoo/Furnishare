@@ -11,11 +11,11 @@
     },
     {
       "id": "maya",
-      "name": "Michelle"
+      "name": "Maya"
     },
     {
       "id": "alex",
-      "name": "Annabel"
+      "name": "Alex"
     }
   ],
   "rooms": [
@@ -51,7 +51,7 @@
     },
     {
       "id": "bed-maya",
-      "name": "Michelle's bedroom",
+      "name": "Maya's bedroom",
       "kind": "bedroom",
       "shared": false,
       "owner_id": "maya",
@@ -193,7 +193,7 @@
     },
     {
       "id": "bed-alex",
-      "name": "Annabel's bedroom",
+      "name": "Alex's bedroom",
       "kind": "bedroom",
       "shared": false,
       "owner_id": "alex",

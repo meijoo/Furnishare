@@ -319,6 +319,7 @@ final class AppModel {
         UserDefaults.standard.set(householdID, forKey: Self.householdKey)
         selectedObjectID = nil
         detailProductID = nil
+        inspirationPreview = nil
         localPoses = [:]
         errorMessage = nil
         scopeNotice = nil
@@ -607,7 +608,10 @@ final class AppModel {
            FileManager.default.fileExists(atPath: url.path) {
             return [url]
         }
-        return [client?.resolve(product.localImage), client?.resolve(product.imageURL)].compactMap { $0 }
+        let bundled = Bundle.main.url(forResource: product.id, withExtension: "jpg")
+            ?? Bundle.main.url(forResource: product.id, withExtension: "jpg", subdirectory: "SeedProductImages")
+        if source == .fixture, let bundled { return [bundled] }
+        return [client?.resolve(product.localImage), bundled, client?.resolve(product.imageURL)].compactMap { $0 }
     }
 
     func alternatives(for product: Product) -> [Product] {
@@ -708,11 +712,21 @@ final class AppModel {
         persistRoster()
     }
 
-    func addInspirationPhoto(_ image: UIImage) {
+    var currentInspirationShots: [InspirationShot] {
+        inspirationShots.filter { $0.householdID == currentHouseholdID }
+    }
+
+    func removeRoomInspiration(_ id: String) async {
+        await perform("inspiration", offline: {}) { try await $0.deleteInspiration(imageID: id) }
+    }
+
+    func addInspirationPhoto(_ image: UIImage, householdID: String? = nil) {
+        let hid = householdID ?? currentHouseholdID
         guard let filename = Self.writeOwnedImage(image) else { return }
-        inspirationShots.insert(InspirationShot(id: UUID(), filename: filename, addedAt: Date()), at: 0)
+        let shot = InspirationShot(id: UUID(), filename: filename, addedAt: Date(), householdID: hid)
+        inspirationShots.insert(shot, at: 0)
         persistJSON(inspirationShots, key: Self.inspirationShotsKey)
-        Task { await uploadInspiration(image) }
+        Task { await uploadInspiration(image, householdID: hid, shotID: shot.id) }
     }
 
     func removeInspirationShot(_ id: UUID) {
@@ -1636,11 +1650,22 @@ final class AppModel {
         await perform("room", offline: { offlineSaveRoom(room) }) { try await $0.putRoom(room) }
     }
 
-    func uploadInspiration(_ image: UIImage) async {
-        inspirationPreview = image
+    func uploadInspiration(_ image: UIImage, householdID: String, shotID: UUID) async {
+        if householdID == currentHouseholdID { inspirationPreview = image }
         guard let jpeg = image.jpegData(compressionQuality: 0.85) else { return }
-        await perform("inspiration", offline: { appendActivity("Inspiration photo saved locally (offline demo)") }) {
-            try await $0.uploadInspiration(jpegData: jpeg)
+        guard source == .live, let client else { return }
+        busy.insert("inspiration")
+        defer { busy.remove("inspiration") }
+        do {
+            try await client.uploadRoomInspiration(householdID: householdID,
+                                                  image: UploadImage(data: jpeg, mimeType: "image/jpeg", filename: "inspiration.jpg"))
+            removeInspirationShot(shotID)
+            if householdID == currentHouseholdID {
+                inspirationPreview = nil
+                try await refresh(client)
+            }
+        } catch {
+            errorMessage = Self.message(error)
         }
     }
 
@@ -1729,6 +1754,7 @@ final class AppModel {
     }
 
     func designRoom(_ text: String) async {
+        guard !busy.contains("inspiration"), actingMemberInScope else { return }
         await sendChat(text.isEmpty ? chatSuggestion : text, mode: "design")
     }
 

@@ -1,5 +1,7 @@
 """Gemini coordination. Gemini proposes; backend code validates every argument and owns money/authorization."""
 import json
+import mimetypes
+from pathlib import Path
 import re
 import time
 
@@ -12,6 +14,7 @@ Rules: only use product ids listed in the prompt, returned by tools, or supplied
 Prefer listed candidates and the user's pick ids. Skip categories they already own. If a proposal is rejected, retry at most twice.
 You cannot approve, pay, or settle anything. Never reveal one roommate's private limit.
 Publishing a design saves it in the app without sending texts. Direct roommates to review and approve in the app.
+Use the attached inspiration photos and saved room description to match colors, materials, and style while respecting the budget.
 Call propose_bundle as soon as you have a valid set. Do not render a preview. Finish with a short friendly explanation."""
 
 START_OVER = re.compile(r'\b(start over|start again|from scratch|new plan|redesign)\b', re.I)
@@ -251,10 +254,22 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
                + (f'Combined contribution limits: {dollars(cap)}. ' if cap is not None else '')
                + ('An inspiration image is uploaded. ' if planner.room_image(h) else 'No inspiration image yet. ')
                + pick_line + skip_line + refine_line + listed_line)
+    description = (db.one('SELECT description FROM room_inspiration WHERE household_id=?', hid) or {}).get('description', '')
+    if description:
+        context += f' Saved room inspiration: {description}.'
+    contents = [f'{context}\nRequest: {text}']
+    image_paths = [Path(row['path']) for row in db.all_(
+        'SELECT path FROM room_inspiration_images WHERE household_id=? ORDER BY created_at,id', hid)]
+    if not image_paths and (legacy_image := planner.room_image(h)):
+        image_paths = [legacy_image]
+    for image in image_paths:
+        if image.is_file():
+            contents.append(types.Part.from_bytes(data=image.read_bytes(),
+                                                 mime_type=mimetypes.guess_type(image.name)[0] or 'image/jpeg'))
     thinking = thinking_off(config.GEMINI_MODEL)
     response = _gemini().models.generate_content(
         model=config.GEMINI_MODEL,
-        contents=f'{context}\nRequest: {text}',
+        contents=contents,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM,
             tools=[search_products, rank_candidates, propose_bundle],

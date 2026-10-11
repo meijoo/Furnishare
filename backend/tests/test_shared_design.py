@@ -93,3 +93,33 @@ def test_reset_seeds_mock_furniture_without_shopping(monkeypatch):
             assert len(state['scene']['objects']) == 4
             assert state['scene']['validation']['ok']
             assert all(catalog.get(item['product_id'])['source_type'] == 'demo' for item in state['scene']['objects'])
+
+
+def test_catalog_seed_has_product_photos_and_details_in_every_room(monkeypatch):
+    from app import config, seed
+
+    def no_shopping(*args, **kwargs):
+        raise AssertionError('Seeding must use saved catalog products without live search')
+
+    monkeypatch.setattr(catalog, 'VERIFIED', config.DATA_DIR / 'catalog_verified.json')
+    monkeypatch.setattr(catalog, 'EXTRA', [config.DATA_DIR / 'catalog_bedroom.json'])
+    monkeypatch.setattr(catalog, 'live_search', no_shopping)
+    catalog._cache['mtime'] = None
+    try:
+        with TestClient(app) as client:
+            response = client.post('/demo/reset', params={'full_reset': 'true'})
+            assert response.status_code == 200, response.text
+            products = {p['id']: p for p in client.get('/products').json()}
+            for hid in ('demo', 'demo-bed-emily', 'demo-bed-maya', 'demo-bed-alex'):
+                state = client.get(f'/households/{hid}/state').json()
+                assert len(state['scene']['objects']) == 4
+                assert state['scene']['validation']['ok'], state['scene']['validation']
+                for item in state['scene']['objects']:
+                    product = products[item['product_id']]
+                    assert product['id'] == seed.SEED_PRODUCT_IDS[item['category']]
+                    assert product['title'] and product['retailer'] and product['source_url']
+                    assert product['price_cents'] > 0 and product['image_url'] and product['local_image']
+                    photo = client.get('/' + product['local_image'])
+                    assert photo.status_code == 200 and photo.headers['content-type'].startswith('image/')
+    finally:
+        catalog._cache['mtime'] = None

@@ -702,6 +702,7 @@ struct InspirationShot: Identifiable, Codable, Hashable, Sendable {
     var id: UUID
     var filename: String
     var addedAt: Date
+    var householdID: String? = nil
 }
 
 struct CandidateGroup: Identifiable, Codable, Hashable, Sendable {

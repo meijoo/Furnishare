@@ -12,6 +12,12 @@ struct InspirationPanel: View {
             lookupSection
             designSection
         }
+        .onChange(of: model.currentHouseholdID) { _, _ in
+            draft = ""
+            designDraft = ""
+            photoItem = nil
+            model.searchInspiration("")
+        }
         .onChange(of: model.demoResetToken) { _, _ in
             draft = ""
             designDraft = ""
@@ -19,9 +25,10 @@ struct InspirationPanel: View {
         }
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
+            let householdID = model.currentHouseholdID
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self), let image = UIImage(data: data) {
-                    model.addInspirationPhoto(image)
+                    model.addInspirationPhoto(image, householdID: householdID)
                 }
                 photoItem = nil
             }
@@ -109,6 +116,9 @@ struct InspirationPanel: View {
     private var photos: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Inspiration photos").font(.headline).foregroundStyle(Color.aeroInk)
+            if model.busy.contains("inspiration") {
+                ProgressView("Uploading photo…").font(.caption)
+            }
             ScrollView(.horizontal) {
                 HStack(spacing: 10) {
                     PhotosPicker(selection: $photoItem, matching: .images) {
@@ -122,16 +132,14 @@ struct InspirationPanel: View {
                         .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Color.figmaWash))
                     }
                     .buttonStyle(.plain)
-                    ForEach(model.inspirationShots) { shot in
+                    .disabled(model.busy.contains("inspiration") || !model.actingMemberInScope)
+                    ForEach(model.state.room.inspirationImages.isEmpty ? model.currentInspirationShots : []) { shot in
                         ZStack(alignment: .topTrailing) {
-                            AsyncImage(url: model.inspirationURL(shot)) { phase in
-                                switch phase {
-                                case .success(let image): image.resizable().scaledToFill()
-                                default: Color.figmaWash
-                                }
+                            if let image = UIImage(contentsOfFile: model.inspirationURL(shot).path) {
+                                Image(uiImage: image).resizable().scaledToFill()
+                                    .frame(width: 88, height: 88)
+                                    .clipShape(RoundedRectangle(cornerRadius: 14))
                             }
-                            .frame(width: 88, height: 88)
-                            .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
                             Button {
                                 model.removeInspirationShot(shot.id)
                             } label: {
@@ -142,20 +150,30 @@ struct InspirationPanel: View {
                         }
                     }
                     ForEach(model.state.room.inspirationImages) { photo in
-                        AsyncImage(url: model.client?.resolve(photo.url)) { phase in
-                            switch phase {
-                            case .success(let image): image.resizable().scaledToFill()
-                            default: Color.figmaWash
+                        ZStack(alignment: .topTrailing) {
+                            AsyncImage(url: model.client?.resolve(photo.url)) { phase in
+                                switch phase {
+                                case .success(let image): image.resizable().scaledToFill()
+                                default: Color.figmaWash
+                                }
                             }
+                            .frame(width: 88, height: 88)
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            Button {
+                                Task { await model.removeRoomInspiration(photo.id) }
+                            } label: {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.white)
+                            }
+                            .padding(4)
+                            .disabled(model.busy.contains("inspiration") || !model.actingMemberInScope)
+                            .accessibilityLabel("Remove photo")
                         }
-                        .frame(width: 88, height: 88)
-                        .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
-                    if let preview = model.inspirationPreview, model.inspirationShots.isEmpty, model.state.room.inspirationImages.isEmpty {
+                    if let preview = model.inspirationPreview, model.currentInspirationShots.isEmpty, model.state.room.inspirationImages.isEmpty {
                         Image(uiImage: preview).resizable().scaledToFill()
                             .frame(width: 88, height: 88)
                             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    } else if let url = model.client?.resolve(model.state.room.inspirationImageURL), model.inspirationShots.isEmpty, model.state.room.inspirationImages.isEmpty {
+                    } else if let url = model.client?.resolve(model.state.room.inspirationImageURL), model.currentInspirationShots.isEmpty, model.state.room.inspirationImages.isEmpty {
                         AsyncImage(url: url) { phase in
                             switch phase {
                             case .success(let image): image.resizable().scaledToFill()
@@ -267,7 +285,7 @@ struct InspirationPanel: View {
                 }
             }
             .buttonStyle(AeroButtonStyle(compact: true))
-            .disabled(designing || model.busy.contains("chat") || !model.actingMemberInScope)
+            .disabled(designing || model.busy.contains("chat") || model.busy.contains("inspiration") || !model.actingMemberInScope)
         }
     }
 
