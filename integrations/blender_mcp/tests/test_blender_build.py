@@ -45,10 +45,19 @@ CASES = [
     ("coffee_table", {"width": 0.7, "depth": 0.7, "height": 0.42}, {"shape": "round"}),
     ("coffee_table", {"width": 0.05, "depth": 0.05, "height": 0.05}, {"shape": "round", "material": "metal"}),
     ("rug", {"width": 1.6, "depth": 1.6, "height": 0.015}, {"shape": "round"}),
+    ("lamp", {"width": 0.35, "depth": 0.35, "height": 0.58}, {"color_hex": "#3F7A45"}),
+    ("lamp", {"width": 0.28, "depth": 0.28, "height": 1.55}, {"form": {"kind": "floor"}}),
+    ("lamp", {"width": 0.18, "depth": 0.18, "height": 0.42}, {"form": {"kind": "desk"}}),
+    ("lamp", {"width": 0.14, "depth": 0.14, "height": 0.28}, {"form": {"kind": "accent"}}),
+    ("lamp", {"width": 0.42, "depth": 0.78, "height": 1.80}, {"form": {"kind": "arc"}}),
+    ("lamp", {"width": 0.32, "depth": 0.32, "height": 1.82}, {"form": {"kind": "torchiere"}}),
+    ("lamp", {"width": 0.35, "depth": 0.35, "height": 0.58},
+     {"form": {"kind": "table", "shade": "mushroom", "base": "gourd"}}),
 ]
 NEW_TOL_M = 0.0005
 BEDROOM_CATEGORIES = {"bed", "nightstand", "dresser", "desk"}
-NEW_CASES = [i for i, (c, _, x) in enumerate(CASES) if c in BEDROOM_CATEGORIES or x.get("shape") == "round"]
+NEW_CASES = [i for i, (c, _, x) in enumerate(CASES)
+             if c in BEDROOM_CATEGORIES or c == "lamp" or x.get("shape") == "round"]
 ROOM = {"width_m": 4.5, "depth_m": 4.0, "height_m": 2.5, "wall_thickness_m": 0.12,
         "openings": [{"kind": "door", "wall": "front", "offset_m": 1.0, "width_m": 0.9},
                      {"kind": "window", "wall": "left", "offset_m": -0.4, "width_m": 1.4},

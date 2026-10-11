@@ -11,6 +11,18 @@ def client():
         yield c
 
 
+def test_lamp_kind_and_default_dims():
+    assert catalog.lamp_kind_from_text('arc floor lamp') == 'arc'
+    assert catalog.lamp_kind_from_text('torchiere uplight') == 'torchiere'
+    assert catalog.lamp_kind_from_text('standing lamp') == 'floor'
+    assert catalog.lamp_kind_from_text('task lamp') == 'desk'
+    assert catalog.lamp_kind_from_text('mini accent lamp') == 'accent'
+    assert catalog.default_dims_for('lamp', 'arc floor lamp') == catalog.LAMP_DIMS['arc']
+    assert catalog.default_dims_for('lamp', 'green lamp') == catalog.LAMP_DIMS['table']
+    assert catalog.infer_category('brass torchiere') == 'lamp'
+    assert catalog.infer_category('arc lamp') == 'lamp'
+
+
 def test_parse_listing_dimensions():
     sofa = catalog.parse_listing_dimensions('Article sofa 84" W x 36" D x 33" H', 'sofa')
     assert sofa == {'width': round(84 * 0.0254, 3), 'depth': round(36 * 0.0254, 3), 'height': round(33 * 0.0254, 3)}
@@ -27,8 +39,22 @@ def test_infer_form_from_title():
     assert sofa['back_style'] == 'tufted'
     assert sofa['seat_cushions'] == 3
     assert realize.infer_form('sofa', 'English rolled-arm sofa')['arm_style'] == 'rolled'
+    plump = realize.infer_form('sofa', 'Overstuffed cloud couch deep seat')
+    assert plump['arm_bulk'] == 'plump' and plump['back_bulk'] == 'thick'
+    slim = realize.infer_form('sofa', 'Mid-century tuxedo apartment sofa')
+    assert slim['arm_bulk'] == 'slim' and slim['seat_rise'] == 'low'
     assert realize.infer_form('bed', 'platform bed with tufted headboard')['headboard'] == 'tufted'
     assert realize.infer_form('desk', 'oak trestle desk with drawers')['leg_style'] == 'trestle'
+    arc = realize.infer_form('lamp', 'Brushed brass arc floor lamp')
+    assert arc['kind'] == 'arc'
+    mushroom = realize.infer_form('lamp', 'Ceramic gourd table lamp mushroom shade')
+    assert mushroom['kind'] == 'table' and mushroom['shade'] == 'mushroom' and mushroom['base'] == 'gourd'
+    torch = realize.infer_form('lamp', 'Black torchiere uplight')
+    assert torch['kind'] == 'torchiere'
+    desk = realize.infer_form('lamp', 'Adjustable desk lamp cone shade')
+    assert desk['kind'] == 'desk' and desk['shade'] == 'cone'
+    assert realize.infer_form('lamp', 'Tripod floor lamp wide shade')['base'] == 'tripod'
+    assert realize.infer_form('lamp', 'Tripod floor lamp wide shade')['shade_scale'] == 'large'
 
 
 def test_realize_endpoint_uses_title_form(client, monkeypatch):

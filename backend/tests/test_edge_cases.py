@@ -118,6 +118,8 @@ def test_product_search_uses_catalog(client, monkeypatch):
     assert all(p['category'] == 'sofa' for p in r.json())
     assert catalog.infer_category('oak queen bed') == 'bed'
     assert catalog.infer_category('brown couch') == 'sofa'
+    assert catalog.infer_category('green lamp') == 'lamp'
+    assert catalog.infer_color('green table lamp') == '#3F7A45'
     assert client.get('/products/search', params={'q': ''}).status_code == 422
 
 

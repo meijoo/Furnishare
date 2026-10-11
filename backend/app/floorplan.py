@@ -205,21 +205,25 @@ def extract(data: bytes, mime: str) -> list[dict]:
 
     from . import agent
     # Short JSON extract: no thinking, medium image tokens, one try.
-    thinking = types.ThinkingConfig(thinking_budget=0, thinking_level=types.ThinkingLevel.MINIMAL)
     started = time.perf_counter()
-    resp = agent._gemini().models.generate_content(
-        model=config.GEMINI_FLOORPLAN_MODEL,
-        contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
-        config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=RESPONSE_SCHEMA,
-                                           temperature=0, thinking_config=thinking,
-                                           max_output_tokens=4096,
-                                           media_resolution=types.MediaResolution.MEDIA_RESOLUTION_MEDIUM,
-                                           http_options=types.HttpOptions(
-                                               timeout=40_000,
-                                               retry_options=types.HttpRetryOptions(attempts=1))),
-    )
-    import json
-    rooms = json.loads(resp.text)['rooms']
+    try:
+        resp = agent._gemini().models.generate_content(
+            model=config.GEMINI_FLOORPLAN_MODEL,
+            contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
+            config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=RESPONSE_SCHEMA,
+                                               temperature=0, thinking_config=agent.thinking_off(config.GEMINI_FLOORPLAN_MODEL),
+                                               max_output_tokens=4096,
+                                               media_resolution=types.MediaResolution.MEDIA_RESOLUTION_MEDIUM,
+                                               http_options=types.HttpOptions(
+                                                   timeout=40_000,
+                                                   retry_options=types.HttpRetryOptions(attempts=1))),
+        )
+        import json
+        rooms = json.loads(resp.text)['rooms']
+    except PlanError:
+        raise
+    except Exception as e:
+        raise PlanError('Could not read the floor plan. Try again.') from e
     logging.getLogger('uvicorn.error').info('Floor-plan image read: %.1f s (%d rooms)',
                                            time.perf_counter() - started, len(rooms))
     return rooms

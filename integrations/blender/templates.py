@@ -939,7 +939,8 @@ def _sofa_arm(mb: MeshBuilder, style, sx, w, arm_w, y0, y1, z0, seat_top, arm_to
 
 def build_sofa(mb: MeshBuilder, w, d, h, spec):
     """Arms, back panel, seat/back cushions and legs. form: arm_style, back_style, seat_cushions, back_cushions,
-    leg_style, skirt, chaise (left = -X; that side's seat runs to the full depth), tufted_seat."""
+    leg_style, skirt, chaise (left = -X; that side's seat runs to the full depth), tufted_seat,
+    arm_bulk, seat_rise, arm_rise, back_bulk (silhouette from the listing photo)."""
     f = _form(spec)
     main = _main_mat(spec)
     finish = spec["frame_finish"]
@@ -955,11 +956,15 @@ def build_sofa(mb: MeshBuilder, w, d, h, spec):
         leg_h = _clamp(h * 0.04, 0.005, 0.03)
     elif leg_style == "bun":
         leg_h = _clamp(h * 0.11, 0.01, 0.1)
-    arm_w = 0.0 if arm_style == "none" else min(_clamp(w * 0.09, 0.05, 0.22), w * 0.2)
-    back_d = min(_clamp(d * 0.2, 0.03, 0.3), d * 0.35)
-    base_top = leg_h + h * 0.18
-    seat_top = h * 0.55
-    arm_top = h * 0.72
+    arm_frac = {"slim": 0.055, "plump": 0.16}.get(f.get("arm_bulk"), 0.09)
+    back_frac = {"thin": 0.12, "thick": 0.32}.get(f.get("back_bulk"), 0.20)
+    seat_frac = {"low": 0.42, "high": 0.64}.get(f.get("seat_rise"), 0.55)
+    arm_frac_h = {"low": 0.58, "high": 0.88}.get(f.get("arm_rise"), 0.72)
+    arm_w = 0.0 if arm_style == "none" else min(_clamp(w * arm_frac, 0.04, 0.28), w * 0.22)
+    back_d = min(_clamp(d * back_frac, 0.03, 0.38), d * 0.42)
+    base_top = min(leg_h + h * 0.16, h * (seat_frac - 0.12))
+    seat_top = _clamp(h * seat_frac, base_top + 0.04, h * 0.78)
+    arm_top = _clamp(h * arm_frac_h, seat_top + 0.02, h * 0.96)
     round_r = min(0.05, 0.3 * min(arm_w or _clamp(w * 0.09, 0.05, 0.22), h * 0.3))
     y_back = d / 2 - back_d
     ix0, ix1 = -w / 2 + arm_w, w / 2 - arm_w
@@ -1944,8 +1949,135 @@ def _open_pedestal(mb: MeshBuilder, x0, x1, y0, y1, under, side, frame, shelf_ma
         mb.rod((x0 + p, yb, z), (x1 - p, yb, z), r, r, frame, segments=4)
 
 
+def _lamp_kind(w, d, h, form):
+    kind = form.get("kind")
+    if kind in ("table", "floor", "desk", "accent", "arc", "torchiere"):
+        return kind
+    if h >= 1.15:
+        return "floor"
+    if h <= 0.38 and max(w, d) <= 0.22:
+        return "accent"
+    if h <= 0.5 and max(w, d) <= 0.32:
+        return "desk"
+    return "table"
+
+
+def build_lamp(mb: MeshBuilder, w, d, h, spec):
+    """Distinct lamp silhouettes that scale with the listing box (14\" table vs 70\" floor vs arc)."""
+    form = _form(spec)
+    kind = _lamp_kind(w, d, h, form)
+    shade = form.get("shade") or "drum"
+    base = form.get("base") or ("gourd" if kind == "accent" else "tripod" if kind == "floor" else "round")
+    shade_mat, metal = _main_mat(spec), _metal_leg_mat(spec)
+    r = min(w, d) / 2
+    stem_k = {"thin": 0.045, "thick": 0.13}.get(form.get("stem"), 0.075)
+    shade_k = {"small": 0.22, "large": 0.50}.get(form.get("shade_scale"), 0.36)
+    if kind in ("floor", "torchiere", "arc"):
+        shade_k = {"small": 0.10, "large": 0.24}.get(form.get("shade_scale"), 0.16)
+    shade_h = max(h * shade_k, 0.04)
+    shade_r = max(r * (0.95 if form.get("shade_scale") == "large" else 0.82), 0.03)
+    stem_r = max(r * stem_k, 0.004)
+    if kind == "arc":
+        _lamp_arc(mb, w, d, h, metal, shade_mat, shade, shade_h, shade_r, stem_r)
+        return
+    if kind == "torchiere":
+        _lamp_base(mb, base, r, h, metal, shade_mat)
+        pole_r = max(stem_r, 0.008)
+        bowl_h, bowl_r = max(h * 0.12, 0.08), max(r * 0.72, 0.07)
+        mb.cylinder(0, 0, h * 0.06, h - bowl_h * 0.35, pole_r, pole_r * 0.9, metal, segments=12)
+        if shade in ("mushroom", "square", "bell", "empire"):
+            _lamp_shade(mb, 0, 0, h - shade_h, shade_h, bowl_r, shade, shade_mat)
+        else:
+            mb.cylinder(0, 0, h - bowl_h, h, bowl_r * 0.32, bowl_r, shade_mat, segments=22, bevel=0.004)
+        return
+    if kind == "desk":
+        base_h, s = max(h * 0.08, 0.01), max(r * 0.5, 0.03)
+        arm_z = h * 0.58
+        mb.box(-s, s, -s * 0.75, s * 0.75, 0.0, base_h, metal, bevel=0.003, segments=2)
+        mb.cylinder(0, 0, base_h, arm_z * 0.5, stem_r, stem_r, metal, segments=10)
+        mb.rod((0.0, 0.0, arm_z * 0.48), (r * 0.4, 0.0, arm_z), stem_r * 0.9, stem_r * 0.9, metal, segments=8)
+        _lamp_shade(mb, r * 0.4, 0.0, arm_z, max(h * 0.2, 0.04), max(r * 0.42, 0.03),
+                    shade if shade != "none" else "cone", shade_mat)
+        return
+    if kind == "accent" or (kind == "table" and base == "gourd"):
+        body_h = h * (0.62 if base == "gourd" else 0.48)
+        br = r * (0.78 if base == "gourd" else 0.55)
+        mb.sphere(0, 0, body_h * 0.48, br, br, body_h * 0.48, shade_mat if base == "gourd" else metal,
+                  segments=18, rings=10)
+        neck = body_h + h * 0.04
+        mb.cylinder(0, 0, body_h * 0.88, neck, r * 0.1, r * 0.08, metal, segments=12)
+        if shade != "none":
+            _lamp_shade(mb, 0, 0, neck, h - neck, shade_r, shade, shade_mat)
+        return
+    # table / floor
+    _lamp_base(mb, base, r, h, metal, shade_mat)
+    base_h = h * (0.04 if kind == "floor" else 0.12)
+    stem_top = h - (0 if shade == "none" else shade_h * 0.7)
+    mb.cylinder(0, 0, base_h, max(stem_top, base_h + 0.02), stem_r, stem_r * 0.88, metal, segments=12)
+    if shade != "none":
+        _lamp_shade(mb, 0, 0, h - shade_h, shade_h, shade_r, shade, shade_mat)
+
+
+def _lamp_base(mb: MeshBuilder, style, r, h, metal, body):
+    base_h = max(h * 0.035, 0.008)
+    br = r * 0.48
+    if style == "tripod":
+        foot, join = max(h * 0.01, 0.006), max(h * 0.18, 0.08)
+        pr = max(r * 0.06, 0.005)
+        for ang in (0.0, 2.094, 4.189):
+            fx, fy = math.cos(ang) * br, math.sin(ang) * br
+            mb.cylinder(fx, fy, 0.0, foot, pr * 1.5, pr * 1.5, metal, segments=10)
+            mb.rod((fx, fy, foot), (0.0, 0.0, join), pr, pr, metal, segments=8)
+    elif style == "square":
+        s = br * 0.85
+        mb.box(-s, s, -s, s, 0.0, base_h, metal, bevel=0.004, segments=2)
+    elif style == "sculpted":
+        mb.sphere(0, 0, base_h * 0.9, br, br, base_h * 0.9, metal, segments=16, rings=8)
+    elif style == "disc":
+        mb.cylinder(0, 0, 0.0, max(base_h * 0.45, 0.004), br * 1.15, br * 1.05, metal, segments=22)
+    elif style == "gourd":
+        mb.sphere(0, 0, h * 0.22, r * 0.7, r * 0.7, h * 0.22, body, segments=18, rings=10)
+    else:
+        mb.cylinder(0, 0, 0.0, base_h, br, br * 0.72, metal, segments=20, bevel=0.003)
+
+
+def _lamp_arc(mb: MeshBuilder, w, d, h, metal, shade_mat, shade, shade_h, shade_r, stem_r):
+    br = min(w, d) * 0.16
+    x0, x1 = -w / 2 + br, w / 2 - shade_r * 0.6
+    mb.cylinder(x0, 0, 0.0, br * 0.7, br, br * 0.65, metal, segments=16)
+    pts = []
+    for i in range(6):
+        t = i / 5
+        pts.append((x0 + t * (x1 - x0), 0.0, br * 0.6 + (h - shade_h * 0.45 - br * 0.6) * math.sin(t * math.pi * 0.92)))
+    for a, b in zip(pts, pts[1:]):
+        mb.rod(a, b, stem_r, stem_r, metal, segments=8)
+    _lamp_shade(mb, pts[-1][0], 0.0, h - shade_h, shade_h, shade_r, shade if shade != "none" else "drum", shade_mat)
+
+
+def _lamp_shade(mb: MeshBuilder, x, y, z0, hh, r, style, mat):
+    if hh <= 0 or r <= 0:
+        return
+    if style == "none":
+        return
+    if style == "empire":
+        mb.cylinder(x, y, z0, z0 + hh, r * 0.58, r, mat, segments=22, bevel=0.004)
+    elif style == "cone":
+        mb.cylinder(x, y, z0, z0 + hh, r, r * 0.35, mat, segments=20, bevel=0.003)
+    elif style == "mushroom":
+        mb.sphere(x, y, z0 + hh * 0.35, r, r, hh * 0.55, mat, segments=20, rings=10)
+    elif style == "square":
+        s = r * 0.82
+        mb.box(x - s, x + s, y - s, y + s, z0, z0 + hh, mat, bevel=min(0.01, hh * 0.12), segments=2)
+    elif style == "bell":
+        mb.cylinder(x, y, z0, z0 + hh * 0.55, r, r * 0.72, mat, segments=22, bevel=0.004)
+        mb.cylinder(x, y, z0 + hh * 0.52, z0 + hh, r * 0.72, r * 0.38, mat, segments=20, bevel=0.003)
+    else:
+        mb.cylinder(x, y, z0, z0 + hh, r * 0.9, r, mat, segments=22, bevel=0.004)
+
+
 BUILDERS = {"sofa": build_sofa, "coffee_table": build_coffee_table, "tv": build_tv, "rug": build_rug,
-            "bed": build_bed, "nightstand": build_nightstand, "dresser": build_dresser, "desk": build_desk}
+            "bed": build_bed, "nightstand": build_nightstand, "dresser": build_dresser, "desk": build_desk,
+            "lamp": build_lamp}
 
 
 def build_furniture(spec: dict, name: str | None = None, collection=None,

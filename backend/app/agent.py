@@ -36,18 +36,28 @@ def _gemini():
     return _client
 
 
+def thinking_off(model: str | None = None):
+    """Gemini accepts only one of thinking_budget (2.5) or thinking_level (later models)."""
+    from google.genai import types
+    name = model or config.GEMINI_MODEL
+    if '2.5' in name:
+        return types.ThinkingConfig(thinking_budget=0)
+    return types.ThinkingConfig(thinking_level=types.ThinkingLevel.MINIMAL)
+
+
 def parse_request(text: str, allowed: list[str] | None = None) -> dict:
     """Budget and categories from free text, limited to the categories this room scope furnishes."""
     budget = re.search(r'\$\s*(\d[\d,]*)', text)
     words = {'sofa': r'sofa|couch|loveseat', 'coffee_table': r'coffee table|table', 'tv': r'tv|television', 'rug': r'rug|carpet',
              'bed': r'bed|bed frame|mattress', 'nightstand': r'nightstand|night stand|bedside table',
              'dresser': r'dresser|chest of drawers|drawers', 'desk': r'desk|workspace',
-             'chair': r'chairs?|armchairs?|accent chair'}
+             'chair': r'chairs?|armchairs?|accent chair', 'lamp': r'lamps?|lighting'}
     allowed = list(allowed or catalog.CATEGORIES)
     found = [c for c, pat in words.items() if re.search(rf'\b({pat})s?\b', text, re.I)]
     if 'nightstand' in found and 'coffee_table' in found and not re.search(r'coffee', text, re.I):
         found.remove('coffee_table')
-    cats = [c for c in found if c in allowed or c == 'chair'] or allowed
+    extras = {'chair', 'lamp'}
+    cats = [c for c in found if c in allowed or c in extras] or allowed
     return {'budget_cents': int(budget.group(1).replace(',', '')) * 100 if budget else None, 'categories': cats,
             'style_text': text}
 
@@ -74,8 +84,8 @@ def _focus_category(text: str, allowed: list[str]) -> str | None:
     words = {'sofa': r'sofa|couch|loveseat', 'coffee_table': r'coffee table', 'tv': r'tv|television',
              'rug': r'rug|carpet', 'bed': r'bed|mattress', 'nightstand': r'nightstand|bedside',
              'dresser': r'dresser|drawers', 'desk': r'desk|workspace',
-             'chair': r'chairs?|armchairs?|accent chair'}
-    found = [c for c, pat in words.items() if (c in allowed or c == 'chair')
+             'chair': r'chairs?|armchairs?|accent chair', 'lamp': r'lamps?|lighting'}
+    found = [c for c, pat in words.items() if (c in allowed or c in ('chair', 'lamp'))
              and re.search(rf'\b({pat})s?\b', text, re.I)]
     return found[0] if found else None
 
@@ -161,7 +171,7 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
 
     def search_products(category: str, max_price_dollars: float = 0, query: str = '') -> dict:
         """Placeable catalog and already-fetched live items. category: one of the requested categories."""
-        allowed = room_categories(core.household(hid))
+        allowed = room_categories(core.household(hid)) + ['chair', 'lamp']
         if category not in allowed:
             return {'error': f'category must be one of {allowed} for this room'}
         room = core.household(hid)['room']
@@ -236,7 +246,7 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
                + (f'Combined contribution limits: {dollars(cap)}. ' if cap is not None else '')
                + ('An inspiration image is uploaded. ' if planner.room_image(h) else 'No inspiration image yet. ')
                + pick_line + skip_line + refine_line + listed_line)
-    thinking = types.ThinkingConfig(thinking_budget=0, thinking_level=types.ThinkingLevel.MINIMAL)
+    thinking = thinking_off(config.GEMINI_MODEL)
     response = _gemini().models.generate_content(
         model=config.GEMINI_MODEL,
         contents=f'{context}\nRequest: {text}',

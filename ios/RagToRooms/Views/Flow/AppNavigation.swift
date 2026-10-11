@@ -5,13 +5,12 @@ enum AppScreen: String, Hashable {
 }
 
 enum RoomTab: String, CaseIterable, Identifiable {
-    case design, items, budget, inspiration, members
+    case design, budget, inspiration, members
     var id: String { rawValue }
 
     var title: String {
         switch self {
         case .design: "Design"
-        case .items: "Items"
         case .budget: "Budget"
         case .inspiration: "Inspiration"
         case .members: "Members"
@@ -21,7 +20,6 @@ enum RoomTab: String, CaseIterable, Identifiable {
     var symbol: String {
         switch self {
         case .design: "cube.transparent"
-        case .items: "shippingbox"
         case .budget: "chart.pie"
         case .inspiration: "sparkles"
         case .members: "person.2.fill"
@@ -217,7 +215,7 @@ final class AppNavigation {
 
     static var debugTab: RoomTab? {
         switch launchArgument("RTRScrollTo") {
-        case "floorplan", "proposal", "product": .items
+        case "floorplan", "proposal", "product": .design
         case "contributions", "finance": .budget
         case "chat", "activity": .inspiration
         default: nil

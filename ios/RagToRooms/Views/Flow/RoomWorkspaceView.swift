@@ -23,7 +23,9 @@ struct RoomWorkspaceView: View {
                             .frame(width: proxy.size.width * 0.55)
                             .frame(maxHeight: .infinity)
                         ScrollViewReader { reader in
-                            ScrollView { ItemsPanel() }
+                            ScrollView {
+                                ItemsPanel()
+                            }
                                 .scrollIndicators(.hidden)
                                 .task { await debugScroll(reader) }
                         }
@@ -90,8 +92,6 @@ struct RoomWorkspaceView: View {
         switch nav.roomTab {
         case .design:
             RoomPanel().frame(height: min(620, height * 0.55))
-            ItemsPanel()
-        case .items:
             ItemsPanel()
         case .budget:
             BudgetPanel()

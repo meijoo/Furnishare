@@ -40,7 +40,7 @@ def test_dimension_limits_inclusive():
 
 
 @pytest.mark.parametrize("bad", [
-    {"category": "lamp", "dimensions_m": DIMS},
+    {"category": "spaceship", "dimensions_m": DIMS},
     {"category": "sofa", "dimensions_m": DIMS, "material": "glass"},
     {"category": "sofa", "dimensions_m": DIMS, "color_hex": "#12345"},
     {"category": "sofa", "dimensions_m": DIMS, "color_hex": "red"},
@@ -275,7 +275,9 @@ def test_spec_from_product_texture(tmp_path, png):
 
 
 CAT_DIMS = {"sofa": DIMS, "coffee_table": {"width": 1.0, "depth": 0.55, "height": 0.42},
-            "tv": {"width": 1.2, "depth": 0.06, "height": 0.75}, "rug": RUG_DIMS, **{c: d for c, (d, _) in BEDROOM.items()}}
+            "tv": {"width": 1.2, "depth": 0.06, "height": 0.75}, "rug": RUG_DIMS,
+            "lamp": {"width": 0.35, "depth": 0.35, "height": 0.58},
+            **{c: d for c, (d, _) in BEDROOM.items()}}
 
 
 def _good_values(allowed):
@@ -404,7 +406,13 @@ def test_spec_from_product():
     assert specs.spec_from_product(p)["dimensions_m"]["width"] == 2.28
     assert specs.spec_from_product(dict(p, dimensions_m=None)) is None
     assert specs.spec_from_product(dict(p, dimension_kind="package")) is None
-    assert specs.spec_from_product(dict(p, category="lamp")) is None
+    assert specs.spec_from_product(dict(p, category="spaceship")) is None
+    lamp = specs.spec_from_product({
+        "id": "lamp-1", "category": "lamp",
+        "dimensions_m": {"width": 0.35, "depth": 0.35, "height": 0.58},
+        "style": {"color_hex": "#3F7A45"},
+    })
+    assert lamp and lamp["category"] == "lamp" and lamp["color_hex"] == "#3F7A45"
     assert specs.spec_from_product(dict(p, dimensions_m={"width": 9, "depth": 1, "height": 1})) is None
     assert specs.spec_from_product(dict(p, style={"material": "velvet"}))["material"] == "fabric"
     legacy = {"id": "sofa-blue", "name": "Cloud sofa", "category": "sofa", "price_cents": 60000,

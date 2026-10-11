@@ -15,8 +15,8 @@ from .geometry import fits_room
 LIVING_CATEGORIES = ('sofa', 'coffee_table', 'tv', 'rug')
 BEDROOM_CATEGORIES = ('bed', 'nightstand', 'dresser', 'desk')
 CATEGORIES = LIVING_CATEGORIES + BEDROOM_CATEGORIES
-# Searchable / placeable extras. Not in default room needs, so auto-design does not add a chair to every plan.
-PLACEABLE_CATEGORIES = CATEGORIES + ('chair',)
+# Searchable / placeable extras. Not in default room needs, so auto-design does not add a chair or lamp to every plan.
+PLACEABLE_CATEGORIES = CATEGORIES + ('chair', 'lamp')
 VERIFIED = Path(os.getenv('RTR_CATALOG', config.DATA_DIR / 'catalog_verified.json'))
 EXTRA = [Path(p) for p in os.getenv('RTR_CATALOG_EXTRA', str(config.DATA_DIR / 'catalog_bedroom.json')).split(os.pathsep) if p]
 DEMO = config.BACKEND_DIR / 'catalog.json'
@@ -142,11 +142,23 @@ def _rememberable(p: dict) -> dict:
     q.setdefault('currency', 'USD')
     q.setdefault('source_type', 'live')
     q.setdefault('retrieved_at', None)
-    q.setdefault('additional_costs', {'shipping_cents': None, 'tax_cents': None, 'assembly_cents': None})
-    q.setdefault('style', {})
-    q['style'].setdefault('color_hex', '#AAB')
-    q['style'].setdefault('tags', [])
     q.setdefault('asset_url', None)
+    if not q.get('variant'):
+        q['variant'] = 'default'
+    if not isinstance(q.get('price_cents'), int):
+        q['price_cents'] = int(q['price_cents'] or 0)
+    costs = q.get('additional_costs')
+    q['additional_costs'] = dict(costs) if isinstance(costs, dict) else {
+        'shipping_cents': None, 'tax_cents': None, 'assembly_cents': None}
+    style = q.get('style')
+    q['style'] = dict(style) if isinstance(style, dict) else {}
+    guessed = infer_color(' '.join(str(q.get(k) or '') for k in ('title', 'description', 'variant')))
+    current = q['style'].get('color_hex')
+    if guessed and (not current or current in ('#AAB', '#9AB', '#AABBCC')):
+        q['style']['color_hex'] = guessed
+    else:
+        q['style'].setdefault('color_hex', guessed or '#AABBCC')
+    q['style'].setdefault('tags', [])
     return q
 
 
@@ -237,13 +249,49 @@ DEFAULT_DIMS = {
     'rug': {'width': 2.00, 'depth': 1.40, 'height': 0.02},
     'tv': {'width': 1.20, 'depth': 0.12, 'height': 0.75},
     'chair': {'width': 0.70, 'depth': 0.75, 'height': 0.85},
+    'lamp': {'width': 0.35, 'depth': 0.35, 'height': 0.58},
     'other': {'width': 0.80, 'depth': 0.80, 'height': 0.80},
 }
+
+LAMP_DIMS = {
+    'table': {'width': 0.35, 'depth': 0.35, 'height': 0.58},
+    'floor': {'width': 0.30, 'depth': 0.30, 'height': 1.55},
+    'desk': {'width': 0.20, 'depth': 0.24, 'height': 0.46},
+    'accent': {'width': 0.14, 'depth': 0.14, 'height': 0.28},
+    'arc': {'width': 0.42, 'depth': 0.78, 'height': 1.80},
+    'torchiere': {'width': 0.32, 'depth': 0.32, 'height': 1.82},
+}
+
+
+def lamp_kind_from_text(text: str) -> str | None:
+    t = (text or '').lower()
+    if re.search(r'\barc\b', t):
+        return 'arc'
+    if re.search(r'\btorchiere\b|\buplight\b', t):
+        return 'torchiere'
+    if re.search(r'\b(floor|standing) lamps?\b', t):
+        return 'floor'
+    if re.search(r'\b(desk|task) lamps?\b', t):
+        return 'desk'
+    if re.search(r'\b(accent|mini) lamps?\b', t):
+        return 'accent'
+    if re.search(r'\b(table|bedside|night) lamps?\b', t):
+        return 'table'
+    if re.search(r'\bfloor\b', t) and 'lamp' in t:
+        return 'floor'
+    return None
+
+
+def default_dims_for(category: str, text: str = '') -> dict:
+    if category == 'lamp':
+        return dict(LAMP_DIMS.get(lamp_kind_from_text(text) or 'table'))
+    return dict(DEFAULT_DIMS.get(category, DEFAULT_DIMS['other']))
 
 _CATEGORY_WORDS = (
     ('bed', r'\b(beds?|mattress)\b'),
     ('nightstand', r'\b(nightstands?|night table|bedside)\b'),
     ('dresser', r'\b(dressers?|chest of drawers)\b'),
+    ('lamp', r'\b((?:floor|table|desk|accent|arc|task)\s+)?lamps?\b|\btorchieres?\b|\blighting\b'),
     ('chair', r'\b((?:arm|accent|dining|lounge|side|office|desk)\s+)?chairs?\b|\barmchairs?\b'),
     ('desk', r'\bdesks?\b'),
     ('sofa', r'\b(sofas?|couch(?:es)?|sectionals?|loveseats?)\b'),
@@ -365,6 +413,27 @@ def infer_category(text: str) -> str:
     return 'other'
 
 
+_COLOR_WORDS = (
+    ('navy', '#1E3A5F'), ('forest', '#2F5D3A'), ('charcoal', '#3A3D42'), ('mustard', '#C4A035'),
+    ('terracotta', '#C46A45'), ('blush', '#D48AA6'), ('cream', '#EFE6D4'), ('beige', '#D4C4A8'),
+    ('ivory', '#F3EFE4'), ('walnut', '#6B4226'), ('oak', '#C4A06A'), ('pine', '#C9B48A'),
+    ('brass', '#B39260'), ('gold', '#C4A15A'), ('silver', '#C0C4C8'), ('natural', '#C9B48A'),
+    ('olive', '#6B7A3F'), ('sage', '#7A8F6A'), ('teal', '#2F7A73'), ('green', '#3F7A45'),
+    ('blue', '#3B6FA0'), ('brown', '#6B4423'), ('tan', '#C4A574'), ('white', '#F4F0E8'),
+    ('black', '#2A2B2E'), ('grey', '#8A8D91'), ('gray', '#8A8D91'), ('red', '#A33A32'),
+    ('pink', '#D48AA6'), ('yellow', '#D4B44A'), ('orange', '#D2782A'), ('purple', '#6A4A8A'),
+)
+
+
+def infer_color(text: str) -> str | None:
+    """Named colour from a listing title, so generated assets are not a generic beige."""
+    t = (text or '').lower()
+    for word, hex_color in _COLOR_WORDS:
+        if re.search(rf'\b{word}\b', t):
+            return hex_color
+    return None
+
+
 def live_search(query: str, limit: int = 16) -> list[dict]:
     """Google Shopping via SerpAPI, shaped like catalog products so they can be placed."""
     if not config.SHOPPING_API_KEY:
@@ -383,7 +452,7 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
     except httpx.HTTPError:
         return []
     category = infer_category(query)
-    dims = DEFAULT_DIMS.get(category, DEFAULT_DIMS['other'])
+    dims = default_dims_for(category, query)
     data = r.json()
     raw = list(data.get('shopping_results') or []) + list(data.get('inline_shopping_results') or [])
     out = []
@@ -406,7 +475,7 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
             'source_url': item.get('product_link') or item.get('link'),
             'price_cents': round(price * 100) if isinstance(price, (int, float)) else 0,
             'currency': 'USD',
-            'dimensions_m': listed or DEFAULT_DIMS.get(item_cat, dims),
+            'dimensions_m': listed or default_dims_for(item_cat, title + ' ' + query),
             'dimension_kind': kind,
             'source_type': 'live',
             'retrieved_at': db.now(),
@@ -423,6 +492,7 @@ _CATEGORY_ALIASES = {
     'dresser': {'dresser', 'dressers'},
     'desk': {'desk', 'desks'},
     'chair': {'chair', 'chairs', 'armchair', 'armchairs'},
+    'lamp': {'lamp', 'lamps', 'lighting', 'torchiere', 'torchieres'},
     'coffee_table': {'coffee', 'table', 'tables'},
     'rug': {'rug', 'rugs', 'carpet', 'carpets'},
     'tv': {'tv', 'tvs', 'television', 'televisions'},
@@ -494,7 +564,7 @@ def search(query: str, limit: int = 20) -> list[dict]:
         seen.add(title)
         chosen.append(p)
     remember(chosen[:limit])
-    return chosen[:limit]
+    return [_rememberable(p) for p in chosen[:limit]]
 
 
 def design_query(category: str, style_text: str = '') -> str:

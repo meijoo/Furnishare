@@ -36,7 +36,8 @@ def make_object(product: dict, room: dict, others: list[dict], keep: dict | None
 
 
 def layout(products: list[dict], room: dict, existing: list[dict] | None = None) -> tuple[list[dict], dict]:
-    order = {'rug': 0, 'sofa': 1, 'tv': 2, 'coffee_table': 3, 'bed': 1, 'nightstand': 2, 'dresser': 3, 'desk': 4}
+    order = {'rug': 0, 'sofa': 1, 'tv': 2, 'coffee_table': 3, 'chair': 4, 'lamp': 5,
+             'bed': 1, 'nightstand': 2, 'dresser': 3, 'desk': 4}
     existing = {o['category']: o for o in existing or []}
     placed = []
     for p in sorted(products, key=lambda p: order.get(p['category'], 9)):
@@ -74,6 +75,9 @@ def select_bundle(hid: str, categories: list[str], budget_cents: int, style_text
         ranked, mode = ranking.rank(cands, room_image(h), style_text=style_text)
         modes.add(mode)
         pools[cat] = [(p, 1.0 - i / TOP_K) for i, (p, _) in enumerate(ranked[:TOP_K])]
+    for cat, pick in preferred.items():
+        if cat not in pools:
+            pools[cat] = [(pick, 1.0)]
     best, best_key = None, None
     for combo in itertools.product(*pools.values()):
         total = sum(p['price_cents'] for p, _ in combo)
@@ -96,6 +100,7 @@ def select_bundle(hid: str, categories: list[str], budget_cents: int, style_text
 
 def propose(hid: str, products: list[dict], explanation: str, activity: str | None = None,
             replace_scene: bool = True) -> dict:
+    products = [catalog._rememberable(p) for p in products]
     h = core.household(hid)
     if len({p['category'] for p in products}) != len(products):
         raise core.Conflict('Propose at most one product per category')

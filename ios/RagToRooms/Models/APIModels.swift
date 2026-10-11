@@ -656,6 +656,16 @@ struct InspirationShot: Identifiable, Codable, Hashable, Sendable {
     var addedAt: Date
 }
 
+struct CandidateGroup: Identifiable, Codable, Hashable, Sendable {
+    var id: UUID
+    var name: String
+    var category: String?
+    var productIDs: [String]
+    var showingProductID: String?
+
+    var objectID: String { "local-group-\(id.uuidString)" }
+}
+
 struct OwnedItem: Identifiable, Codable, Hashable, Sendable {
     var id: UUID
     var householdID: String
@@ -769,6 +779,7 @@ extension String {
         case "dresser": "cabinet.fill"
         case "desk": "studentdesk"
         case "chair": "chair.fill"
+        case "lamp": "lamp.table.fill"
         default: "shippingbox.fill"
         }
     }

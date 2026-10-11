@@ -11,6 +11,9 @@ def test_clean_keeps_only_valid_values():
                                         'surface': 'velvet'}
     assert forms.clean('tv', {'bezel': 'frame', 'surface': 'plasma'}) == {'bezel': 'frame'}
     assert forms.clean('unknown', {'surface': 'oak', 'x': 1}) == {'surface': 'oak'}
+    assert forms.clean('sofa', {'arm_bulk': 'plump', 'seat_rise': 'low', 'arm_rise': 'high',
+                                'back_bulk': 'thick', 'arm_bulk_extra': 'nope'}) == {
+        'arm_bulk': 'plump', 'seat_rise': 'low', 'arm_rise': 'high', 'back_bulk': 'thick'}
     assert forms.clean('desk', {'primary_hex': ' #b8865a', 'accent_surface': 'black_metal',
                                 'accent_hex': 'not-a-color', 'pedestal_open': True}) == {
         'primary_hex': '#B8865A', 'accent_surface': 'black_metal', 'pedestal_open': True}
@@ -21,6 +24,12 @@ def test_response_schema_matches_categories():
         props = forms.response_schema(cat)['properties']
         assert set(props) == {'surface', *forms.SCHEMA[cat]}
     assert forms.response_schema('sofa')['properties']['seat_cushions'] == {'type': 'integer', 'minimum': 1, 'maximum': 4}
+    lamp = forms.response_schema('lamp')['properties']
+    assert set(lamp) == {'surface', *forms.SCHEMA['lamp']}
+    assert lamp['kind']['enum'] == ['table', 'floor', 'desk', 'accent', 'arc', 'torchiere']
+    assert forms.clean('lamp', {'kind': 'arc', 'shade': 'mushroom', 'base': 'gourd', 'shade_scale': 'large',
+                                'stem': 'thin', 'bogus': 1}) == {
+        'kind': 'arc', 'shade': 'mushroom', 'base': 'gourd', 'shade_scale': 'large', 'stem': 'thin'}
 
 
 def test_catalog_merges_forms(tmp_path, monkeypatch):

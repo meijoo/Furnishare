@@ -39,6 +39,22 @@ private struct LocalSceneExtras: Codable {
     var objects: [SceneObject] = []
     var products: [Product] = []
     var applied: [String: String] = [:]
+    var groups: [CandidateGroup] = []
+
+    enum CodingKeys: String, CodingKey { case objects, products, applied, groups }
+
+    init(objects: [SceneObject] = [], products: [Product] = [], applied: [String: String] = [:],
+         groups: [CandidateGroup] = []) {
+        self.objects = objects; self.products = products; self.applied = applied; self.groups = groups
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        objects = try c.decodeIfPresent([SceneObject].self, forKey: .objects) ?? []
+        products = try c.decodeIfPresent([Product].self, forKey: .products) ?? []
+        applied = try c.decodeIfPresent([String: String].self, forKey: .applied) ?? [:]
+        groups = try c.decodeIfPresent([CandidateGroup].self, forKey: .groups) ?? []
+    }
 }
 
 struct ChatMessage: Identifiable, Equatable {
@@ -100,8 +116,10 @@ final class AppModel {
     var ownedItems: [OwnedItem] = []
     var inspirationQuery = ""
     var inspirationResults: [Product] = []
-    var inspirationPicks: [String] = []
+    var candidateGroups: [CandidateGroup] = []
     var inspirationCategory: String?
+    var pendingInspirationQuery: String?
+    var inspirationPicks: [String] { candidateGroups.flatMap(\.productIDs) }
     private var inspirationSearchID = 0
     var extraObjects: [SceneObject] = []
     var extraProducts: [Product] = []
@@ -686,11 +704,14 @@ final class AppModel {
                     seen.insert(title)
                     merged.append(product)
                 }
-                merged.forEach(remember)
-                inspirationResults = merged
-                if inspirationCategory == nil {
+                if let inferred = Self.category(from: query) {
+                    inspirationCategory = inferred
+                    merged = merged.filter { $0.category == inferred || Self.category(from: $0.title) == inferred }
+                } else if inspirationCategory == nil {
                     inspirationCategory = merged.first.flatMap { Self.category(from: $0.title) } ?? merged.first?.category
                 }
+                merged.forEach(remember)
+                inspirationResults = merged
             } catch {
                 guard searchID == inspirationSearchID else { return }
                 errorMessage = Self.message(error)
@@ -699,31 +720,120 @@ final class AppModel {
     }
 
     func toggleInspirationPick(_ productID: String) {
-        if let index = inspirationPicks.firstIndex(of: productID) {
-            inspirationPicks.remove(at: index)
-            if let objectID = objectID(forProductID: productID), previews[objectID] == productID {
-                clearPreview(objectID: objectID)
-            }
+        let name = groupName(for: inspirationQuery, productID: productID)
+        if let index = candidateGroups.firstIndex(where: { $0.productIDs.contains(productID) }) {
+            removeFromGroup(candidateGroups[index].id, productID: productID)
             return
         }
-        guard inspirationPicks.count < 10 else { return }
-        inspirationPicks.append(productID)
-        if let objectID = objectID(forCategory: product(productID)?.category) {
-            setPreview(objectID: objectID, productID: productID)
-            select(objectID)
+        addToGroup(named: name, productID: productID)
+    }
+
+    func addToGroup(named raw: String, productID: String) {
+        guard let product = product(productID) ?? inspirationResults.first(where: { $0.id == productID }) else { return }
+        remember(product)
+        let name = Self.normalizedGroupName(raw.isEmpty ? product.title : raw)
+        if let other = candidateGroups.firstIndex(where: { $0.productIDs.contains(productID) }) {
+            removeFromGroup(candidateGroups[other].id, productID: productID)
         }
+        if let index = candidateGroups.firstIndex(where: { Self.normalizedGroupName($0.name) == name }) {
+            guard candidateGroups[index].productIDs.count < 20 else { return }
+            candidateGroups[index].productIDs.append(productID)
+            if candidateGroups[index].showingProductID == nil {
+                showInGroup(candidateGroups[index].id, productID: productID)
+            }
+        } else {
+            let group = CandidateGroup(id: UUID(), name: raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                                       ? product.title : raw.trimmingCharacters(in: .whitespacesAndNewlines),
+                                       category: product.category, productIDs: [productID], showingProductID: productID)
+            candidateGroups.append(group)
+            placeGroupInRoom(group, product: product)
+        }
+        persistCurrentExtras()
+    }
+
+    func removeFromGroup(_ groupID: UUID, productID: String) {
+        guard let index = candidateGroups.firstIndex(where: { $0.id == groupID }) else { return }
+        candidateGroups[index].productIDs.removeAll { $0 == productID }
+        if candidateGroups[index].showingProductID == productID {
+            candidateGroups[index].showingProductID = candidateGroups[index].productIDs.first
+        }
+        if candidateGroups[index].productIDs.isEmpty {
+            extraObjects.removeAll { $0.objectID == candidateGroups[index].objectID }
+            appliedPreviews[candidateGroups[index].objectID] = nil
+            previews[candidateGroups[index].objectID] = nil
+            candidateGroups.remove(at: index)
+        } else if let next = candidateGroups[index].showingProductID {
+            showInGroup(groupID, productID: next)
+        }
+        persistCurrentExtras()
+    }
+
+    func showInGroup(_ groupID: UUID, productID: String) {
+        guard let index = candidateGroups.firstIndex(where: { $0.id == groupID }),
+              candidateGroups[index].productIDs.contains(productID),
+              let product = product(productID) else { return }
+        candidateGroups[index].showingProductID = productID
+        remember(product)
+        let objectID = candidateGroups[index].objectID
+        if extraObjects.contains(where: { $0.objectID == objectID }) {
+            appliedPreviews[objectID] = productID
+            previews[objectID] = nil
+            if let dims = product.placeableDimensions, let i = extraObjects.firstIndex(where: { $0.objectID == objectID }) {
+                extraObjects[i].productID = productID
+                extraObjects[i].dimensionsM = dims
+                extraObjects[i].colorHex = product.style?.colorHex
+                extraObjects[i].assetURL = product.assetURL
+            }
+            select(objectID)
+        } else {
+            placeGroupInRoom(candidateGroups[index], product: product)
+        }
+        persistCurrentExtras()
+        realizeInBackground(product)
+    }
+
+    func editCandidateGroup(_ group: CandidateGroup) {
+        pendingInspirationQuery = group.name
+    }
+
+    private func groupName(for query: String, productID: String) -> String {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !trimmed.isEmpty { return trimmed }
+        return product(productID)?.title ?? "Selected"
+    }
+
+    private static func normalizedGroupName(_ name: String) -> String {
+        name.lowercased().split { $0.isWhitespace }.joined(separator: " ")
+    }
+
+    private func placeGroupInRoom(_ group: CandidateGroup, product: Product) {
+        guard let dims = product.placeableDimensions else { return }
+        remember(product)
+        let objectID = group.objectID
+        if extraObjects.contains(where: { $0.objectID == objectID }) {
+            appliedPreviews[objectID] = product.id
+            select(objectID)
+            return
+        }
+        let room = state.room
+        let existing = displayedObjects.filter { $0.category == product.category }.count
+        let x = Self.clamped(-room.widthM / 2 + dims.width / 2 + 0.25 + Double(existing) * 0.4,
+                             lo: -room.widthM / 2 + dims.width / 2, hi: room.widthM / 2 - dims.width / 2)
+        let z = Self.clamped(-room.depthM / 2 + dims.depth / 2 + 0.3,
+                             lo: -room.depthM / 2 + dims.depth / 2, hi: room.depthM / 2 - dims.depth / 2)
+        extraObjects.append(SceneObject(
+            objectID: objectID, productID: product.id, category: product.category,
+            positionM: [x, 0, z], rotationYRad: 0, dimensionsM: dims,
+            colorHex: product.style?.colorHex, assetURL: product.assetURL, proposalVersion: nil,
+            texture: product.category == "rug" ? (product.imageURL ?? product.localImage).map { ObjectTexture(imageURL: $0) } : nil))
+        appliedPreviews[objectID] = product.id
+        select(objectID)
+        persistCurrentExtras()
+        realizeInBackground(product)
     }
 
     func previewInspiration(_ productID: String) {
-        guard let product = product(productID), product.placeableDimensions != nil else { return }
-        remember(product)
-        if let objectID = objectID(forCategory: product.category) {
-            setPreview(objectID: objectID, productID: productID)
-            select(objectID)
-            realizeInBackground(product)
-        } else {
-            placeInRoom(product)
-        }
+        toggleInspirationPick(productID)
     }
 
     func objectID(forCategory category: String?) -> String? {
@@ -742,6 +852,7 @@ final class AppModel {
             ("nightstand", ["nightstand", "nightstands", "night table", "bedside"]),
             ("dresser", ["dresser", "dressers", "chest of drawers"]),
             ("chair", ["chair", "chairs", "armchair", "armchairs"]),
+            ("lamp", ["lamp", "lamps", "lighting"]),
             ("desk", ["desk", "desks"]),
             ("sofa", ["sofa", "sofas", "couch", "couches", "sectional"]),
             ("coffee_table", ["coffee table", "coffee tables"]),
@@ -759,7 +870,12 @@ final class AppModel {
     static func rank(products: [Product], query: String, category: String?) -> [Product] {
         let tokens = query.lowercased().split { !$0.isLetter && $0 != "'" }.map(String.init)
             .filter { $0.count > 1 && !["the", "and", "for", "with"].contains($0) }
-        let pool = category.map { cat in products.filter { $0.category == cat } } ?? products
+        let pool: [Product]
+        if let cat = category {
+            pool = products.filter { $0.category == cat }
+        } else {
+            pool = products.filter { score($0, tokens: tokens) > 0 }
+        }
         return pool.sorted { a, b in
             let sa = score(a, tokens: tokens)
             let sb = score(b, tokens: tokens)
@@ -812,7 +928,7 @@ final class AppModel {
 
     private func persistCurrentExtras() {
         extrasByHousehold[currentHouseholdID] = LocalSceneExtras(
-            objects: extraObjects, products: extraProducts, applied: appliedPreviews)
+            objects: extraObjects, products: extraProducts, applied: appliedPreviews, groups: candidateGroups)
         if let data = try? JSONEncoder().encode(extrasByHousehold) {
             UserDefaults.standard.set(data, forKey: Self.extrasKey)
         }
@@ -823,6 +939,7 @@ final class AppModel {
         extraObjects = extras.objects
         extraProducts = extras.products
         appliedPreviews = extras.applied
+        candidateGroups = extras.groups
     }
 
     private static func loadExtras() -> [String: LocalSceneExtras] {
@@ -1102,7 +1219,7 @@ final class AppModel {
     /// Called at the end of a gesture. Persists the move only if the user enabled it in Settings.
     func commitMove(_ objectID: String) {
         guard UserDefaults.standard.bool(forKey: Self.patchMovesKey), source == .live, let client,
-              let pose = localPoses[objectID] else { return }
+              !objectID.hasPrefix("local-"), let pose = localPoses[objectID] else { return }
         Task {
             do {
                 try await client.patchObject(objectID, x: pose.x, z: pose.z, rotation: pose.rotation)

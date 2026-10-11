@@ -10,15 +10,15 @@ import os
 import re
 from typing import Any
 
-TEMPLATE_VERSION = "2026.10.4"
+TEMPLATE_VERSION = "2026.10.14"
 # Capabilities a warm worker must report in `ping` before clients reuse it (older workers lack these).
 WORKER_FEATURES = ("texture", "form", "surfaces")
 
-CATEGORIES = ("sofa", "coffee_table", "tv", "rug", "bed", "nightstand", "dresser", "desk")
+CATEGORIES = ("sofa", "coffee_table", "tv", "rug", "bed", "nightstand", "dresser", "desk", "lamp")
 MATERIALS = ("fabric", "wood", "metal", "leather", "wool")
 FRAME_FINISHES = ("wood", "metal", "upholstered")
 SHAPES = ("rect", "round")
-ROUND_CATEGORIES = ("coffee_table", "nightstand", "rug")
+ROUND_CATEGORIES = ("coffee_table", "nightstand", "rug", "lamp")
 ROUND_TOLERANCE_M = 0.005  # round pieces need width == depth (the diameter) within this
 _SHAPE_ALIASES = {"rect": "rect", "rectangular": "rect", "square": "rect",
                   "round": "round", "circular": "round", "circle": "round"}
@@ -35,6 +35,7 @@ CATEGORY_DIM_RANGES_M = {
     "nightstand": {"width": (0.2, 1.0), "depth": (0.2, 0.8), "height": (0.2, 1.0)},
     "dresser": {"width": (0.4, 2.6), "depth": (0.25, 0.9), "height": (0.3, 1.8)},
     "desk": {"width": (0.5, 2.6), "depth": (0.3, 1.4), "height": (0.4, 1.3)},
+    "lamp": {"width": (0.08, 0.8), "depth": (0.08, 0.8), "height": (0.2, 2.2)},
 }
 ROOM_WIDTH_RANGE_M = (1.0, 20.0)
 ROOM_HEIGHT_RANGE_M = (1.8, 5.0)
@@ -53,16 +54,19 @@ _IMAGE_MAGIC = {".jpg": (b"\xff\xd8\xff",), ".jpeg": (b"\xff\xd8\xff",), ".png":
                 ".webp": (b"RIFF",)}
 
 DEFAULT_MATERIAL = {"sofa": "fabric", "coffee_table": "wood", "tv": "metal", "rug": "wool",
-                    "bed": "fabric", "nightstand": "wood", "dresser": "wood", "desk": "wood"}
+                    "bed": "fabric", "nightstand": "wood", "dresser": "wood", "desk": "wood", "lamp": "metal"}
 DEFAULT_COLOR = {"sofa": "#C9BFAE", "coffee_table": "#9C7A55", "tv": "#24262B", "rug": "#B7AE9C",
-                 "bed": "#B5AA99", "nightstand": "#A27E58", "dresser": "#8A6748", "desk": "#B89A74"}
+                 "bed": "#B5AA99", "nightstand": "#A27E58", "dresser": "#8A6748", "desk": "#B89A74",
+                 "lamp": "#E8D9B8"}
 DEFAULT_WALL_COLOR = "#ECE8E1"
 DEFAULT_FLOOR_COLOR = "#B48E66"
 
 # Visible main surface finish; every build renders it as an image texture (see integrations/blender/surfaces.py).
 SURFACES = ("oak", "walnut", "white_oak", "pine", "painted", "lacquer", "linen", "weave", "boucle", "velvet",
-            "chenille", "leather", "faux_leather", "brushed_metal", "black_metal", "glass", "marble", "wool")
-SOFT_SURFACES = ("linen", "weave", "boucle", "velvet", "chenille", "leather", "faux_leather", "wool")
+            "chenille", "leather", "faux_leather", "brushed_metal", "black_metal", "glass", "marble", "wool",
+            "suede", "cotton", "ceramic", "enamel", "rattan")
+SOFT_SURFACES = ("linen", "weave", "boucle", "velvet", "chenille", "leather", "faux_leather", "wool",
+                 "suede", "cotton")
 MATERIAL_SURFACE = {"fabric": "weave", "wood": "oak", "leather": "leather", "wool": "wool"}  # metal: by luminance
 METAL_DARK_LUMA = 100  # sRGB luma below this -> black_metal, else brushed_metal
 
@@ -78,7 +82,12 @@ FORM_SCHEMA: dict[str, dict[str, Any]] = {
              "back_style": ("tight", "pillow", "tufted", "channel"),
              "seat_cushions": (1, 4), "back_cushions": (0, 4),
              "leg_style": ("tapered", "block", "metal", "hidden", "bun", "turned"),
-             "skirt": bool, "chaise": ("none", "left", "right"), "tufted_seat": bool, **_COMMON_FORM},
+             "skirt": bool, "chaise": ("none", "left", "right"), "tufted_seat": bool,
+             "arm_bulk": ("slim", "regular", "plump"),
+             "seat_rise": ("low", "mid", "high"),
+             "arm_rise": ("low", "mid", "high"),
+             "back_bulk": ("thin", "regular", "thick"),
+             **_COMMON_FORM},
     "coffee_table": {"leg_style": ("tapered", "straight", "hairpin", "pedestal", "panel", "sled", "x_base", "turned"),
                      "shelf": bool, "drawer": bool, "top_style": ("slab", "glass", "stone", "lift_top"),
                      **_COMMON_FORM},
@@ -94,6 +103,11 @@ FORM_SCHEMA: dict[str, dict[str, Any]] = {
     "desk": {"drawers": (0, 3), "pedestal": ("none", "left", "right"), "pedestal_open": bool,
              "leg_style": ("tapered", "straight", "metal_frame", "trestle", "panel", "hairpin"),
              "shelf": bool, **_COMMON_FORM},
+    "lamp": {"kind": ("table", "floor", "desk", "accent", "arc", "torchiere"),
+             "shade": ("drum", "empire", "cone", "none", "mushroom", "square", "bell"),
+             "base": ("round", "square", "tripod", "sculpted", "disc", "gourd"),
+             "shade_scale": ("small", "regular", "large"), "stem": ("thin", "regular", "thick"),
+             **_COMMON_FORM},
 }
 _BOOL_WORDS = {"true": True, "yes": True, "1": True, "false": False, "no": False, "0": False}
 # (regex, surface) hints read from free-text style.material when form.surface is absent; earliest match wins.
@@ -104,10 +118,13 @@ _SURFACE_HINTS = [(re.compile(p), s) for p, s in (
     (r"\bwool\b", "wool"),
     (r"\bwalnut\b", "walnut"), (r"\bwhite oak\b|\bbirch\b|\bmaple\b", "white_oak"), (r"\boak\b|\bash\b", "oak"),
     (r"\bpine\b", "pine"), (r"\blacquer", "lacquer"), (r"\bpainted\b", "painted"), (r"\bglass\b", "glass"),
-    (r"\bmarble\b|\bstone\b|\bterrazzo\b", "marble"))]
+    (r"\bmarble\b|\bstone\b|\bterrazzo\b", "marble"),
+    (r"\bsuede\b", "suede"), (r"\bcotton\b", "cotton"), (r"\bceramic\b", "ceramic"),
+    (r"\benamel\b", "enamel"), (r"\brattan\b|\bwicker\b", "rattan"))]
 _GENERIC_FABRIC_HINT = re.compile(r"\bfabric\b|\bcotton\b|\bpolyester\b|\bupholster")  # only when nothing specific
 _HINT_SURFACES = {"sofa": SOFT_SURFACES, "bed": SOFT_SURFACES, "rug": ("wool", "weave", "linen"),
-                  "tv": ("oak", "walnut", "white_oak", "brushed_metal", "black_metal")}
+                  "tv": ("oak", "walnut", "white_oak", "brushed_metal", "black_metal"),
+                  "lamp": ("linen", "cotton", "ceramic", "enamel", "brushed_metal", "black_metal")}
 _PILE_HINTS = [(re.compile(r"\bhigh[ -]?pile\b|\bshag"), "high"), (re.compile(r"\blow[ -]?pile\b"), "low"),
                (re.compile(r"\bflat[ -]?wov|\bflatweave\b"), "flat")]
 

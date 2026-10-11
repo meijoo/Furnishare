@@ -12,31 +12,7 @@ struct InspirationPanel: View {
             PanelHeader(title: "Inspiration", symbol: "sparkles",
                         trailing: model.inspirationCategory?.categoryLabel)
             photos
-            TextField("Search sofas, beds, lamps…", text: $draft, axis: .vertical)
-                .lineLimit(1...3)
-                .padding(12)
-                .background(RoundedRectangle(cornerRadius: 14).fill(Color.figmaWash))
-                .onSubmit(search)
-            HStack {
-                Button(action: search) {
-                    if model.busy.contains("inspiration-search") {
-                        ProgressView().tint(.white)
-                    } else {
-                        Label("Search", systemImage: "magnifyingglass")
-                    }
-                }
-                .buttonStyle(AeroButtonStyle(compact: true))
-                .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || model.busy.contains("inspiration-search"))
-                if !model.inspirationPicks.isEmpty {
-                    Text("\(model.inspirationPicks.count)/10")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.aeroInk)
-                }
-                Spacer()
-            }
-            if !model.inspirationPicks.isEmpty {
-                picks
-            }
+            searchBar
             results
             design
         }
@@ -50,6 +26,43 @@ struct InspirationPanel: View {
                 photoItem = nil
             }
         }
+        .onChange(of: model.pendingInspirationQuery) { _, query in
+            guard let query, !query.isEmpty else { return }
+            draft = query
+            model.pendingInspirationQuery = nil
+            model.searchInspiration(query)
+        }
+    }
+
+    private var searchBar: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass").foregroundStyle(Color.figmaMuted)
+            TextField("Search sofas, beds, lamps…", text: $draft)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .onSubmit(search)
+            if !draft.isEmpty {
+                Button {
+                    draft = ""
+                    model.searchInspiration("")
+                } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundStyle(Color.figmaMuted)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
+            }
+            Button(action: search) {
+                if model.busy.contains("inspiration-search") {
+                    ProgressView().tint(.white)
+                } else {
+                    Text("Search")
+                }
+            }
+            .buttonStyle(AeroButtonStyle(compact: true))
+            .disabled(draft.trimmingCharacters(in: .whitespaces).isEmpty || model.busy.contains("inspiration-search"))
+        }
+        .padding(12)
+        .background(RoundedRectangle(cornerRadius: 14).fill(Color.figmaWash))
     }
 
     private var photos: some View {
@@ -107,29 +120,16 @@ struct InspirationPanel: View {
         }
     }
 
-    private var picks: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Picks").font(.headline).foregroundStyle(Color.aeroInk)
-            ScrollView(.horizontal) {
-                HStack(spacing: 10) {
-                    ForEach(model.inspirationPicks, id: \.self) { id in
-                        if let product = model.product(id) {
-                            card(product, picked: true)
-                        }
-                    }
-                }
-                .padding(2)
-            }
-            .scrollIndicators(.hidden)
-        }
-    }
-
     @ViewBuilder private var results: some View {
         if model.inspirationResults.isEmpty {
             if model.busy.contains("inspiration-search") {
                 ProgressView().frame(maxWidth: .infinity).padding(.vertical, 24)
             } else if !model.inspirationQuery.isEmpty {
                 Text("No matches").foregroundStyle(Color.figmaMuted)
+            } else {
+                Text("Search for a piece. Everything you select joins the proposal on Design.")
+                    .font(.subheadline)
+                    .foregroundStyle(Color.figmaMuted)
             }
         } else {
             HStack {
@@ -141,6 +141,13 @@ struct InspirationPanel: View {
                         .font(.caption)
                         .foregroundStyle(Color.figmaMuted)
                 }
+                Spacer()
+                let selected = model.inspirationResults.filter { model.inspirationPicks.contains($0.id) }.count
+                if selected > 0 {
+                    Text("\(selected) selected")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.aeroInk)
+                }
             }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 168), spacing: 12)], spacing: 12) {
                 ForEach(model.inspirationResults) { product in
@@ -151,10 +158,7 @@ struct InspirationPanel: View {
     }
 
     private func card(_ product: Product, picked: Bool) -> some View {
-        let objectID = model.objectID(forCategory: product.category)
-        let canPlace = product.placeableDimensions != nil
-        let showing = objectID.map { model.previews[$0] == product.id || model.displayedObjects.contains { $0.productID == product.id } } ?? false
-        return VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
             ZStack(alignment: .topTrailing) {
                 ProductImage(urls: model.imageURLs(for: product), category: product.category)
                     .frame(height: 110)
@@ -176,35 +180,17 @@ struct InspirationPanel: View {
                 Text(dims.listingLabel).font(.caption.monospacedDigit()).foregroundStyle(Color.figmaMuted)
             }
             Text(dollars(product.priceCents)).font(.headline.monospacedDigit()).foregroundStyle(Color.aeroInk)
-            HStack(spacing: 10) {
-                Button {
-                    model.toggleInspirationPick(product.id)
-                } label: {
-                    Text(picked ? "Selected" : "Select")
-                        .font(.subheadline.weight(.medium))
-                        .foregroundStyle(Color.aeroInk)
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                        .background(Capsule().strokeBorder(Color.black.opacity(0.12), lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .disabled(!picked && model.inspirationPicks.count >= 10)
-                Spacer(minLength: 0)
-                if canPlace {
-                    Button {
-                        if !picked { model.toggleInspirationPick(product.id) }
-                        model.previewInspiration(product.id)
-                    } label: {
-                        Image(systemName: showing ? "eye.fill" : "eye")
-                            .font(.body.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .frame(width: 40, height: 40)
-                            .background(Circle().fill(showing ? Color.aeroGrass : Color.aeroAmber))
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(showing ? "Showing \(product.title)" : "Preview \(product.title)")
-                }
+            Button {
+                model.toggleInspirationPick(product.id)
+            } label: {
+                Text(picked ? "Selected" : "Select")
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(Color.aeroInk)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    .background(Capsule().strokeBorder(Color.black.opacity(0.12), lineWidth: 1))
             }
+            .buttonStyle(.plain)
         }
         .padding(10)
         .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(Color.white))

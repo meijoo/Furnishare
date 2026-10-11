@@ -62,6 +62,23 @@ def test_search_remembers_live_ids(client, monkeypatch):
     assert catalog.placeable(found)
 
 
+def test_sparse_live_listing_can_be_proposed(client, monkeypatch):
+    monkeypatch.setattr(realize._pool, 'submit', lambda *a, **k: None)
+    sparse = {
+        'id': 'live-sparse-sofa', 'title': 'Sparse sofa', 'category': 'sofa',
+        'price_cents': 40000, 'dimensions_m': catalog.DEFAULT_DIMS['sofa'], 'source_type': 'live',
+        'variant': None, 'additional_costs': None, 'style': None,
+    }
+    catalog.remember([sparse])
+    r = client.post(f'/households/{H}/chat', json={
+        'member_id': 'emily', 'text': 'Just a sofa for $1500.',
+        'pick_ids': ['live-sparse-sofa'], 'mode': 'design',
+    })
+    assert r.status_code == 200, r.text
+    ids = [i['product_id'] for i in client.get(f'/households/{H}/state').json()['proposal']['items']]
+    assert 'live-sparse-sofa' in ids
+
+
 def test_design_with_picks_publishes_live_product(client, monkeypatch):
     monkeypatch.setattr(realize._pool, 'submit', lambda *a, **k: None)
     catalog.remember([LIVE])
@@ -94,6 +111,14 @@ def test_design_skips_owned_category(client, monkeypatch):
     items = client.get(f'/households/{H}/state').json()['proposal']['items']
     assert all(i['category'] != 'sofa' for i in items)
     assert 'live-brown-couch' not in [i['product_id'] for i in items]
+
+
+def test_green_lamp_is_not_a_couch(client, monkeypatch):
+    monkeypatch.setattr(catalog, 'live_search', lambda *a, **k: [])
+    assert catalog.infer_category('green lamp') == 'lamp'
+    r = client.get('/products/search', params={'q': 'green lamp'})
+    assert r.status_code == 200
+    assert all(p['category'] in ('lamp', 'other') for p in r.json())
 
 
 def test_green_chair_does_not_return_catalog_dressers(client, monkeypatch):

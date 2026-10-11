@@ -161,7 +161,7 @@ def test_ensure_asset_null_dimensions_returns_none(tmp_path, monkeypatch):
     monkeypatch.setenv("BLENDER_BIN", "/nonexistent")
     assert assets.ensure_asset(dict(PRODUCT, dimensions_m=None), tmp_path) is None
     assert assets.ensure_asset(dict(PRODUCT, dimension_kind="package"), tmp_path) is None
-    assert assets.ensure_asset(dict(PRODUCT, category="lamp"), tmp_path) is None
+    assert assets.ensure_asset(dict(PRODUCT, category="spaceship"), tmp_path) is None
 
 
 def test_ensure_asset_returns_cached_file_without_blender(tmp_path, monkeypatch):

@@ -10,7 +10,8 @@ from pathlib import Path
 from . import config
 
 SURFACES = ('oak', 'walnut', 'white_oak', 'pine', 'painted', 'lacquer', 'linen', 'weave', 'boucle', 'velvet',
-            'chenille', 'leather', 'faux_leather', 'brushed_metal', 'black_metal', 'glass', 'marble', 'wool')
+            'chenille', 'leather', 'faux_leather', 'brushed_metal', 'black_metal', 'glass', 'marble', 'wool',
+            'suede', 'cotton', 'ceramic', 'enamel', 'rattan')
 BOOL = 'bool'
 HEX = 'hex'
 _HEX_RE = re.compile(r'^#?([0-9A-Fa-f]{6})$')
@@ -19,7 +20,9 @@ SCHEMA = {
     'sofa': {'arm_style': ('track', 'rolled', 'sloped', 'flared', 'none'),
              'back_style': ('tight', 'pillow', 'tufted', 'channel'), 'seat_cushions': (1, 4), 'back_cushions': (0, 4),
              'leg_style': ('tapered', 'block', 'metal', 'hidden', 'bun', 'turned'), 'skirt': BOOL,
-             'chaise': ('none', 'left', 'right'), 'tufted_seat': BOOL, **_COMMON},
+             'chaise': ('none', 'left', 'right'), 'tufted_seat': BOOL,
+             'arm_bulk': ('slim', 'regular', 'plump'), 'seat_rise': ('low', 'mid', 'high'),
+             'arm_rise': ('low', 'mid', 'high'), 'back_bulk': ('thin', 'regular', 'thick'), **_COMMON},
     'coffee_table': {'leg_style': ('tapered', 'straight', 'hairpin', 'pedestal', 'panel', 'sled', 'x_base', 'turned'),
                      'shelf': BOOL, 'drawer': BOOL, 'top_style': ('slab', 'glass', 'stone', 'lift_top'), **_COMMON},
     'tv': {'bezel': ('thin', 'frame'), 'stand': ('feet', 'pedestal', 'none'), **_COMMON},
@@ -33,15 +36,22 @@ SCHEMA = {
     'desk': {'drawers': (0, 3), 'pedestal': ('none', 'left', 'right'), 'pedestal_open': BOOL,
              'leg_style': ('tapered', 'straight', 'metal_frame', 'trestle', 'panel', 'hairpin'), 'shelf': BOOL,
              **_COMMON},
+    'lamp': {'kind': ('table', 'floor', 'desk', 'accent', 'arc', 'torchiere'),
+             'shade': ('drum', 'empire', 'cone', 'none', 'mushroom', 'square', 'bell'),
+             'base': ('round', 'square', 'tripod', 'sculpted', 'disc', 'gourd'),
+             'shade_scale': ('small', 'regular', 'large'), 'stem': ('thin', 'regular', 'thick'), **_COMMON},
 }
 FORMS_PATH = Path(config.DATA_DIR / 'catalog_forms.json')
 
-PROMPT = """You are describing a {category} product photo so a 3D modeller can match it. Title: {title}.
-Fill a field only when the photo clearly shows it; omit anything you cannot see. "surface" is the main visible
-finish of the piece (upholstery for sofas and beds, the top and body for tables and cases). "primary_hex" is
-that finish's colour as #RRGGBB. "accent_surface" and "accent_hex" are the legs, frame, base or metal parts
-when they differ from the main finish. Counts are what is visible in the photo (for sofas: separate seat
-cushions and back cushions)."""
+PROMPT = """You are describing a {category} product photo so a 3D modeller can match its SHAPE. Title: {title}.
+Fill a field only when the photo clearly shows it; omit anything you cannot see. Silhouette matters more than
+colour. For a sofa: arm_bulk is how thick the arms are (slim mid-century vs plump overstuffed); seat_rise is
+how high the seat is on the piece; arm_rise is how high the arms sit versus the back; back_bulk is how deep
+the backrest is front-to-back. For a lamp: kind is table/floor/desk/accent/arc/torchiere; shade is the shade
+silhouette (drum, empire, cone, mushroom, square, bell, or none); base is the foot or body (gourd = ceramic
+body with little stem); shade_scale is how tall the shade is versus the whole lamp; stem is pole thickness.
+"surface" is the main visible finish. "primary_hex" is that finish as #RRGGBB.
+"accent_surface" and "accent_hex" are legs/frame when they differ. Counts are visible seat and back cushions."""
 
 
 def response_schema(category: str) -> dict:

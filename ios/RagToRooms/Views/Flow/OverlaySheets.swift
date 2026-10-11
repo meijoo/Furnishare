@@ -56,7 +56,7 @@ struct CatalogSheet: View {
         Button {
             model.select(nil)
             model.detailProductID = product.id
-            nav.roomTab = .items
+            nav.roomTab = .design
             dismiss()
         } label: {
             VStack(alignment: .leading, spacing: 8) {
@@ -86,7 +86,7 @@ struct AddItemSheet: View {
     @State private var depthIn = ""
     @State private var heightIn = ""
 
-    private let categories = ["bed", "nightstand", "dresser", "desk", "chair", "sofa", "coffee_table", "rug", "tv", "other"]
+    private let categories = ["bed", "nightstand", "dresser", "desk", "chair", "lamp", "sofa", "coffee_table", "rug", "tv", "other"]
 
     var body: some View {
         NavigationStack {
@@ -177,6 +177,7 @@ struct AddItemSheet: View {
         case "coffee_table": ("43", "24", "17")
         case "rug": ("79", "55", "1")
         case "tv": ("47", "5", "30")
+        case "lamp": ("14", "14", "23")
         default: ("32", "32", "32")
         }
         if force || widthIn.isEmpty { widthIn = values.0 }
@@ -190,7 +191,7 @@ struct AddItemSheet: View {
         model.addOwnedItem(name: trimmed, category: category, link: normalizedLink.isEmpty ? nil : normalizedLink,
                            image: preview, widthM: width, depthM: depth, heightM: height)
         dismiss()
-        nav.roomTab = .items
+        nav.roomTab = .design
         nav.showSuccess(.itemAdded(trimmed))
     }
 }

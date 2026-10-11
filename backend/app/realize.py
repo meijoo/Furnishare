@@ -1,6 +1,7 @@
 """Build a unique-looking USDZ for a live or owned item: read the photo, match form, bake a mesh."""
 import hashlib
 import logging
+import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -72,6 +73,15 @@ def infer_form(category: str, title: str) -> dict:
             raw['chaise'] = 'right'
         if 'skirt' in t:
             raw['skirt'] = True
+        if any(w in t for w in ('overstuffed', 'cloud', 'plush', 'deep seat')):
+            raw['arm_bulk'] = 'plump'
+            raw['back_bulk'] = 'thick'
+        elif any(w in t for w in ('mid-century', 'midcentury', 'tuxedo', 'slim', 'apartment')):
+            raw['arm_bulk'] = 'slim'
+            raw['back_bulk'] = 'thin'
+        if any(w in t for w in ('low profile', 'low-profile', 'midcentury', 'mid-century')):
+            raw['seat_rise'] = 'low'
+            raw['arm_rise'] = 'low'
         if any(w in t for w in ('hairpin', 'metal leg')):
             raw['leg_style'] = 'metal'
         elif 'bun' in t:
@@ -109,6 +119,38 @@ def infer_form(category: str, title: str) -> dict:
             raw['shape'] = 'round'
     elif category == 'rug' and 'fringe' in t:
         raw['fringe'] = True
+    elif category == 'lamp':
+        kind = catalog.lamp_kind_from_text(title)
+        if kind:
+            raw['kind'] = kind
+        if 'mushroom' in t:
+            raw['shade'] = 'mushroom'
+        elif 'empire' in t:
+            raw['shade'] = 'empire'
+        elif re.search(r'\b(cone|coolie)\b', t):
+            raw['shade'] = 'cone'
+        elif re.search(r'\b(square|rectangular) shade\b', t):
+            raw['shade'] = 'square'
+        elif re.search(r'\bbell\b', t):
+            raw['shade'] = 'bell'
+        elif 'drum' in t:
+            raw['shade'] = 'drum'
+        elif re.search(r'\b(no shade|exposed bulb|edison)\b', t):
+            raw['shade'] = 'none'
+        if 'tripod' in t:
+            raw['base'] = 'tripod'
+        elif re.search(r'\b(gourd|ginger jar)\b', t):
+            raw['base'] = 'gourd'
+        elif 'sculpt' in t:
+            raw['base'] = 'sculpted'
+        elif re.search(r'\bdisc(us)?\b|\bdisk base\b', t):
+            raw['base'] = 'disc'
+        elif re.search(r'\bsquare base\b', t):
+            raw['base'] = 'square'
+        if re.search(r'\b(wide|oversized) shade\b', t):
+            raw['shade_scale'] = 'large'
+        elif re.search(r'\bnarrow shade\b', t):
+            raw['shade_scale'] = 'small'
     return forms.clean(category, raw)
 
 
@@ -126,7 +168,7 @@ def start(body: dict, image_bytes: bytes | None = None, mime: str = 'image/jpeg'
     if category not in forms.SCHEMA:
         category = 'sofa'
     listed = catalog.parse_listing_dimensions(title, category) or catalog.parse_listing_dimensions(body.get('description'), category)
-    raw_dims = listed or body.get('dimensions_m') or catalog.DEFAULT_DIMS.get(category) or catalog.DEFAULT_DIMS['other']
+    raw_dims = listed or body.get('dimensions_m') or catalog.default_dims_for(category, title)
     dims = _clamp_dims(category, raw_dims)
     dimension_kind = 'assembled' if listed else ('estimated' if not body.get('dimensions_m') else 'assembled')
     form = infer_form(category, title)
@@ -217,6 +259,7 @@ def _clamp_dims(category: str, dims: dict) -> dict:
         'rug': {'width': (0.5, 4.0), 'depth': (0.5, 3.0), 'height': (0.003, 0.08)},
         'tv': {'width': (0.4, 2.2), 'depth': (0.04, 0.4), 'height': (0.25, 1.2)},
         'chair': {'width': (0.35, 1.1), 'depth': (0.4, 1.1), 'height': (0.4, 1.3)},
+        'lamp': {'width': (0.08, 0.8), 'depth': (0.08, 0.8), 'height': (0.2, 2.2)},
     }.get(category, {'width': (0.2, 3.0), 'depth': (0.2, 2.0), 'height': (0.05, 2.0)})
     out = {}
     for axis in ('width', 'depth', 'height'):

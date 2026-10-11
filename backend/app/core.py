@@ -128,6 +128,8 @@ def create_proposal(hid: str, items: list[dict], shares: dict[str, int], explana
     validate_split(total, shares, limits(hid))
     if set(shares) != {m['id'] for m in members(hid)}:
         raise Conflict('Every member needs exactly one share')
+    from . import catalog
+    items = [catalog._rememberable(i) for i in items]
     unknown = sorted({k.replace('_cents', '') for i in items for k, v in i['additional_costs'].items() if v is None})
     known_extra = sum(v for i in items for v in i['additional_costs'].values() if isinstance(v, int))
     who = names(hid)
@@ -142,8 +144,8 @@ def create_proposal(hid: str, items: list[dict], shares: dict[str, int], explana
         c.execute('INSERT INTO proposals VALUES (?, ?, ?, ?, ?, ?, ?)', (
             hid, version, 'awaiting_approval', total + known_extra, json.dumps(unknown), explanation, db.now()))
         for i in items:
-            snapshot = {k: i[k] for k in ('id', 'title', 'retailer', 'variant', 'category', 'source_url', 'image_url',
-                                          'dimensions_m', 'source_type', 'retrieved_at', 'additional_costs', 'style')}
+            snapshot = {k: i.get(k) for k in ('id', 'title', 'retailer', 'variant', 'category', 'source_url', 'image_url',
+                                              'dimensions_m', 'source_type', 'retrieved_at', 'additional_costs', 'style')}
             c.execute('INSERT INTO proposal_items VALUES (?, ?, ?, ?, ?, ?)',
                       (hid, version, i['id'], i['category'], i['price_cents'], json.dumps(snapshot)))
         for mid, amount in shares.items():

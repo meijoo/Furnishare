@@ -3,9 +3,10 @@ import SwiftUI
 struct ProductDetailPanel: View {
     @Environment(AppModel.self) private var model
 
+    var showAlternatives = true
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            PanelHeader(title: "Item", symbol: "cube")
             if let product = model.detailProduct {
                 if let objectID = model.selectedObjectID, model.previews[objectID] != nil {
                     HStack {
@@ -19,12 +20,12 @@ struct ProductDetailPanel: View {
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(Color.aeroAmber.opacity(0.6)))
                 }
                 details(product)
-                alternatives(for: product)
+                if showAlternatives && product.sourceType != "owned" { alternatives(for: product) }
             } else if let object = model.selectedObject {
                 Text(format(object.dimensionsM)).foregroundStyle(Color.figmaMuted)
             }
         }
-        .glassPanel()
+        .id("product")
     }
 
     private func details(_ product: Product) -> some View {
@@ -36,7 +37,11 @@ struct ProductDetailPanel: View {
                     Text(product.retailer.uppercased()).font(.caption.weight(.heavy)).tracking(1.5).foregroundStyle(Color.aeroSky)
                     Text(product.title).font(.title3.bold())
                     if let variant = product.variant { Text(variant).font(.subheadline).foregroundStyle(.secondary) }
-                    Text(dollars(product.priceCents)).font(.title2.bold().monospacedDigit())
+                    if product.sourceType == "owned" {
+                        Text("Owned").font(.title3.weight(.semibold))
+                    } else {
+                        Text(dollars(product.priceCents)).font(.title2.bold().monospacedDigit())
+                    }
                 }
                 .foregroundStyle(Color.aeroInk)
             }

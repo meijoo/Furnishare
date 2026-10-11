@@ -42,6 +42,11 @@ PRESETS = {
     "wool":          dict(kind="wool", tile_m=0.25, px=512, roughness=1.0, metallic=0.0, normal=1.8, sheen=0.6),
     "quilted":       dict(kind="fabric", tile_m=0.32, px=512, roughness=0.95, metallic=0.0, normal=3.0, sheen=0.3),
     "shag":          dict(kind="wool", tile_m=0.3, px=512, roughness=1.0, metallic=0.0, normal=3.0, sheen=0.8),
+    "suede":         dict(kind="fabric", tile_m=0.28, px=512, roughness=0.88, metallic=0.0, normal=1.4, sheen=0.7),
+    "cotton":        dict(kind="fabric", tile_m=0.14, px=512, roughness=0.9, metallic=0.0, normal=1.8, sheen=0.2),
+    "ceramic":       dict(kind="paint", tile_m=0.4, px=512, roughness=0.28, metallic=0.0, normal=0.0, coat=0.35),
+    "enamel":        dict(kind="paint", tile_m=0.4, px=512, roughness=0.18, metallic=0.0, normal=0.0, coat=0.7),
+    "rattan":        dict(kind="wood", tile_m=0.18, px=512, roughness=0.72, metallic=0.0, normal=2.4),
 }
 GLASS_TINT = "#A9BDB8"  # glass is a fixed cool tint; its frame/legs carry the product color
 
@@ -289,6 +294,11 @@ GENERATORS = {
     "wool": _wool,
     "quilted": _quilted,
     "shag": _shag,
+    "suede": _velvet,
+    "cotton": lambda n, r: _weave(n, r, 7, 0.22, 0.04, slub=0.03),
+    "ceramic": lambda n, r: _paint(n, r, 0.008),
+    "enamel": lambda n, r: _paint(n, r, 0.004),
+    "rattan": lambda n, r: _weave(n, r, 5, 0.42, 0.08, slub=0.06),
 }
 assert set(GENERATORS) == set(PRESETS)
 
