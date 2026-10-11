@@ -8,13 +8,13 @@ struct BudgetPanel: View {
     @State private var budgetText = ""
 
     private var budget: Int? { model.state.budgetCents }
-    private var spent: Int { model.state.proposal?.knownTotalCents ?? 0 }
+    private var spent: Int { model.roomEstimateCents }
     private var remaining: Int { (budget ?? 0) - spent }
     private var individualBudget: Int? {
         model.actingMember?.contributionBudgetCents ?? model.actingMember?.limitCents
     }
     private var individualUsed: Int {
-        model.state.proposal?.shares[model.actingMemberID] ?? 0
+        model.roomEstimateShares[model.actingMemberID] ?? 0
     }
 
     var body: some View {
@@ -64,6 +64,10 @@ struct BudgetPanel: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
                     .foregroundStyle(Color.aeroInk)
             }
+            Text(model.roomEstimateHasUnknownPrices
+                 ? "Estimated cost · some prices unknown"
+                 : "Estimated cost · owned items excluded")
+                .font(.caption).foregroundStyle(Color.figmaMuted)
             budgetBar(used: spent, limit: budget)
             if model.actingMemberInScope {
                 VStack(alignment: .leading, spacing: 10) {
@@ -136,11 +140,11 @@ struct BudgetPanel: View {
     }
 
     @ViewBuilder private var sharedCard: some View {
-        let shares = model.state.proposal?.shares ?? [:]
+        let shares = model.roomEstimateItems.isEmpty ? [:] : model.roomEstimateShares
         VStack(alignment: .leading, spacing: 16) {
             Text("Shared expenses").font(.title2.bold()).foregroundStyle(Color.aeroInk)
             if model.isPrivateScope || shares.isEmpty {
-                Text(model.isPrivateScope ? "This room is private." : "Split appears after a proposal.")
+                Text(model.isPrivateScope ? "This room is private." : "Add items to see the split.")
                     .font(.subheadline)
                     .foregroundStyle(Color.figmaMuted)
             } else {
@@ -183,11 +187,11 @@ struct BudgetPanel: View {
 
     private var spendingSlices: [SpendSlice] {
         var furniture = 0, decor = 0, lighting = 0
-        for item in model.state.proposal?.items ?? [] {
+        for item in model.roomEstimateItems {
             guard let cents = item.priceCents else { continue }
             switch item.category {
             case "rug": decor += cents
-            case "tv", "other": lighting += cents
+            case "lamp", "lighting", "floor_lamp", "table_lamp", "tv", "other": lighting += cents
             default: furniture += cents
             }
         }

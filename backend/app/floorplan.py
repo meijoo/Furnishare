@@ -270,8 +270,8 @@ def _trim_overlaps(spaces: list[dict], rounds: int = 20) -> None:
 
 
 def build_plan(reads: list[dict], width_px: int, height_px: int, members: list[str],
-               plan_width_m: float | None = None) -> dict:
-    """Plan dict (rooms in metres, owners assigned) from Gemini reads. Raises PlanError when it can't be scaled."""
+               plan_width_m: float | None = None, *, assign_owners: bool = True) -> dict:
+    """Plan dict in metres from Gemini reads; uploaded plans can leave bedrooms unassigned. Raises PlanError when it can't be scaled."""
     spaces = []
     for r in reads:
         box = r.get('box_2d') or []
@@ -339,9 +339,14 @@ def build_plan(reads: list[dict], width_px: int, height_px: int, members: list[s
         counts[room['kind']] = counts.get(room['kind'], 0) + 1
         room['id'] = f"{room['kind']}-{counts[room['kind']]}"
         if room['kind'] == 'bedroom':
+            if not assign_owners:
+                room.update(name=f"Bedroom {counts['bedroom']}", owner_id=None)
             size = room.get('interior_m') or room
             if min(size['width_m'], size['depth_m']) < MIN_BEDROOM_M:
                 warnings.append(f"{room['name']} is too small to furnish ({size['width_m']} x {size['depth_m']} m)")
+                continue
+            if not assign_owners:
+                room['household_id'] = f"demo-bed-{counts['bedroom']}"
                 continue
             owner = next(owners, None)
             if owner:

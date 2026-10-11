@@ -1,7 +1,7 @@
 """Demo household: three roommates, one living room, a $600-ish sofa split three ways."""
 import json
 
-from . import catalog, config, core, db, planner
+from . import catalog, config, core, db, design_edits, planner
 from .money import solve_split
 
 HID = 'demo'
@@ -25,12 +25,18 @@ def _handles() -> dict:
 
 
 def demo_sofa() -> dict | None:
-    sofas = [p for p in catalog.products() if p['category'] == 'sofa' and p['dimensions_m']]
-    tagged = [p for p in sofas if 'demo-primary' in p['style'].get('tags', [])]
-    if tagged:
-        return tagged[0]
-    near = sorted(sofas, key=lambda p: abs(p['price_cents'] - 60000))
-    return near[0] if near else None
+    return next((p for p in catalog._demo_products() if p['id'] == 'sofa-blue'), None)
+
+
+def mock_furniture(categories: list[str]) -> list[dict]:
+    """Fixed fictional furniture; seeding never searches shopping or calls Gemini."""
+    chosen = {'sofa': 'sofa-blue', 'coffee_table': 'demo-pebble-table', 'rug': 'demo-lagoon-rug',
+              'tv': 'demo-horizon-tv', 'bed': 'demo-fjord-bed', 'nightstand': 'demo-pine-nightstand',
+              'dresser': 'demo-harbor-dresser', 'desk': 'demo-studio-desk'}
+    pool = {p['id']: p for p in catalog._demo_products()}
+    furniture = [pool[chosen[category]] for category in categories]
+    catalog.remember(furniture)
+    return furniture
 
 
 def reset(hid: str = HID, clear_handles: bool = True, room: dict | None = None,
@@ -38,6 +44,7 @@ def reset(hid: str = HID, clear_handles: bool = True, room: dict | None = None,
     keep = {} if clear_handles else {
         m['id']: m['handle'] for m in db.all_('SELECT id, handle FROM members WHERE household_id = ?', hid)}
     handles = {**_handles(), **{k: v for k, v in keep.items() if v}}
+    design_edits.reset(hid)
     with db.tx() as c:
         version = (c.execute('SELECT state_version FROM households WHERE id = ?', (hid,)).fetchone() or {'state_version': 0})['state_version']
         for table in ('proposals', 'proposal_items', 'shares', 'decisions', 'scene_objects', 'liabilities',
@@ -63,8 +70,8 @@ def reset(hid: str = HID, clear_handles: bool = True, room: dict | None = None,
     sofa = demo_sofa()
     if not sofa:
         return {'ok': False, 'error': 'No sofa with confirmed dimensions in the catalog'}
-    rest = planner.select_bundle(hid, ['coffee_table', 'tv', 'rug'], BUDGET_CENTS - sofa['price_cents'], STYLE)
-    scene, _ = planner.layout([sofa] + (rest['products'] if rest['ok'] else []), core.household(hid)['room'])
+    furniture = mock_furniture(list(catalog.LIVING_CATEGORIES))
+    scene, _ = planner.layout(furniture, core.household(hid)['room'])
     shares = solve_split(sofa['price_cents'], [m for m, _ in MEMBERS], SEED_LIMITS)
     p = core.create_proposal(hid, [sofa], shares,
                              f"The {sofa['title']} anchors the room; splitting it evenly.", scene=scene,

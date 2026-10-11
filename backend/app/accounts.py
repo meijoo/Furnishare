@@ -160,7 +160,7 @@ def join_group(uid, code):
             for row in c.execute('SELECT household_id FROM group_rooms WHERE group_id=?', (gid,)).fetchall():
                 hid = row['household_id']
                 room = core.household(hid)['room']
-                if room.get('kind') == 'bedroom':
+                if room.get('kind') == 'bedroom' and ('owner_id' not in room or room.get('owner_id')):
                     continue
                 c.execute('INSERT INTO members (household_id,id,name,limit_cents) VALUES (?,?,?,0)', (hid, uid, user['name']))
                 c.execute("UPDATE proposals SET status='superseded' WHERE household_id=? AND status!='settled'", (hid,))
@@ -201,21 +201,18 @@ def import_plan(gid, data, mime, image_url, width_m=None):
     group = snapshot(gid)
     users = [m['id'] for m in group['members']]
     image_width, image_height = floorplan.image_size(data)
-    plan = floorplan.build_plan(floorplan.extract(data, mime), image_width, image_height, users, width_m)
-    names = {m['id']: m['name'] for m in group['members']}
+    plan = floorplan.build_plan(floorplan.extract(data, mime), image_width, image_height, users, width_m, assign_owners=False)
     with db.tx() as c:
         for room in plan['rooms']:
             old_hid = room.get('household_id')
             if not old_hid:
                 continue
-            hid = gid if old_hid == 'demo' else f"{gid}-bed-{room['owner_id']}"
+            hid = gid if old_hid == 'demo' else f"{gid}-{room['id']}"
             room['household_id'] = hid
-            if room.get('owner_id'):
-                room['name'] = f"{names[room['owner_id']]}'s bedroom"
             if not c.execute('SELECT 1 FROM households WHERE id=?', (hid,)).fetchone():
                 size = room.get('interior_m') or room
                 geometry = {'width_m': size['width_m'], 'depth_m': size['depth_m'], 'height_m': 2.5,
-                            'kind': room['kind'], 'openings': [], 'clearances': []}
+                            'kind': room['kind'], 'owner_id': room.get('owner_id'), 'openings': [], 'clearances': []}
                 owner = room.get('owner_id') or group['owner_id']
                 create_room(c, gid, hid, room['name'], owner, geometry, [owner] if room.get('owner_id') else users)
         if not any(r.get('household_id') == gid for r in plan['rooms']):

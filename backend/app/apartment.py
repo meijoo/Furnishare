@@ -4,7 +4,7 @@ import json
 import logging
 import time
 
-from . import catalog, config, core, db, floorplan, planner, seed
+from . import catalog, config, core, db, design_edits, floorplan, planner, seed
 
 AID = 'demo'
 NAME = '3-bedroom apartment'
@@ -101,8 +101,11 @@ def _bedroom_size(room: dict) -> tuple[float, float]:
 
 
 def reset_bedroom(room: dict, furnished: bool = True) -> dict:
-    hid, owner = room['household_id'], room['owner_id']
-    name = dict(seed.MEMBERS)[owner]
+    hid, owner = room['household_id'], room.get('owner_id')
+    name = dict(seed.MEMBERS).get(owner, room['name'])
+    budget = BEDROOM_BUDGETS.get(owner, 0)
+    members = [(owner, name)] if owner else seed.MEMBERS
+    design_edits.reset(hid)
     with db.tx() as c:
         row = c.execute('SELECT state_version FROM households WHERE id = ?', (hid,)).fetchone()
         version = row['state_version'] if row else 0
@@ -112,22 +115,20 @@ def reset_bedroom(room: dict, furnished: bool = True) -> dict:
         c.execute('DELETE FROM outbound_jobs WHERE household_id = ?', (hid,))
         c.execute('DELETE FROM households WHERE id = ?', (hid,))
         c.execute('INSERT INTO households (id, name, budget_cents, payer_id, state_version, room_json, needs_json, style_text) '
-                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, room['name'], BEDROOM_BUDGETS[owner], owner, version + 1,
+                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, room['name'], budget, owner or members[0][0], version + 1,
                                                       json.dumps(bedroom_room(*_bedroom_size(room))),
                                                       json.dumps(list(catalog.BEDROOM_CATEGORIES)),
                                                       BEDROOM_STYLES.get(owner, BEDROOM_STYLE)))
         # Handles are globally unique and bound to the living room, so bedroom members act through the app.
-        c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, NULL, ?)',
-                  (hid, owner, name, BEDROOM_BUDGETS[owner]))
-        db.log(c, hid, f"{room['name']} created; {name} pays for it alone")
+        for mid, member_name in members:
+            c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, NULL, ?)',
+                      (hid, mid, member_name, budget))
+        db.log(c, hid, f"{room['name']} created" + (f"; {name} pays for it alone" if owner else '; unassigned'))
     if not furnished:
         return {'ok': True, 'household_id': hid, 'proposal_version': None, 'total_cents': 0}
-    pick = planner.select_bundle(hid, list(catalog.BEDROOM_CATEGORIES), BEDROOM_BUDGETS[owner],
-                                BEDROOM_STYLES.get(owner, BEDROOM_STYLE))
-    if not pick['ok'] or not pick['products']:
-        return {'ok': False, 'household_id': hid, 'notes': pick.get('notes') or ['No bedroom products fit']}
-    titles = ', '.join(p['title'] for p in pick['products'])
-    p = planner.propose(hid, pick['products'], f"A starter bedroom for {name}: {titles}. {name} pays the whole amount.",
+    furniture = seed.mock_furniture(list(catalog.BEDROOM_CATEGORIES))
+    titles = ', '.join(p['title'] for p in furniture)
+    p = planner.propose(hid, furniture, f"A starter bedroom for {name}: {titles}." + (f" {name} pays the whole amount." if owner else ""),
                         activity='Bedroom plan proposed', notify=False)
     return {'ok': True, 'household_id': hid, 'proposal_version': p['version'], 'total_cents': p['known_total_cents']}
 
@@ -154,7 +155,22 @@ def _living_seed_room() -> dict:
     return {**seed.ROOM, 'width_m': size['width_m'], 'depth_m': size['depth_m']}
 
 
-def reset(clear_handles: bool = True, furnished: bool = True) -> dict:
+def reset(clear_handles: bool = True, furnished: bool = True, full_reset: bool = False) -> dict:
+    if full_reset:
+        with db.tx() as c:
+            c.execute('DELETE FROM kv WHERE key = ?', (PLAN_KEY,))
+        demo_scopes = [row['id'] for row in db.all_("SELECT id FROM households WHERE id='demo' OR id LIKE 'demo-bed-%'")]
+        for hid in demo_scopes:
+            with db.tx() as c:
+                for table in ('room_budgets', 'room_inspiration', 'room_inspiration_images', 'proposals',
+                              'proposal_items', 'shares', 'decisions', 'scene_objects', 'liabilities',
+                              'financial_ops', 'activity'):
+                    c.execute(f'DELETE FROM {table} WHERE household_id=?', (hid,))
+                c.execute('DELETE FROM outbound_jobs WHERE household_id=?', (hid,))
+                c.execute('UPDATE households SET inspiration_path=NULL WHERE id=?', (hid,))
+        from . import textures
+        saved_textures = db.kv_get(textures.KEY, {})
+        db.kv_set(textures.KEY, {hid: entries for hid, entries in saved_textures.items() if hid not in demo_scopes})
     out = {'living': seed.reset(seed.HID, clear_handles=clear_handles, room=_living_seed_room(),
                                 furnished=furnished)}
     for room in _owned_bedrooms():
@@ -174,11 +190,7 @@ def import_plan(data: bytes, mime: str, image_url: str, plan_width_m: float | No
     The living room's live demo scope keeps its own room geometry."""
     reads = floorplan.extract(data, mime)
     w, h = floorplan.image_size(data)
-    built = floorplan.build_plan(reads, w, h, [mid for mid, _ in seed.MEMBERS], plan_width_m)
-    names = dict(seed.MEMBERS)
-    for r in built['rooms']:
-        if r.get('owner_id'):
-            r['label'], r['name'] = r['name'], f"{names[r['owner_id']]}'s bedroom"
+    built = floorplan.build_plan(reads, w, h, [mid for mid, _ in seed.MEMBERS], plan_width_m, assign_owners=False)
     stored = {'name': f"Imported {sum(r['kind'] == 'bedroom' for r in built['rooms'])}-bedroom plan",
               'source': 'imported', 'image_url': image_url, **built}
     db.kv_set(PLAN_KEY, stored)

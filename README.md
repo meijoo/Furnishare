@@ -127,10 +127,30 @@ Share lets you enter new roommates' phone numbers and sends the group's code in
 individual Photon messages. Recipients still need Photon permission to receive
 messages on your shared line. Text preferences target the most recently created
 or joined group for that phone. Floor-plan imports are saved per real group;
-bedroom scopes use the group's real member ids.
+detected bedrooms are numbered Bedroom 1, Bedroom 2, and so on. Uploaded bedrooms
+stay unassigned and can be opened by all group members.
 
 In a room's Budget tab, the payer sees **Request** and other members see **Pay**.
 After purchase confirmation, Request previews a room-specific payment reminder.
 Send queues one Photon message for every other member who selected that room.
 Retries of the same request do not duplicate messages; this action sends reminders
 and does not initiate a money transfer.
+
+## Three-iPad shared demo
+
+Run one backend on your Mac with `backend/scripts/serve.sh`. All three iPads must
+reach that Mac on the same network. In each app's Settings, connect to the same
+Mac IP address (port 8000); `127.0.0.1` refers to the iPad itself and will not work.
+Choose **Try demo → Emily**, **Try demo → Maya**, or **Try demo → Alex**, one person
+per iPad. Existing demo installs can change their identity with **Settings → Acting as**.
+Make sure each device shows a live backend connection rather than Offline demo.
+
+The living room is shared; each bedroom is edited and approved by its owner.
+Furniture additions, swaps, visibility, removal, option selections, drags and
+rotations sync through the common backend. Proposals, approvals, budgets and
+simulated payments also share the same state. Offline fixture demos are independent.
+
+**Reset demo household** on any connected iPad clears saved changes and restores
+the fixed fictional furniture in the living room and all three bedrooms. Each
+device keeps its own Emily/Maya/Alex identity. Reset reloads any contacts in
+`backend/data/members.json`, clears old demo messages, and sends no reset texts.

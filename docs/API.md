@@ -261,13 +261,13 @@ Optional `style.shape`: `"rect"` (default) or `"round"`. Round products have `di
 Gemini reads each room's label, kind, printed size text and a rough box. The backend does the rest:
 - It sets the scale from the printed sizes (median), using `width_m` only as a fallback.
 - It trims overlapping boxes, such as a bedroom box that swallowed its closet.
-- It assigns bedrooms in reading order (top-left first) to Emily, Maya and Alex. Bedrooms under 2.4 m, or beyond the third, are drawn but get no scope.
+- Uploaded bedrooms are named Bedroom 1, Bedroom 2, and so on in reading order (top-left first), with `owner_id: null`. All detected bedrooms remain on the plan; those under 2.4 m are drawn with a warning and get no scope. Furnishable unassigned bedrooms are accessible to all group members, including roommates who join later.
 - It links the first living room to the live `demo` scope.
-- It re-seeds each bedroom scope at the printed interior size.
+- It opens each numbered bedroom scope empty at the printed interior size, without assigning a user.
 
 The living room's 3D room keeps its own geometry, so the live demo does not change. The `kind` values extend to `dining`, `closet`, `patio`, `laundry` and `other`.
 
-Response: `{"apartment": <GET /apartments snapshot>, "warnings": [...], "seeded": {"bed-emily": {"ok": true, ...}}, "scale_m_per_px": 0.0178}`.
+Response: `{"apartment": <GET /apartments snapshot>, "warnings": [...], "seeded": {"bedroom-1": {"ok": true, ...}}, "scale_m_per_px": 0.0178}`.
 
 After an import, `GET /apartments/{aid}` also returns:
 - `"source": "imported"` (otherwise `"built_in"`).
@@ -375,3 +375,21 @@ in UserDefaults. Account and group creation require a reachable backend.
 Real-group invitations can include existing members or new `{phone,name}` invitees.
 They send the group's existing code by DM. Invitees become members when they sign
 up and join with that code; invitations do not create password-less accounts.
+
+### Shared room design edits
+
+`GET /households/{hid}/state` includes `design_edits: {epoch, edits}`. The edits
+contain placed extra objects, products, option groups, owned items, chosen product
+IDs, poses, visibility/removal sets, and dismissed suggestions.
+
+`PATCH /households/{hid}/design-edits` accepts `{member_id, epoch, before, after}`.
+The server applies the difference between the client's before/after snapshots,
+preserving concurrent changes to other objects, groups, and options. Only members
+of that room may edit it; real-group requests also require their authenticated
+account. The room state version increments, causing connected devices to refresh.
+Edits affect the scene and design estimate, not approved payment proposals.
+
+A demo reset issues a new epoch and clears edits. Patches using an old epoch
+return 409 so a reconnecting device cannot undo the reset. The iOS reset sends
+`POST /demo/reset?clear_handles=true&furnished=true&full_reset=true` to restore the
+furnished demo while clearing prior edits, photos, decisions, and demo messages.

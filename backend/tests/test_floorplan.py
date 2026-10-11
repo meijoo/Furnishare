@@ -168,10 +168,14 @@ def test_import_reseeds_bedrooms_at_plan_size(client):
     a = body['apartment']
     assert a['source'] == 'imported' and a['image_url'].startswith('/uploads/')
     assert a['image_frame_m']['width_m'] > a['width_m'] - 0.5
-    for m in MEMBERS:
-        assert body['seeded'][f'bed-{m}']['ok'], body['seeded']
-        state = client.get(f'/households/demo-bed-{m}/state').json()
-        room = next(x for x in a['rooms'] if x['id'] == f'bed-{m}')
+    bedrooms = [room for room in a['rooms'] if room['kind'] == 'bedroom']
+    assert [room['name'] for room in bedrooms] == ['Bedroom 1', 'Bedroom 2', 'Bedroom 3']
+    assert all(room['owner_id'] is None for room in bedrooms)
+    for room in bedrooms:
+        assert body['seeded'][room['id']]['ok'], body['seeded']
+        state = client.get(f"/households/{room['household_id']}/state").json()
+        assert {m['id'] for m in state['members']} == set(MEMBERS)
+        assert state['proposal'] is None
         assert state['room']['width_m'] == room['interior_m']['width_m']
         assert state['room']['depth_m'] == room['interior_m']['depth_m']
         assert state['scene']['validation']['ok'], state['scene']['validation']
@@ -245,3 +249,17 @@ def test_import_timeout_returns_actionable_error(client, monkeypatch):
     response = client.post('/apartments/demo/floorplan', files={'file': ('plan.png', png(), 'image/png')})
     assert response.status_code == 504
     assert response.json()['detail'] == 'Reading the floor plan took too long. Please try again.'
+
+
+def test_unassigned_plan_keeps_every_bedroom_without_roommate_limit():
+    reads = [
+        {'label': label, 'kind': 'bedroom', 'dimension_text': '4 x 3 m',
+         'box_2d': [0, i * 200, 900, (i + 1) * 200]}
+        for i, label in enumerate(['Primary Bedroom', 'Guest Bedroom', 'Bedroom', 'Bedroom'])
+    ]
+    plan = floorplan.build_plan(reads, 1000, 300, ['emily'], assign_owners=False)
+    bedrooms = plan['rooms']
+    assert [r['name'] for r in bedrooms] == [f'Bedroom {i}' for i in range(1, 5)]
+    assert all(r['owner_id'] is None and r.get('household_id') for r in bedrooms)
+    assert len({r['household_id'] for r in bedrooms}) == 4
+    assert not any('roommate' in w for w in plan['warnings'])

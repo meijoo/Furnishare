@@ -21,6 +21,7 @@ from . import (agent, apartment, assets, blender_mcp_client, catalog, config, co
                nessie, planner, ranking, realize, seed, state, textures, invitations, accounts)
 from .core import Conflict, Forbidden
 from . import setup_preferences
+from . import design_edits
 from .money import dollars
 
 
@@ -363,7 +364,10 @@ def health():
 
 @app.get('/products')
 def products(category: str | None = None):
-    return [p for p in catalog.products() if not category or p['category'] == category]
+    items = catalog.products()
+    ids = {p['id'] for p in items}
+    items += [p for p in catalog.remembered() if p.get('source_type') == 'demo' and p['id'] not in ids]
+    return [p for p in items if not category or p['category'] == category]
 
 
 @app.get('/products/search')
@@ -407,6 +411,18 @@ def realize_status(pid: str):
 @app.get('/households/{hid}/state')
 def get_state(hid: str, member_id: str | None = None):
     return state.snapshot(hid, member_id)
+
+
+class DesignEditsBody(BaseModel):
+    member_id: str
+    epoch: str
+    before: dict
+    after: dict
+
+
+@app.patch('/households/{hid}/design-edits')
+def patch_design_edits(hid: str, body: DesignEditsBody):
+    return design_edits.patch(hid, body.member_id, body.epoch, body.before, body.after)
 
 
 @app.get('/households/{hid}/events')
@@ -599,8 +615,8 @@ def scene_preview(hid: str):
 
 
 @app.post('/demo/reset')
-def demo_reset(clear_handles: bool = True):
-    return apartment.reset(clear_handles=clear_handles)
+def demo_reset(clear_handles: bool = True, furnished: bool = True, full_reset: bool = False):
+    return apartment.reset(clear_handles=clear_handles, furnished=furnished, full_reset=full_reset)
 
 
 @app.post('/demo/blank')

@@ -173,8 +173,18 @@ def test_group_floorplan_stays_separate_from_demo(client, monkeypatch):
     result = accounts.import_plan(group['id'], data, 'image/png', '/uploads/test.png')
     rooms = result['apartment']['rooms']
     assert all(not (r.get('household_id') or '').startswith('demo') for r in rooms)
-    bed = next(r for r in rooms if r.get('owner_id'))
-    assert bed['owner_id'] == owner['user']['id']
+    bedrooms = [r for r in rooms if r['kind'] == 'bedroom']
+    assert [r['name'] for r in bedrooms] == ['Bedroom 1', 'Bedroom 2', 'Bedroom 3']
+    assert all(r['owner_id'] is None for r in bedrooms)
+    bed = bedrooms[0]
     assert accounts.group_for_room(bed['household_id']) == group['id']
+    _, roommate, roommate_headers = signup(client)
+    joined = client.post('/groups/join', headers=roommate_headers, json={'code': group['group_code']})
+    assert joined.status_code == 200, joined.text
+    for bedroom in bedrooms:
+        members = db.all_('SELECT id FROM members WHERE household_id=?', bedroom['household_id'])
+        assert {m['id'] for m in members} == {owner['user']['id'], roommate['user']['id']}
+        response = client.get(f"/households/{bedroom['household_id']}/state", headers=roommate_headers)
+        assert response.status_code == 200, response.text
     assert db.kv_get(f'group-plan:{group["id"]}')['image_url'] == '/uploads/test.png'
     assert accounts.restore_plan(group['id'])['rooms'][0]['household_id'] == group['id']

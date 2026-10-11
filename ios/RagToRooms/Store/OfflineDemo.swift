@@ -6,7 +6,7 @@ extension AppModel {
     static func loadFixtures() -> (state: HouseholdState, products: [Product]) {
         do {
             let decoder = JSONDecoder()
-            let state = try decoder.decode(HouseholdState.self, from: try fixtureData("demo_state"))
+            var state = try decoder.decode(HouseholdState.self, from: try fixtureData("demo_state"))
             let products = try decoder.decode(ProductList.self, from: try fixtureData("demo_products")).products
             return (state, products)
         } catch {
@@ -24,11 +24,12 @@ extension AppModel {
         }
     }()
 
-    /// Offline snapshot for any room scope. Emily's bedroom carries a demo proposal; the other bedrooms start empty.
+    /// Offline snapshot with neatly placed furniture in every roommate's bedroom.
     static func fixtureState(forScope householdID: String) -> HouseholdState {
         if householdID == defaultHouseholdID { return loadFixtures().state }
         var state = blankState(forScope: householdID, apartment: fixtureApartment)
-        guard fixtureApartment?.room(forHousehold: householdID)?.ownerID == "emily" else { return state }
+        guard let owner = fixtureApartment?.room(forHousehold: householdID)?.ownerID else { return state }
+        let ownerName = fixtureApartment?.name(of: owner) ?? owner.capitalized
         let pieces: [(id: String, category: String, title: String, cents: Int, x: Double, z: Double, rotation: Double,
                       size: Dimensions, hex: String)] = [
             ("bed-queen", "bed", "Drift queen bed", 49900, 0, -0.7, 0, Dimensions(width: 1.6, depth: 2.1, height: 1.0), "#D8CBB6"),
@@ -41,8 +42,8 @@ extension AppModel {
         state.proposal = Proposal(
             version: 1, status: .awaitingApproval,
             items: pieces.map { ProposalItem(productID: $0.id, category: $0.category, priceCents: $0.cents, title: $0.title, sourceType: "demo") },
-            knownTotalCents: total, unknownCosts: ["shipping", "tax"], shares: ["emily": total], approvals: ["emily": false],
-            explanation: "Offline demo proposal. This is Emily's private room, so Emily pays 100% and approves alone. The bed's headboard is on the back wall, the nightstand is on the side away from the door, and nothing blocks the door swing.",
+            knownTotalCents: total, unknownCosts: ["shipping", "tax"], shares: [owner: total], approvals: [owner: false],
+            explanation: "Offline demo proposal. This is \(ownerName)'s private room, so \(ownerName) pays 100% and approves alone. Furniture is placed with the door clear.",
             createdAt: "2026-10-10T05:00:00Z")
         state.scene = SceneState(objects: pieces.map {
             SceneObject(objectID: "obj-\($0.category)", productID: $0.id, category: $0.category, positionM: [$0.x, 0, $0.z],
@@ -54,6 +55,18 @@ extension AppModel {
 
     /// Empty snapshot for a scope: right size from the plan, a front door, members from the plan. Also the
     /// stand-in shown while a scope that was never visited loads from the backend.
+    static func emptyDemoState(_ original: HouseholdState) -> HouseholdState {
+        var state = original
+        state.proposal = nil
+        state.scene = SceneState(objects: [], validation: nil)
+        state.finance = Finance(payerID: original.finance.payerID, simulator: "mock")
+        state.room.inspirationImageURL = nil
+        state.room.inspirationDescription = ""
+        state.room.inspirationImages = []
+        state.activity = []
+        return state
+    }
+
     static func blankState(forScope householdID: String, apartment: Apartment?) -> HouseholdState {
         let planRoom = apartment?.room(forHousehold: householdID)
         let width = planRoom?.widthM ?? 3.5, depth = planRoom?.depthM ?? 3.5

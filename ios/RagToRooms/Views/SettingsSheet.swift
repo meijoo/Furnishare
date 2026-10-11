@@ -28,7 +28,13 @@ struct SettingsSheet: View {
                     }
                 }
                 Section {
-                    Picker("Acting as", selection: Binding(get: { model.actingMemberID }, set: { model.setActingMember($0) })) {
+                    Picker("Acting as", selection: Binding(get: { model.actingMemberID }, set: {
+                        model.setActingMember($0)
+                        if model.currentGroupID == nil {
+                            nav.profileName = model.actingMemberName
+                            nav.persistProfile()
+                        }
+                    })) {
                         ForEach(model.actingCandidates, id: \.id) { candidate in
                             Text(candidate.name).tag(candidate.id)
                         }
@@ -94,18 +100,24 @@ struct SettingsSheet: View {
                 }
 
                 Section {
-                    Toggle("Save moves to the backend", isOn: $patchMoves)
+                    if model.state.designEdits != nil {
+                        Label("Furniture edits sync across connected iPads", systemImage: "arrow.triangle.2.circlepath")
+                    } else {
+                        Toggle("Save moves to the backend", isOn: $patchMoves)
+                    }
                 } header: {
                     Text("Room editing")
                 } footer: {
-                    Text("Off: drags and rotations stay on this iPad. On: the final position is sent with PATCH when a gesture ends.")
+                    Text(model.state.designEdits != nil
+                         ? "Changes to furniture, positions and selections are shared with the other devices using this room."
+                         : "Connect to the shared backend to sync room edits. Offline changes stay on this iPad.")
                 }
 
                 Section {
                     Button("Reset demo household", systemImage: "arrow.counterclockwise.circle", role: .destructive) {
                         confirmReset = true
                     }
-                    .disabled(model.currentGroupID != nil || model.busy.contains("reset"))
+                    .disabled(model.currentGroupID != nil || !model.busy.isEmpty)
                     Button("Clear downloaded 3D assets", systemImage: "trash") {
                         Task { await AssetCache.shared.clear() }
                     }
@@ -117,8 +129,8 @@ struct SettingsSheet: View {
                     Text("Demo")
                 } footer: {
                     Text(model.isOfflineDemo
-                         ? "Offline demo: reset reloads the bundled fixtures. Replay intro walks through signup and room selection again."
-                         : "Reset clears saved demo contacts and queued messages, reloads seed contacts, and restores the demo without sending texts. Replay intro restarts the walkthrough.")
+                         ? "Reset clears your changes and restores the neatly furnished demo rooms. Replay intro restarts the walkthrough."
+                         : "Reset clears saved edits, photos, searches and queued demo messages, then restores the furnished rooms across connected iPads. Seed contacts reload without sending texts.")
                 }
 
                 Section("About") {
@@ -138,7 +150,7 @@ struct SettingsSheet: View {
             .confirmationDialog("Reset the demo household?", isPresented: $confirmReset, titleVisibility: .visible) {
                 Button("Reset demo", role: .destructive) { Task { await model.resetDemo() } }
             } message: {
-                Text("Proposals, approvals and simulated payments go back to the starting point. Saved demo contacts and queued messages are cleared; seed contacts are reloaded without sending texts.")
+                Text("Clear all demo changes and restore the original furnished rooms, floor plan and budgets across connected iPads? Approvals and simulated payments reset. Seed contacts reload without sending texts.")
             }
         }
         .onAppear { draftURL = baseURL }
