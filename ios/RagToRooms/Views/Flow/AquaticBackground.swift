@@ -42,8 +42,19 @@ struct AquaticBackground: View {
                 .offset(x: size * 0.7, y: -size * 0.95)
             pearlBubble(size: size * 0.2)
                 .offset(x: size * 0.22, y: -size * 1.38)
+            pearlBubble(size: size * 0.25)
+                .offset(x: size * 0.5, y: -size * 1.8)
+            pearlBubble(size: size * 0.13)
+                .offset(x: size * 0.12, y: -size * 2.15)
+            pearlBubble(size: size * 0.18)
+                .offset(x: size * 0.8, y: size * 0.35)
+            pearlBubble(size: size * 0.30)
+                .offset(x: size * 0.30, y: size * 0.65)
+            pearlBubble(size: size * 0.16)
+                .offset(x: size * 0.15, y: size * 1.25)
         }
         .frame(width: size * 1.1, height: size * 1.6, alignment: .bottomLeading)
+        .padding(.bottom, size * 1.15)
     }
 
     private func pearlBubble(size: CGFloat) -> some View {

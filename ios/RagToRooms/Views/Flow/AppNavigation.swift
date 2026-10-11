@@ -1,11 +1,11 @@
 import SwiftUI
 
 enum AppScreen: String, Hashable {
-    case welcome, login, signUp, livingSituation, joinGroup, groupSetup, floorPlan, roomSelect, spaces, room
+    case welcome, login, signUp, livingSituation, joinGroup, groupSetup, floorPlan, roomSelect, room
 }
 
 enum RoomTab: String, CaseIterable, Identifiable {
-    case design, items, budget, inspiration
+    case design, items, budget, inspiration, members
     var id: String { rawValue }
 
     var title: String {
@@ -14,6 +14,7 @@ enum RoomTab: String, CaseIterable, Identifiable {
         case .items: "Items"
         case .budget: "Budget"
         case .inspiration: "Inspiration"
+        case .members: "Members"
         }
     }
 
@@ -23,6 +24,7 @@ enum RoomTab: String, CaseIterable, Identifiable {
         case .items: "shippingbox"
         case .budget: "chart.pie"
         case .inspiration: "sparkles"
+        case .members: "person.2.fill"
         }
     }
 }
@@ -55,13 +57,6 @@ enum LivingMode: String, CaseIterable {
     }
 }
 
-enum HubSection: String, CaseIterable, Identifiable {
-    case rooms, members
-    var id: String { rawValue }
-    var title: String { self == .rooms ? "Rooms" : "Members" }
-    var symbol: String { self == .rooms ? "square.grid.2x2.fill" : "person.2.fill" }
-}
-
 enum SuccessKind: Equatable {
     case roomsSaved(Int)
     case itemAdded(String)
@@ -74,6 +69,8 @@ enum SuccessKind: Equatable {
 @MainActor
 final class AppNavigation {
     static let completedKey = "hasCompletedOnboarding"
+    static let introVersionKey = "completedIntroVersion"
+    static let introVersion = 1
     static let profileNameKey = "profileDisplayName"
     static let profileEmailKey = "profileEmail"
     static let groupNameKey = "groupDisplayName"
@@ -82,7 +79,6 @@ final class AppNavigation {
 
     var screen: AppScreen
     var roomTab: RoomTab = .design
-    var hubSection: HubSection = .rooms
     var showSettings = false
     var showRoomSetup = false
     var showAR = false
@@ -90,6 +86,8 @@ final class AppNavigation {
     var showAddItem = false
     var showSendMoney = false
     var showShare = false
+    var showAddRooms = false
+    var finishSetupAfterInvites = false
     var success: SuccessKind?
 
     var profileName: String
@@ -113,14 +111,15 @@ final class AppNavigation {
         } else {
             selectedRoomIDs = []
         }
-        if let raw = UserDefaults.standard.string(forKey: "RTRScreen"), let forced = AppScreen(rawValue: raw) {
+        if let raw = Self.launchArgument("RTRScreen"), let forced = AppScreen(rawValue: raw) {
             screen = forced
             roomTab = Self.debugTab ?? .design
         } else if Self.shouldOpenWorkspace {
             screen = .room
             roomTab = Self.debugTab ?? .design
-        } else if UserDefaults.standard.bool(forKey: Self.completedKey) {
-            screen = .spaces
+        } else if UserDefaults.standard.bool(forKey: Self.completedKey)
+                    && UserDefaults.standard.integer(forKey: Self.introVersionKey) == Self.introVersion {
+            screen = .room
         } else {
             screen = .welcome
         }
@@ -152,21 +151,43 @@ final class AppNavigation {
     func finishOnboarding() {
         persistProfile()
         UserDefaults.standard.set(true, forKey: Self.completedKey)
-        hubSection = .rooms
-        screen = .spaces
+        UserDefaults.standard.set(Self.introVersion, forKey: Self.introVersionKey)
+        roomTab = .design
+        screen = .room
     }
 
     func replayIntro() {
         UserDefaults.standard.set(false, forKey: Self.completedKey)
         screen = .welcome
         roomTab = .design
-        hubSection = .rooms
     }
 
     func enterRoom(_ room: ApartmentRoom, model: AppModel) {
         model.selectRoom(room.id)
         roomTab = .design
         screen = .room
+    }
+
+    func enterSelectedRoom(model: AppModel) {
+        let rooms = model.apartment?.furnishableRooms ?? []
+        if let room = rooms.first(where: { selectedRoomIDs.isEmpty || selectedRoomIDs.contains($0.id) }) {
+            enterRoom(room, model: model)
+        } else {
+            roomTab = .design
+            screen = .room
+        }
+    }
+
+    func finishRoomSetup(model: AppModel) {
+        finishSetupAfterInvites = false
+        finishOnboarding()
+        enterSelectedRoom(model: model)
+        showSuccess(.roomsSaved(selectedRoomIDs.count))
+    }
+
+    func addRooms(_ roomIDs: Set<String>) {
+        selectedRoomIDs.formUnion(roomIDs)
+        persistProfile()
     }
 
     func showSuccess(_ kind: SuccessKind) {
@@ -179,13 +200,23 @@ final class AppNavigation {
     }
 
     static var shouldOpenWorkspace: Bool {
-        let defaults = UserDefaults.standard
-        return ["RTRScrollTo", "RTRSelect", "RTRSwitchTo"].contains { defaults.string(forKey: $0) != nil }
-            || defaults.bool(forKey: "RTRSkipOnboarding")
+        ["RTRScrollTo", "RTRSelect", "RTRSwitchTo"].contains { launchArgument($0) != nil }
+            || ["1", "true", "yes"].contains(launchArgument("RTRSkipOnboarding")?.lowercased() ?? "")
+    }
+
+    /// Only explicit launch arguments can bypass the intro, never old saved debug preferences.
+    private static func launchArgument(_ name: String) -> String? {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        guard let index = args.firstIndex(of: "-" + name), args.indices.contains(index + 1) else { return nil }
+        return args[index + 1]
+        #else
+        return nil
+        #endif
     }
 
     static var debugTab: RoomTab? {
-        switch UserDefaults.standard.string(forKey: "RTRScrollTo") {
+        switch launchArgument("RTRScrollTo") {
         case "floorplan", "proposal", "product": .items
         case "contributions", "finance": .budget
         case "chat", "activity": .inspiration

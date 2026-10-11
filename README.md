@@ -40,13 +40,11 @@ Everything runs **without keys** using clearly labeled fallbacks:
 | Key | Without it |
 |---|---|
 | `NESSIE_API_KEY` | Payments run in an in-process mock, labeled "Simulated (mock)" |
-| `GEMINI_API_KEY` (AI Studio). Vertex ADC is ignored when this key is set. | A deterministic planner replaces the agent |
+| `GEMINI_API_KEY`, or Vertex (`GOOGLE_GENAI_USE_VERTEXAI`, `GOOGLE_CLOUD_PROJECT`, `GOOGLE_CLOUD_LOCATION`, `GEMINI_MODEL`) | A deterministic planner replaces the agent |
 | `PHOTON_PROJECT_ID`, `PHOTON_PROJECT_SECRET` | Use `npm run mock` to type messages in a terminal |
 | `SHOPPING_API_KEY` (SerpAPI) | Verified catalog only |
 
 Ask the team lead for keys privately. Never paste them into the repo, issues or chat logs.
-
-Teammates copy `.env.example` and paste the same `GEMINI_API_KEY` (and `SHOPPING_API_KEY`). `GET /health` should show `"gemini_backend": "ai_studio"`.
 
 ## Run
 
@@ -90,7 +88,8 @@ Run the tests for the area you touched before opening a pull request.
 ## Accounts and saved groups
 
 **Create your account** now saves a real user in `backend/data/app.db`. Log in with
-that email/password to return to your saved groups. **Group setup** creates a
+your username/password to return to your saved groups. Only username and phone
+number must be unique; email is not required. **Group setup** creates a
 persistent group, with an empty living room and a six-digit join code. **Join a
 group** validates the code and stores membership for the signed-in account.
 Passwords are salted scrypt hashes; session tokens are hashed in SQLite, expire

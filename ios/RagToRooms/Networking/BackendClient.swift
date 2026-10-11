@@ -69,8 +69,8 @@ struct BackendClient: Sendable {
         try await send("POST", "/auth/signup", body: SignupRequest(name: name, email: email, phone: phone, username: username, password: password), timeout: 30)
     }
 
-    func login(email: String, password: String) async throws -> AccountSession {
-        try await send("POST", "/auth/login", body: LoginRequest(email: email, password: password), timeout: 30)
+    func login(username: String, password: String) async throws -> AccountSession {
+        try await send("POST", "/auth/login", body: LoginRequest(username: username, password: password), timeout: 30)
     }
 
     func accountStatus() async throws -> AccountStatus { try await send("GET", "/auth/me") }
@@ -367,5 +367,5 @@ struct JoinGroupRequest: Encodable { let code: String }
 struct JoinedGroup: Decodable { let household_id: String; let group_name: String; let group_code: String; let group_id: String? }
 
 struct SignupRequest: Encodable { let name: String; let email: String; let phone: String; let username: String; let password: String }
-struct LoginRequest: Encodable { let email: String; let password: String }
+struct LoginRequest: Encodable { let username: String; let password: String }
 struct CreateGroupRequest: Encodable { let name: String; let location: String; let request_id: String }

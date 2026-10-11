@@ -35,12 +35,14 @@ def issue_session(user):
 def signup(name, email, phone, username, password):
     name, email, username = name.strip(), email.strip().lower(), username.strip().lower()
     phone = core.normalize_handle(phone)
-    if not name or not re.fullmatch(r'[^\s@]+@[^\s@]+\.[^\s@]+', email):
-        raise ValueError('Enter a name and valid email address.')
+    if not name:
+        raise ValueError('Enter your name.')
     if not re.fullmatch(r'\+[1-9][0-9]{7,14}', phone):
         raise ValueError('Enter a valid international phone number.')
+    if len(username) < 3:
+        raise ValueError('Username needs at least 3 characters.')
     if not re.fullmatch(r'[a-z0-9_.-]{3,40}', username):
-        raise ValueError('Username must contain 3–40 letters, numbers, dots, hyphens, or underscores.')
+        raise ValueError('Username must use letters, numbers, dots, hyphens, or underscores, up to 40 characters.')
     if not 8 <= len(password) <= 256:
         raise ValueError('Password must contain 8–256 characters.')
     uid = 'usr_' + secrets.token_hex(12)
@@ -50,17 +52,19 @@ def signup(name, email, phone, username, password):
             c.execute('INSERT INTO users (id,name,email,phone,username,password_hash,created_at) VALUES (?,?,?,?,?,?,?)',
                       (uid, name, email, phone, username, hashed, db.now()))
     except sqlite3.IntegrityError as e:
-        raise core.Conflict('An account already uses that email, username, or phone number.') from e
+        if db.one('SELECT 1 FROM users WHERE username=?', username):
+            raise core.Conflict('That username is already taken.') from e
+        raise core.Conflict('That phone number already has an account.') from e
     return issue_session(db.one('SELECT * FROM users WHERE id = ?', uid))
 
 
-def login(email, password):
-    user = db.one('SELECT * FROM users WHERE email = ?', email.strip().lower())
+def login(username, password):
+    user = db.one('SELECT * FROM users WHERE username = ?', username.strip().lower())
     # Compute the same cost for missing accounts to avoid a cheap enumeration path.
     stored = user['password_hash'] if user else password_hash('missing-account-password', '00' * 16)
     _, salt, _ = stored.split('$')
     if not hmac.compare_digest(password_hash(password, salt), stored) or not user:
-        raise HTTPException(401, 'Email or password is incorrect.')
+        raise HTTPException(401, 'Username or password is incorrect.')
     return issue_session(user)
 
 

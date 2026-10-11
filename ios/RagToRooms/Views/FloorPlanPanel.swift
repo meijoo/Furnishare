@@ -372,12 +372,13 @@ private struct RoomTile: View {
 /// Compact chip row for the top bar: Living room · Emily's room · Maya's room · Alex's room.
 struct RoomSwitcher: View {
     @Environment(AppModel.self) private var model
+    @Environment(AppNavigation.self) private var nav
 
     var body: some View {
         if let apartment = model.apartment {
             ScrollView(.horizontal) {
                 HStack(spacing: 8) {
-                    ForEach(apartment.furnishableRooms) { room in
+                    ForEach(apartment.furnishableRooms.filter { nav.selectedRoomIDs.isEmpty || nav.selectedRoomIDs.contains($0.id) }) { room in
                         let isCurrent = room.householdID == model.currentHouseholdID
                         Button { model.selectRoom(room.id) } label: {
                             Label(apartment.shortName(room), systemImage: isCurrent ? "checkmark.circle.fill" : room.kind.symbol)
@@ -385,6 +386,11 @@ struct RoomSwitcher: View {
                         .buttonStyle(GlassChipStyle(selected: isCurrent))
                         .accessibilityAddTraits(isCurrent ? .isSelected : [])
                     }
+                    Button { nav.showAddRooms = true } label: {
+                        Image(systemName: "plus")
+                    }
+                    .buttonStyle(GlassChipStyle())
+                    .accessibilityLabel("Add rooms")
                 }
                 .padding(.vertical, 2)
             }

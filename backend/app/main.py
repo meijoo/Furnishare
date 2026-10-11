@@ -11,6 +11,8 @@ from pathlib import Path
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
+from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
@@ -102,6 +104,25 @@ async def _invalid(_r, e):
     return JSONResponse({'detail': str(e)}, status_code=422)
 
 
+@app.exception_handler(RequestValidationError)
+async def _validation(request, e):
+    if request.url.path not in ('/auth/signup', '/auth/login'):
+        return await request_validation_exception_handler(request, e)
+    messages = []
+    labels = {'name': 'Name', 'username': 'Username', 'phone': 'Phone number', 'password': 'Password', 'email': 'Email'}
+    for error in e.errors():
+        field = str(error['loc'][-1])
+        label = labels.get(field, 'This field')
+        context = error.get('ctx', {})
+        if error['type'] == 'string_too_short':
+            messages.append(f"{label} needs at least {context['min_length']} characters.")
+        elif error['type'] == 'string_too_long':
+            messages.append(f"{label} must be {context['max_length']} characters or fewer.")
+        else:
+            messages.append(f'Enter a valid {label.lower()}.')
+    return JSONResponse({'detail': ' '.join(messages)}, status_code=422)
+
+
 class MemberBody(BaseModel):
     member_id: str
 
@@ -177,14 +198,14 @@ class ClaimBody(BaseModel):
 
 class SignupBody(BaseModel):
     name: str = Field(min_length=1, max_length=100)
-    email: str = Field(min_length=1, max_length=254)
+    email: str = Field(default='', max_length=254)
     phone: str = Field(min_length=1, max_length=30)
     username: str = Field(min_length=3, max_length=40)
     password: str = Field(min_length=8, max_length=256)
 
 
 class LoginBody(BaseModel):
-    email: str = Field(max_length=254)
+    username: str = Field(min_length=1, max_length=40)
     password: str = Field(min_length=1, max_length=256)
 
 
@@ -242,7 +263,7 @@ def signup(body: SignupBody):
 
 @app.post('/auth/login')
 def login(body: LoginBody):
-    return accounts.login(body.email, body.password)
+    return accounts.login(body.username, body.password)
 
 
 @app.get('/auth/me')

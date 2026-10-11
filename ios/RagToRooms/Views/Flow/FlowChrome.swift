@@ -2,17 +2,20 @@ import SwiftUI
 
 struct BrandMark: View {
     var compact = false
+    var prominent = false
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: prominent ? 16 : 8) {
             Image(systemName: "house.fill")
-                .font(compact ? .body : .title3)
+                .font(prominent ? .system(size: 34) : compact ? .body : .title3)
                 .foregroundStyle(.white)
-                .frame(width: compact ? 32 : 38, height: compact ? 32 : 38)
-                .background(RoundedRectangle(cornerRadius: 10, style: .continuous).fill(Color.aeroSky))
+                .frame(width: prominent ? 72 : compact ? 32 : 38, height: prominent ? 72 : compact ? 32 : 38)
+                .background(RoundedRectangle(cornerRadius: prominent ? 18 : 10, style: .continuous).fill(Color.aeroSky))
             Text("Furnishare")
-                .font(compact ? .headline : .title3.weight(.semibold))
+                .font(prominent ? .system(size: 44, weight: .bold) : compact ? .headline : .title3.weight(.semibold))
                 .foregroundStyle(Color.aeroInk)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Furnishare")
@@ -92,6 +95,7 @@ struct FlowField: View {
     @Binding var text: String
     var keyboard: UIKeyboardType = .default
     var secure = false
+    var username = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -103,8 +107,8 @@ struct FlowField: View {
                 } else {
                     TextField(prompt, text: $text)
                         .keyboardType(keyboard)
-                        .textInputAutocapitalization(keyboard == .emailAddress ? .never : .words)
-                        .autocorrectionDisabled(keyboard == .emailAddress || keyboard == .URL)
+                        .textInputAutocapitalization(username || keyboard == .emailAddress ? .never : .words)
+                        .autocorrectionDisabled(username || keyboard == .emailAddress || keyboard == .URL)
                 }
             }
             .padding(12)

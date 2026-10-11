@@ -12,7 +12,7 @@ _local = threading.local()
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL UNIQUE,
+  id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL DEFAULT '',
   phone TEXT NOT NULL UNIQUE, username TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL, created_at TEXT NOT NULL, active_group_id TEXT
 );
@@ -115,7 +115,37 @@ def conn() -> sqlite3.Connection:
 
 
 def init() -> None:
-    conn().executescript(SCHEMA)
+    with LOCK:
+        c = conn()
+        c.executescript(SCHEMA)
+        migrate_account_email(c)
+
+
+def migrate_account_email(c) -> None:
+    """Remove the old email uniqueness constraint without losing account references."""
+    indexes = c.execute('PRAGMA index_list(users)').fetchall()
+    if not any(row['unique'] and [r['name'] for r in c.execute(f'PRAGMA index_info("{row["name"]}")')] == ['email']
+               for row in indexes):
+        return
+    c.execute('PRAGMA foreign_keys=OFF')
+    try:
+        c.execute('BEGIN IMMEDIATE')
+        c.execute("""CREATE TABLE users_email_migration (
+          id TEXT PRIMARY KEY, name TEXT NOT NULL, email TEXT NOT NULL DEFAULT '',
+          phone TEXT NOT NULL UNIQUE, username TEXT NOT NULL UNIQUE,
+          password_hash TEXT NOT NULL, created_at TEXT NOT NULL, active_group_id TEXT
+        )""")
+        c.execute('INSERT INTO users_email_migration SELECT id,name,email,phone,username,password_hash,created_at,active_group_id FROM users')
+        c.execute('DROP TABLE users')
+        c.execute('ALTER TABLE users_email_migration RENAME TO users')
+        if c.execute('PRAGMA foreign_key_check').fetchone():
+            raise sqlite3.IntegrityError('Account migration would break existing references')
+        c.execute('COMMIT')
+    except BaseException:
+        c.execute('ROLLBACK')
+        raise
+    finally:
+        c.execute('PRAGMA foreign_keys=ON')
 
 
 @contextmanager
