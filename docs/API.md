@@ -349,10 +349,11 @@ Demo data stays in `seed.py`; it is independent of real accounts. SQLite in
 `backend/data/app.db` now also stores users, sessions, groups, group memberships,
 and room-to-group mappings. Signup never inserts a demo persona.
 
-- `POST /auth/signup`: `{name,email,phone,username,password}` → `{token,user,groups}`.
-  Email/username are case-insensitive and unique; phone is normalized and unique.
+- `POST /auth/signup`: `{name,phone,username,password}` → `{token,user,groups}`.
+  Username is case-insensitive and unique; phone is normalized and unique.
+  Email is optional legacy profile data and does not have to be unique.
   Passwords have at least eight characters and are stored as salted scrypt hashes.
-- `POST /auth/login`: `{email,password}` → the same response; invalid credentials → 401.
+- `POST /auth/login`: `{username,password}` → the same response; invalid credentials → 401.
 - `GET /auth/me`: bearer token → `{user,groups}`. Sessions expire after 30 days.
 - `POST /auth/logout`: revokes the current bearer token.
 - `POST /groups`: bearer token, `{name,location,request_id}` → group snapshot

@@ -28,6 +28,8 @@ struct RoomWorkspaceView: View {
                                 .task { await debugScroll(reader) }
                         }
                     }
+                } else if nav.roomTab == .members {
+                    MembersView()
                 } else {
                     ScrollViewReader { reader in
                         ScrollView {
@@ -60,12 +62,6 @@ struct RoomWorkspaceView: View {
 
     private var title: some View {
         HStack(spacing: 10) {
-            Button {
-                nav.screen = .spaces
-            } label: {
-                Image(systemName: "chevron.left").accessibilityLabel("Back to rooms")
-            }
-            .buttonStyle(GlassChipStyle())
             VStack(alignment: .leading, spacing: 2) {
                 Text(model.currentRoomName).font(.title3.bold()).foregroundStyle(Color.aeroInk)
                 Text(sizeLine).font(.caption).foregroundStyle(.secondary)
@@ -105,6 +101,8 @@ struct RoomWorkspaceView: View {
             InspirationPanel()
             GroupSuggestionsPanel()
             ChatPanel().id("chat")
+        case .members:
+            MembersView()
         }
     }
 

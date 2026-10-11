@@ -24,7 +24,12 @@ struct ContentView: View {
         .sheet(isPresented: $nav.showCatalog) { CatalogSheet().environment(model).environment(self.nav) }
         .sheet(isPresented: $nav.showAddItem) { AddItemSheet().environment(model).environment(self.nav) }
         .sheet(isPresented: $nav.showSendMoney) { SendMoneySheet().environment(model).environment(self.nav) }
-        .sheet(isPresented: $nav.showShare) { ShareSpaceSheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showShare, onDismiss: {
+            if nav.finishSetupAfterInvites {
+                nav.finishRoomSetup(model: model)
+            }
+        }) { ShareSpaceSheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showAddRooms) { AddRoomsSheet().environment(model).environment(self.nav) }
         .fullScreenCover(isPresented: $nav.showAR) {
             ARPlacementScreen(room: model.state.room, objects: model.displayedObjects,
                               names: Dictionary(model.displayedObjects.map { ($0.objectID, model.displayName($0)) }, uniquingKeysWith: { a, _ in a }),
@@ -67,7 +72,6 @@ struct ContentView: View {
         case .groupSetup: GroupSetupView()
         case .floorPlan: FloorPlanUploadView()
         case .roomSelect: RoomSelectView()
-        case .spaces: SpacesHubView()
         case .room: RoomWorkspaceView()
         }
     }

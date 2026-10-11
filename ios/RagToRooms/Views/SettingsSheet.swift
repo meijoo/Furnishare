@@ -17,7 +17,7 @@ struct SettingsSheet: View {
                 if let account = model.account {
                     Section("Account") {
                         Text(account.name)
-                        Text(account.email).foregroundStyle(.secondary)
+                        Text("@\(account.username)").foregroundStyle(.secondary)
                         Button("Sign out", role: .destructive) {
                             Task {
                                 await model.signOut()

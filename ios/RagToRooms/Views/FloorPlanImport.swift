@@ -25,9 +25,16 @@ struct FloorPlanImportControls: View {
     @State private var failure: String?
 
     private var working: Bool { preparing || model.busy.contains("floorplan") }
+    private var uploadTitle: String { apartment.isImported ? "Reupload floor plan" : "Import floor plan" }
+    private let uploadError = "Couldn't upload your floor plan. Please try again with a clear PNG or JPEG image."
 
     var body: some View {
         VStack(alignment: prominent ? .center : .leading, spacing: 10) {
+            if apartment.isImported && !working {
+                Label("Floor plan uploaded", systemImage: "checkmark.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(Color.aeroGrass)
+            }
             if prominent {
                 importHero
             } else {
@@ -35,13 +42,13 @@ struct FloorPlanImportControls: View {
             }
             if !model.backendReachable {
                 Label(model.isOfflineDemo
-                      ? "Offline demo: importing a floor plan needs the backend, which reads the plan with Gemini."
+                      ? "Connect to the backend to analyze your floor plan."
                       : "Connect to the backend to import a floor plan.",
                       systemImage: "wifi.slash")
                     .font(.caption).foregroundStyle(.secondary)
             }
             if working { progress }
-            if let widthPrompt, !working { widthCard(widthPrompt) }
+            if widthPrompt != nil && !working { widthCard }
             if let failure {
                 note(failure, symbol: "exclamationmark.triangle.fill", tint: .aeroRed) { self.failure = nil }
             }
@@ -56,9 +63,9 @@ struct FloorPlanImportControls: View {
             case .success(let url):
                 let scoped = url.startAccessingSecurityScopedResource()
                 defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-                if let data = try? Data(contentsOf: url) { Task { await begin(data) } } else { failure = "Couldn't read that file" }
-            case .failure(let error):
-                failure = error.localizedDescription
+                if let data = try? Data(contentsOf: url) { Task { await begin(data) } } else { failure = uploadError }
+            case .failure:
+                failure = uploadError
             }
         }
         .onChange(of: photoItem) { _, item in
@@ -66,7 +73,7 @@ struct FloorPlanImportControls: View {
             photoItem = nil
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self) { await begin(data) }
-                else { failure = "Couldn't read that photo" }
+                else { failure = uploadError }
             }
         }
         .task { await debugImport() }
@@ -88,7 +95,7 @@ struct FloorPlanImportControls: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "square.and.arrow.down.on.square")
-                    Text("Import floor plan")
+                    Text(uploadTitle)
                 }
             }
             .buttonStyle(AeroWideButtonStyle())
@@ -108,7 +115,7 @@ struct FloorPlanImportControls: View {
                 Button("Choose from Photos", systemImage: "photo.on.rectangle") { showPhotos = true }
                 Button("Choose a PNG or JPEG file", systemImage: "folder") { showFiles = true }
             } label: {
-                Label("Import floor plan", systemImage: "square.and.arrow.down.on.square")
+                Label(uploadTitle, systemImage: "square.and.arrow.down.on.square")
             }
             .buttonStyle(AeroButtonStyle(compact: true))
             .disabled(!model.backendReachable || working)
@@ -130,7 +137,7 @@ struct FloorPlanImportControls: View {
         HStack(spacing: 10) {
             ProgressView()
             VStack(alignment: .leading, spacing: 2) {
-                Text(preparing ? "Preparing the image…" : startedAt != nil ? "Reading the plan with Gemini…" : "Restoring the built-in plan…")
+                Text(preparing ? "Preparing the image…" : startedAt != nil ? "Analyzing floor plan…" : "Restoring the built-in plan…")
                     .font(.subheadline.weight(.semibold))
                 if let startedAt {
                     TimelineView(.periodic(from: startedAt, by: 1)) { context in
@@ -147,7 +154,7 @@ struct FloorPlanImportControls: View {
         .accessibilityElement(children: .combine)
     }
 
-    private func widthCard(_ message: String) -> some View {
+    private var widthCard: some View {
         VStack(alignment: .leading, spacing: 8) {
             Label("No room sizes are printed on this plan", systemImage: "ruler").font(.subheadline.weight(.semibold))
             Text("Enter the overall width of the plan (left to right) and import again.").font(.caption).foregroundStyle(.secondary)
@@ -172,7 +179,6 @@ struct FloorPlanImportControls: View {
             if !widthText.isEmpty, widthMeters == nil {
                 Label("Use a width between 2 and 60 m (7 and 196 ft)", systemImage: "info.circle").font(.caption).foregroundStyle(.secondary)
             }
-            Text("Server: \(message)").font(.caption2).foregroundStyle(.secondary)
         }
         .foregroundStyle(Color.aeroInk)
         .padding(10)
@@ -209,7 +215,7 @@ struct FloorPlanImportControls: View {
         preparing = true
         let image = await UploadImage.prepare(data, maxLongSide: 1600, keepPNG: true, name: "floorplan")
         preparing = false
-        guard let image else { failure = "Couldn't read that image. Use a PNG, JPEG or a photo."; return }
+        guard let image else { failure = uploadError; return }
         pending = image
         await send(widthM: nil)
     }
@@ -232,8 +238,8 @@ struct FloorPlanImportControls: View {
             showImage = true
         case .needsWidth(let message):
             widthPrompt = message
-        case .failed(let message):
-            failure = "Import failed: \(message)"
+        case .failed:
+            failure = uploadError
             pending = nil
         }
     }
@@ -244,7 +250,7 @@ struct FloorPlanImportControls: View {
         guard !Self.debugImportDone, let path = UserDefaults.standard.string(forKey: "RTRImportPlanFile") else { return }
         Self.debugImportDone = true
         try? await Task.sleep(for: .seconds(4))
-        if let data = FileManager.default.contents(atPath: path) { await begin(data) } else { failure = "Debug: can't read \(path)" }
+        if let data = FileManager.default.contents(atPath: path) { await begin(data) } else { failure = uploadError }
         #endif
     }
 
@@ -254,8 +260,8 @@ struct FloorPlanImportControls: View {
 
     private func restore() async {
         failure = nil
-        if let error = await model.restoreBuiltInPlan() {
-            failure = "Couldn't restore the built-in plan: \(error)"
+        if await model.restoreBuiltInPlan() != nil {
+            failure = "Couldn't restore the floor plan. Please try again."
         } else {
             warnings = []
         }

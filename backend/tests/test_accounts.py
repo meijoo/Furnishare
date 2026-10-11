@@ -42,13 +42,54 @@ def test_signup_login_duplicate_and_password_storage(client):
     assert row['password_hash'].startswith('scrypt$')
     assert body['password'] not in row['password_hash']
     assert client.post('/auth/signup', json=body).status_code == 409
-    bad = client.post('/auth/login', json={'email': body['email'], 'password': 'wrong-password'})
+    bad = client.post('/auth/login', json={'username': body['username'], 'password': 'wrong-password'})
     assert bad.status_code == 401
-    assert client.post('/auth/login', json={'email': body['email'].upper(), 'password': body['password']}).status_code == 200
+    assert client.post('/auth/login', json={'username': body['username'].upper(), 'password': body['password']}).status_code == 200
     assert client.get('/auth/me', headers=headers).json()['user']['id'] == row['id']
     assert client.get('/auth/me').status_code == 401
     assert client.post('/auth/logout', headers=headers).status_code == 200
     assert client.get('/auth/me', headers=headers).status_code == 401
+
+
+def test_signup_without_email_uniqueness_and_friendly_validation(client):
+    body, session, _ = signup(client)
+    another, _, _ = signup(client)
+    new_body = {**another, 'username': uuid.uuid4().hex}
+    # Two accounts can share an email, and new clients can omit it entirely.
+    new_body['phone'] = '+1' + str(int(uuid.uuid4().hex[:12], 16) % 10000000000).zfill(10)
+    new_body['email'] = body['email']
+    assert client.post('/auth/signup', json=new_body).status_code == 201
+    new_body.update(username=uuid.uuid4().hex, phone='+1' + str(int(uuid.uuid4().hex[:12], 16) % 10000000000).zfill(10))
+    new_body.pop('email')
+    assert client.post('/auth/signup', json=new_body).status_code == 201
+    assert client.post('/auth/signup', json={**new_body, 'username': body['username'].upper()}).json()['detail'] == 'That username is already taken.'
+    assert client.post('/auth/signup', json={**new_body, 'username': uuid.uuid4().hex, 'phone': body['phone']}).json()['detail'] == 'That phone number already has an account.'
+    response = client.post('/auth/signup', json={**new_body, 'username': 'ab'})
+    assert response.status_code == 422
+    assert response.json()['detail'] == 'Username needs at least 3 characters.'
+    assert client.post('/auth/login', json={'username': body['username'].upper(), 'password': body['password']}).json()['user']['id'] == session['user']['id']
+
+
+def test_old_email_constraint_migration_preserves_account_references():
+    import sqlite3
+    c = sqlite3.connect(':memory:', isolation_level=None)
+    c.row_factory = sqlite3.Row
+    c.executescript(db.SCHEMA.replace("email TEXT NOT NULL DEFAULT ''", 'email TEXT NOT NULL UNIQUE'))
+    c.execute('PRAGMA foreign_keys=ON')
+    c.execute("INSERT INTO users VALUES ('u','Name','same@example.com','+15551111111','first','hash','now',NULL)")
+    c.execute("INSERT INTO sessions VALUES ('token','u',123,'now')")
+    c.execute("INSERT INTO groups VALUES ('g','Home','Here','u','123456','request','now')")
+    c.execute("INSERT INTO group_members VALUES ('g','u','owner','now')")
+    db.migrate_account_email(c)
+    db.migrate_account_email(c)
+    c.execute("INSERT INTO users VALUES ('u2','Name','same@example.com','+15552222222','second','hash','now',NULL)")
+    assert c.execute('SELECT user_id FROM sessions').fetchone()['user_id'] == 'u'
+    assert c.execute('SELECT owner_id FROM groups').fetchone()['owner_id'] == 'u'
+    assert c.execute('PRAGMA foreign_key_check').fetchall() == []
+    assert c.execute('PRAGMA foreign_keys').fetchone()[0] == 1
+    with pytest.raises(sqlite3.IntegrityError):
+        c.execute("INSERT INTO users VALUES ('u3','Name','','+15552222222','third','hash','now',NULL)")
+    c.close()
 
 
 def test_group_creation_join_and_authorization(client):
@@ -90,7 +131,7 @@ def test_restart_and_demo_reset_preserve_real_records(client):
     with TestClient(app) as restarted:
         assert restarted.get('/auth/me', headers=headers).json()['user']['id'] == session['user']['id']
         assert restarted.get('/groups', headers=headers).json()['groups'][0]['id'] == group['id']
-        assert restarted.post('/auth/login', json={'email': body['email'], 'password': body['password']}).status_code == 200
+        assert restarted.post('/auth/login', json={'username': body['username'], 'password': body['password']}).status_code == 200
 
 
 def test_demo_disabled_and_session_expiry(client, monkeypatch):

@@ -292,8 +292,10 @@ struct ShareSpaceSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Invite roommates") {
-                    Text("Enter everyone's number, including yours. Furnishare will text each person the same six-digit code to join this room. Reply to your individual conversation with furniture preferences and links.")
+                Section {
+                    Text("Invite roommates by phone number. They'll receive a code to join your space. You can invite more later.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
                     ForEach(model.state.members, id: \.id) { member in
                         TextField("\(member.name): +15551234567", text: Binding(
                             get: { phones[member.id] ?? "" },
@@ -303,7 +305,7 @@ struct ShareSpaceSheet: View {
                     }
                     if model.currentGroupID != nil {
                         ForEach(inviteePhones.indices, id: \.self) { index in
-                            TextField("New roommate: +15551234567", text: Binding(
+                            TextField("Enter roommate's number", text: Binding(
                                 get: { inviteePhones[index] },
                                 set: { inviteePhones[index] = $0; requestID = UUID().uuidString; invitation = nil }
                             ))
@@ -341,10 +343,11 @@ struct ShareSpaceSheet: View {
                     }
                 }
             }
-            .navigationTitle("Share this space")
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+            .navigationTitle("Invite roommates")
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.disabled(sending) } }
         }
         .presentationDetents([.large])
+        .interactiveDismissDisabled(sending)
         .onAppear {
             if let account = model.account { phones[account.id] = account.phone }
         }
@@ -410,6 +413,7 @@ struct GroupSuggestionsPanel: View {
 }
 
 struct SuccessOverlay: View {
+    @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
     let kind: SuccessKind
 
@@ -421,9 +425,14 @@ struct SuccessOverlay: View {
                     .font(.system(size: 56))
                     .foregroundStyle(Color.aeroGrass)
                 Text(title).font(.title.bold()).foregroundStyle(Color.aeroInk)
-                Text(detail).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                if let detail {
+                    Text(detail).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
+                }
                 VStack(spacing: 10) {
-                    Button(primaryTitle) { nav.dismissSuccess() }
+                    Button(primaryTitle) {
+                        if case .roomsSaved = kind { nav.enterSelectedRoom(model: model) }
+                        nav.dismissSuccess()
+                    }
                         .buttonStyle(AeroWideButtonStyle())
                     if case .itemAdded = kind {
                         Button("Keep adding") { nav.dismissSuccess(continueAdding: true) }
@@ -436,10 +445,6 @@ struct SuccessOverlay: View {
                             nav.screen = .room
                         }
                         .buttonStyle(AeroWideButtonStyle(outlined: true))
-                    }
-                    if case .roomsSaved = kind {
-                        Button("Keep designing") { nav.dismissSuccess() }
-                            .buttonStyle(AeroWideButtonStyle(outlined: true))
                     }
                 }
             }
@@ -461,10 +466,10 @@ struct SuccessOverlay: View {
         }
     }
 
-    private var detail: String {
+    private var detail: String? {
         switch kind {
-        case .roomsSaved(let count):
-            return "Your design list now includes \(count) room\(count == 1 ? "" : "s"). Open one to start furnishing."
+        case .roomsSaved:
+            return nil
         case .itemAdded(let name):
             return "“\(name)” is saved with things you already have. It is not part of the room budget."
         case .paymentSent(let amount, let to):
@@ -476,7 +481,7 @@ struct SuccessOverlay: View {
 
     private var primaryTitle: String {
         switch kind {
-        case .roomsSaved: "View all rooms"
+        case .roomsSaved: "View room"
         case .itemAdded: "View room"
         case .paymentSent: "Done"
         case .linkCopied: "Done"

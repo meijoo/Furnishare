@@ -5,18 +5,24 @@ struct LivingSituationView: View {
 
     var body: some View {
         @Bindable var nav = nav
-        FlowScreen(maxWidth: 980) {
-            VStack(spacing: 28) {
-                header
-                VStack(spacing: 8) {
-                    Text("How are you living?")
-                        .font(.largeTitle.bold())
-                        .foregroundStyle(.black)
-                        .multilineTextAlignment(.center)
+        GeometryReader { geometry in
+            let wideLandscape = geometry.size.width >= 800 && geometry.size.width > geometry.size.height
+            FlowScreen(maxWidth: 1200) {
+                VStack(spacing: 28) {
+                    header
+                    VStack(spacing: 8) {
+                        Text("How are you living?")
+                            .font(.largeTitle.bold())
+                            .foregroundStyle(.black)
+                            .multilineTextAlignment(.center)
+                    }
+                    LazyVGrid(columns: wideLandscape
+                              ? Array(repeating: GridItem(.flexible(), spacing: 18), count: 3)
+                              : [GridItem(.adaptive(minimum: 260), spacing: 18)], spacing: 18) {
+                        cards(illustrationHeight: wideLandscape ? max(240, geometry.size.height - 280) : 160)
+                    }
                 }
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 260), spacing: 18)], spacing: 18) {
-                    cards
-                }
+                .frame(minHeight: max(0, geometry.size.height - 40), alignment: .top)
             }
         }
     }
@@ -27,20 +33,12 @@ struct LivingSituationView: View {
             Spacer()
             FlowStepBar(current: 1, total: 3, captions: ["Group setup", "Floor plan", "Select rooms"])
             Spacer()
-            Button { nav.screen = .welcome } label: {
-                Label("Back", systemImage: "chevron.left")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
-                    .background(.white, in: RoundedRectangle(cornerRadius: 12))
-            }
-            .buttonStyle(.plain)
+            OnboardingBackButton { nav.screen = .welcome }
             Color.clear.frame(width: SettingsGearButton.reservedWidth, height: 1)
         }
     }
 
-    @ViewBuilder private var cards: some View {
+    @ViewBuilder private func cards(illustrationHeight: CGFloat) -> some View {
         ForEach(LivingMode.allCases, id: \.self) { mode in
             Button {
                 nav.livingMode = mode
@@ -52,7 +50,7 @@ struct LivingSituationView: View {
             } label: {
                 VStack(alignment: .leading, spacing: 0) {
                     RoomIllustration(scene: RoomScene(mode: mode))
-                        .frame(height: 160)
+                        .frame(height: illustrationHeight)
                     HStack(spacing: 10) {
                         Image(systemName: mode.symbol)
                             .font(.body.weight(.semibold))
@@ -117,7 +115,7 @@ struct JoinGroupView: View {
                 nav.groupName = group.group_name
                 nav.joinCode = group.group_code
                 nav.finishOnboarding()
-                nav.screen = .room
+                nav.enterSelectedRoom(model: model)
             } catch { self.error = error.localizedDescription }
             return
         }
@@ -134,9 +132,8 @@ struct GroupSetupView: View {
 
     var body: some View {
         @Bindable var nav = nav
-        FlowScreen(maxWidth: 520) {
+        OnboardingPage(step: 1, back: .livingSituation, maxWidth: 520) {
             VStack(alignment: .leading, spacing: 18) {
-                onboardingChrome(step: 1, back: .livingSituation)
                 Text("Group setup")
                     .font(.largeTitle.bold())
                     .foregroundStyle(.black)
@@ -180,13 +177,10 @@ struct FloorPlanUploadView: View {
     @State private var showImage = true
 
     var body: some View {
-        FlowScreen(maxWidth: 640) {
+        OnboardingPage(step: 2, back: nav.livingMode == .createGroup ? .groupSetup : nav.livingMode == .joinGroup ? .joinGroup : .livingSituation, maxWidth: 640) {
             VStack(alignment: .leading, spacing: 22) {
-                onboardingChrome(step: 2, back: nav.livingMode == .createGroup ? .groupSetup : nav.livingMode == .joinGroup ? .joinGroup : .livingSituation)
                 VStack(spacing: 8) {
                     Text("Upload your floor plan").font(.largeTitle.bold()).foregroundStyle(Color.aeroInk)
-                    Text("Take a photo or pick one from the library. We’ll read the rooms and sizes.")
-                        .foregroundStyle(Color.figmaMuted)
                 }
                 .frame(maxWidth: .infinity)
                 if let apartment = model.apartment {
@@ -201,8 +195,6 @@ struct FloorPlanUploadView: View {
                     tip("internaldrive", "Max file size", "Up to 10 MB")
                 }
                 HStack {
-                    Button("Back") { nav.screen = nav.livingMode == .createGroup ? .groupSetup : .livingSituation }
-                        .buttonStyle(GlassChipStyle())
                     Spacer()
                     Button(action: goNext) { continueLabel("Continue") }
                         .buttonStyle(AeroButtonStyle())
@@ -238,25 +230,14 @@ struct RoomSelectView: View {
     @State private var submitting = false
 
     var body: some View {
-        FlowScreen(maxWidth: 1280) {
+        @Bindable var nav = nav
+        OnboardingPage(step: 3, back: .floorPlan, maxWidth: 1280) {
             VStack(alignment: .leading, spacing: 18) {
-                onboardingChrome(step: 3, back: .floorPlan)
                 groupBanner
                 Text("Select your rooms").font(.largeTitle.bold()).foregroundStyle(Color.aeroInk)
-                Text("Choose every room you can furnish. Bathrooms and halls stay on the plan for reference but aren’t selectable.")
-                    .foregroundStyle(Color.figmaMuted)
-                ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .top, spacing: 20) {
-                        roomCards.frame(width: 340)
-                        planCard.layoutPriority(1)
-                    }
-                    VStack(alignment: .leading, spacing: 16) { roomCards; planCard }
-                }
+                RoomSelectionContent(selection: $nav.selectedRoomIDs)
                 HStack {
-                    Button("Back") { nav.screen = .floorPlan }.buttonStyle(GlassChipStyle())
                     Spacer()
-                    Button { nav.showShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
-                        .buttonStyle(GlassChipStyle())
                     Button(action: finish) { continueLabel(submitting ? "Setting up…" : "Submit") }
                         .buttonStyle(AeroButtonStyle())
                         .disabled(submitting || nav.selectedRoomIDs.isEmpty)
@@ -277,65 +258,6 @@ struct RoomSelectView: View {
         .glassPanel(cornerRadius: 18, padding: 12)
     }
 
-    @ViewBuilder private var planCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Floor plan preview").font(.headline)
-            Text("Tap a furnishable room to include or leave it out.").font(.caption).foregroundStyle(.secondary)
-            if let apartment = model.apartment {
-                ApartmentPlanView(apartment: apartment, showImage: true, compact: true, maxHeight: 780,
-                                 selection: Binding(get: { nav.selectedRoomIDs }, set: { nav.selectedRoomIDs = $0 }))
-            } else {
-                Text("Plan unavailable.").foregroundStyle(.secondary)
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .glassPanel()
-    }
-
-    private var roomCards: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Choose the rooms you have access to").font(.headline)
-            if let apartment = model.apartment {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: 10)], spacing: 10) {
-                    ForEach(apartment.rooms.filter { $0.kind != .hall && $0.kind != .closet && $0.kind != .other }) { room in
-                        roomCard(room, apartment: apartment)
-                    }
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .glassPanel()
-    }
-
-    private func roomCard(_ room: ApartmentRoom, apartment: Apartment) -> some View {
-        let selected = nav.selectedRoomIDs.contains(room.id)
-        let enabled = room.isFurnishable
-        return Button {
-            guard enabled else { return }
-            if selected { nav.selectedRoomIDs.remove(room.id) } else { nav.selectedRoomIDs.insert(room.id) }
-        } label: {
-            VStack(alignment: .leading, spacing: 8) {
-                ZStack(alignment: .topTrailing) {
-                    RoomIllustration(scene: room.kind.scene)
-                        .frame(height: 80)
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    Image(systemName: selected ? "checkmark.square.fill" : "square")
-                        .foregroundStyle(enabled ? Color.aeroSky : Color.figmaMuted)
-                        .padding(6)
-                }
-                Text(apartment.shortName(room)).font(.subheadline.weight(.semibold)).foregroundStyle(Color.aeroInk).lineLimit(1)
-                Text(enabled ? room.sizeLabel : room.kind.label).font(.caption).foregroundStyle(.secondary)
-            }
-            .padding(8)
-            .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(.white.opacity(enabled ? 0.85 : 0.4)))
-            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(selected ? Color.aeroSky : .clear, lineWidth: 2))
-            .opacity(enabled ? 1 : 0.55)
-        }
-        .buttonStyle(.plain)
-        .disabled(!enabled)
-        .accessibilityAddTraits(selected ? .isSelected : [])
-    }
-
     private func seedSelection() {
         guard nav.selectedRoomIDs.isEmpty, let rooms = model.apartment?.furnishableRooms else { return }
         nav.selectedRoomIDs = Set(rooms.map(\.id))
@@ -347,8 +269,8 @@ struct RoomSelectView: View {
         nav.persistProfile()
         Task {
             await model.startBlankApartment()
-            nav.finishOnboarding()
-            nav.showSuccess(.roomsSaved(nav.selectedRoomIDs.count))
+            nav.finishSetupAfterInvites = true
+            nav.showShare = true
         }
     }
 }
@@ -365,6 +287,24 @@ func onboardingChrome(step: Int, back: AppScreen) -> some View {
     OnboardingChrome(step: step, back: back)
 }
 
+private struct OnboardingPage<Content: View>: View {
+    let step: Int
+    let back: AppScreen
+    var maxWidth: CGFloat = 720
+    @ViewBuilder var content: Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            OnboardingChrome(step: step, back: back)
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+            FlowScreen(maxWidth: maxWidth) {
+                content
+            }
+        }
+    }
+}
+
 private struct OnboardingChrome: View {
     @Environment(AppNavigation.self) private var nav
     let step: Int
@@ -376,8 +316,24 @@ private struct OnboardingChrome: View {
             Spacer()
             FlowStepBar(current: step, total: 3, captions: ["Group setup", "Floor plan", "Select rooms"])
             Spacer()
-            Button("Back") { nav.screen = back }.buttonStyle(GlassChipStyle())
+            OnboardingBackButton { nav.screen = back }
             Color.clear.frame(width: SettingsGearButton.reservedWidth, height: 1)
         }
+    }
+}
+
+private struct OnboardingBackButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label("Back", systemImage: "chevron.left")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.black)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(.white, in: RoundedRectangle(cornerRadius: 12))
+        }
+        .buttonStyle(.plain)
     }
 }
