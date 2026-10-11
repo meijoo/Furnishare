@@ -1,5 +1,5 @@
 """Room budgets are shared; legacy private-limit fields remain viewer-specific."""
-from . import catalog, core, db, finance, geometry, textures
+from . import catalog, core, db, design_edits, finance, geometry, textures
 
 
 def snapshot(hid: str, viewer: str | None = None) -> dict:
@@ -49,6 +49,7 @@ def snapshot(hid: str, viewer: str | None = None) -> dict:
     return {
         'household_id': hid,
         'state_version': h['state_version'],
+        'design_edits': design_edits.snapshot(hid),
         'members': members,
         'room': room,
         'budget_cents': (None if hid.startswith('grp_') and not db.one('SELECT 1 FROM room_budgets WHERE household_id=?', hid) else h['budget_cents']),

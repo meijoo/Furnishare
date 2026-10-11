@@ -50,7 +50,8 @@ struct FloorPlanPanel: View {
         let s = room.summary ?? RoomSummary()
         return HStack(spacing: 8) {
             Label("Viewing \(apartment.shortName(room))", systemImage: "eye.fill").font(.subheadline.weight(.semibold))
-            StatusBadge(text: room.shared ? "Shared" : "Private", symbol: room.shared ? "person.3.fill" : "lock.fill")
+            StatusBadge(text: room.shared ? "Shared" : (room.ownerID == nil ? "Unassigned" : "Private"),
+                        symbol: room.shared ? "person.3.fill" : (room.ownerID == nil ? "person.crop.circle.badge.questionmark" : "lock.fill"))
             if s.hasProposal {
                 let status = s.status ?? .unknown
                 StatusBadge(text: status.label, symbol: status.symbol)
@@ -283,6 +284,8 @@ private struct RoomTile: View {
                             StatusBadge(text: "Shared", symbol: "person.3.fill", tint: .aeroInk)
                         } else if room.ownerID != nil {
                             StatusBadge(text: "Private", symbol: "lock.fill", tint: .aeroInk)
+                        } else {
+                            StatusBadge(text: "Unassigned", symbol: "person.crop.circle.badge.questionmark", tint: .aeroInk)
                         }
                         summary
                     }
@@ -345,7 +348,7 @@ private struct RoomTile: View {
     }
 
     private var accessibilityText: String {
-        var parts = [title, room.shared ? "shared" : "private \(room.kind.label.lowercased())"]
+        var parts = [title, room.shared ? "shared" : (room.ownerID == nil ? "unassigned" : "private \(room.kind.label.lowercased())")]
         if let s = room.summary, s.hasProposal {
             parts.append((s.status ?? .unknown).label)
             if let total = s.knownTotalCents { parts.append("known total \(dollars(total))") }

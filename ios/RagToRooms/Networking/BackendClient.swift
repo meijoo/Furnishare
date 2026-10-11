@@ -208,7 +208,12 @@ struct BackendClient: Sendable {
     }
 
     func resetDemo() async throws {
-        try await sendIgnoringBody("POST", "/demo/reset")
+        try await sendIgnoringBody("POST", "/demo/reset",
+                                   query: ["clear_handles": "true", "furnished": "true", "full_reset": "true"], timeout: 30)
+    }
+
+    func patchDesignEdits(_ patch: RoomDesignPatch) async throws -> RoomDesignSnapshot {
+        try await send("PATCH", "\(household)/design-edits", body: patch, timeout: 15)
     }
 
     func blankApartment() async throws {
@@ -292,8 +297,9 @@ struct BackendClient: Sendable {
         }
     }
 
-    private func sendIgnoringBody(_ method: String, _ path: String, body: (any Encodable)? = nil, timeout: TimeInterval = 8) async throws {
-        var request = makeRequest(method, path, query: [:], timeout: timeout)
+    private func sendIgnoringBody(_ method: String, _ path: String, body: (any Encodable)? = nil,
+                                  query: [String: String] = [:], timeout: TimeInterval = 8) async throws {
+        var request = makeRequest(method, path, query: query, timeout: timeout)
         if let body {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try Self.encoder.encode(body)

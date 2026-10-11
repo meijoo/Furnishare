@@ -109,7 +109,7 @@ also live in SQLite and photo files are stored in `backend/static/uploads/`.
 Saved inspiration appears in each room's Inspiration tab. Back up both the
 database and uploads folder.
 
-Use **Try demo** on the welcome screen for Emily, Maya, and Alex. Demo resets
+Use **Try demo** on the welcome screen for Emily, Michelle, and Annabel. Demo resets
 preserve real users, groups, memberships, and their invitation jobs. Set
 `RTR_SEED_DEMO=0` to disable automatic demo seeding on backend startup; existing
 demo records remain until explicitly reset or removed. The default is `1`.
@@ -127,7 +127,8 @@ Share lets you enter new roommates' phone numbers and sends the group's code in
 individual Photon messages. Recipients still need Photon permission to receive
 messages on your shared line. Text preferences target the most recently created
 or joined group for that phone. Floor-plan imports are saved per real group;
-bedroom scopes use the group's real member ids.
+detected bedrooms are numbered Bedroom 1, Bedroom 2, and so on. Uploaded bedrooms
+stay unassigned and can be opened by all group members.
 
 In a room's Budget tab, the payer sees **Request** and other members see **Pay**.
 After purchase confirmation, Request previews a room-specific payment reminder.
@@ -150,3 +151,22 @@ purchase is confirmed; pending or failed purchases are not reported as complete.
 Roommates receiving a request can pay in the app or reply **PAY** to authorize
 their own simulated reimbursement to the payer. Repeated replies reuse the same
 payment operation, and confirmation is sent after the reimbursement succeeds.
+
+## Three-iPad shared demo
+
+Run one backend on your Mac with `backend/scripts/serve.sh`. All three iPads must
+reach that Mac on the same network. In each app's Settings, connect to the same
+Mac IP address (port 8000); `127.0.0.1` refers to the iPad itself and will not work.
+Choose **Try demo → Emily**, **Try demo → Michelle**, or **Try demo → Annabel**, one person
+per iPad. Existing demo installs can change their identity with **Settings → Acting as**.
+Make sure each device shows a live backend connection rather than Offline demo.
+
+The living room is shared; each bedroom is edited and approved by its owner.
+Furniture additions, swaps, visibility, removal, option selections, drags and
+rotations sync through the common backend. Proposals, approvals, budgets and
+simulated payments also share the same state. Offline fixture demos are independent.
+
+**Reset demo household** on any connected iPad clears saved changes and restores
+the fixed fictional furniture in the living room and all three bedrooms. Each
+device keeps its own Emily/Michelle/Annabel identity. Reset reloads any contacts in
+`backend/data/members.json`, clears old demo messages, and sends no reset texts.

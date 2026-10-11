@@ -29,13 +29,13 @@ enum ConnectionStatus: Equatable {
 
 enum DataSource { case fixture, live }
 
-struct LocalPose: Equatable {
+struct LocalPose: Codable, Hashable, Sendable {
     var x: Double
     var z: Double
     var rotation: Double
 }
 
-private struct LocalSceneExtras: Codable {
+struct LocalSceneExtras: Codable, Hashable, Sendable {
     var objects: [SceneObject] = []
     var products: [Product] = []
     var applied: [String: String] = [:]
@@ -43,15 +43,18 @@ private struct LocalSceneExtras: Codable {
     var hiddenItems: Set<String> = []
     var removedItems: Set<String> = []
     var dismissedOptions: [String: Set<String>] = [:]
+    var poses: [String: LocalPose] = [:]
+    var owned: [OwnedItem] = []
 
-    enum CodingKeys: String, CodingKey { case objects, products, applied, groups, hiddenItems, removedItems, dismissedOptions }
+    enum CodingKeys: String, CodingKey { case objects, products, applied, groups, hiddenItems, removedItems, dismissedOptions, poses, owned }
 
     init(objects: [SceneObject] = [], products: [Product] = [], applied: [String: String] = [:],
          groups: [CandidateGroup] = [], hiddenItems: Set<String> = [], removedItems: Set<String> = [],
-         dismissedOptions: [String: Set<String>] = [:]) {
+         dismissedOptions: [String: Set<String>] = [:], poses: [String: LocalPose] = [:], owned: [OwnedItem] = []) {
         self.objects = objects; self.products = products; self.applied = applied; self.groups = groups
         self.hiddenItems = hiddenItems; self.removedItems = removedItems
         self.dismissedOptions = dismissedOptions
+        self.poses = poses; self.owned = owned
     }
 
     init(from decoder: Decoder) throws {
@@ -63,6 +66,8 @@ private struct LocalSceneExtras: Codable {
         hiddenItems = try c.decodeIfPresent(Set<String>.self, forKey: .hiddenItems) ?? []
         removedItems = try c.decodeIfPresent(Set<String>.self, forKey: .removedItems) ?? []
         dismissedOptions = try c.decodeIfPresent([String: Set<String>].self, forKey: .dismissedOptions) ?? [:]
+        poses = try c.decodeIfPresent([String: LocalPose].self, forKey: .poses) ?? [:]
+        owned = try c.decodeIfPresent([OwnedItem].self, forKey: .owned) ?? []
     }
 }
 
@@ -100,6 +105,10 @@ final class AppModel {
     static let memberPhotosKey = "memberPhotos"
     static let inviteKey = "groupInviteCode"
     static let inspirationShotsKey = "inspirationShots"
+    static let emptyDemoKey = "demoStartsEmpty"
+    static let designOutboxKey = "roomDesignOutbox"
+    static let designEpochsKey = "roomDesignEpochs"
+    var demoResetToken = 0
 
     /// Room scope the panels, 3D room and AR show. Every `/households/{hid}` call targets it.
     private(set) var currentHouseholdID: String
@@ -160,6 +169,11 @@ final class AppModel {
     private var apartmentLoading = false
     @ObservationIgnored private var apartmentGeneration = 0
     private var extrasByHousehold: [String: LocalSceneExtras] = [:]
+    private var designEpochs: [String: String] = [:]
+    private var retiredDesignEpochs: [String: Set<String>] = [:]
+    private var designOutbox: [String: [RoomDesignPatch]] = [:]
+    private var designSyncTasks: [String: Task<Void, Never>] = [:]
+    private var designSyncIDs: [String: UUID] = [:]
 
     init() {
         let fixtures = Self.loadFixtures()
@@ -170,6 +184,8 @@ final class AppModel {
         actingMemberID = UserDefaults.standard.string(forKey: Self.actingMemberKey) ?? "emily"
         ownedItems = Self.loadOwnedItems()
         extrasByHousehold = Self.loadExtras()
+        designEpochs = Self.loadJSON(Self.designEpochsKey, as: [String: String].self) ?? [:]
+        designOutbox = Self.loadJSON(Self.designOutboxKey, as: [String: [RoomDesignPatch]].self) ?? [:]
         restoreExtras(for: householdID)
         extraPeople = currentGroupID == nil ? (Self.loadJSON(Self.rosterKey, as: [GroupPerson].self) ?? []) : []
         memberPhotos = Self.loadJSON(Self.memberPhotosKey, as: [String: String].self) ?? [:]
@@ -204,7 +220,7 @@ final class AppModel {
 
     var accessibleFurnishableRooms: [ApartmentRoom] {
         (apartment?.furnishableRooms ?? []).filter {
-            account == nil || $0.shared || $0.ownerID == actingMemberID
+            account == nil || $0.shared || $0.ownerID == nil || $0.ownerID == actingMemberID
         }
     }
 
@@ -215,9 +231,9 @@ final class AppModel {
     }
 
     /// Bedrooms: one member who pays 100%, approves alone and has no reimbursements.
-    var isPrivateScope: Bool { currentRoom.map { !$0.shared } ?? false }
+    var isPrivateScope: Bool { currentRoom.map { !$0.shared && $0.ownerID != nil } ?? false }
 
-    var scopeOwnerID: String? { isPrivateScope ? (currentRoom?.ownerID ?? state.members.first?.id) : nil }
+    var scopeOwnerID: String? { isPrivateScope ? currentRoom?.ownerID : nil }
 
     /// False when acting as someone who isn't a member of the current scope (their actions would 4xx).
     var actingMemberInScope: Bool { state.members.isEmpty || state.members.contains { $0.id == actingMemberID } }
@@ -408,7 +424,7 @@ final class AppModel {
         liveSummaries = [:]
         await refreshApartment(force: true)
         if let fetchedApartment, fetchedApartment.room(forHousehold: currentHouseholdID) == nil {
-            switchScope(to: Self.defaultHouseholdID)
+            switchScope(to: currentGroupID ?? Self.defaultHouseholdID)
         } else if let client {
             localPoses = [:]
             try? await refresh(client)
@@ -450,7 +466,10 @@ final class AppModel {
     }
 
     func designItemID(for item: ProposalItem) -> String {
-        "proposal-\(state.proposal?.version ?? 0)-\(item.productID)"
+        if state.proposal?.items.contains(where: { $0.productID == item.productID }) == true {
+            return "proposal-\(state.proposal?.version ?? 0)-\(item.productID)"
+        }
+        return state.scene.objects.first { $0.productID == item.productID }?.objectID ?? item.productID
     }
 
     private func designItemID(for object: SceneObject) -> String {
@@ -462,7 +481,53 @@ final class AppModel {
     }
 
     var designProposalItems: [ProposalItem] {
-        (state.proposal?.items ?? []).filter { !removedDesignItems.contains(designItemID(for: $0)) }
+        let proposed = state.proposal?.items ?? []
+        let ids = Set(proposed.map(\.productID))
+        let staged = state.scene.objects.filter { !ids.contains($0.productID) }.map { object in
+            let product = product(object.productID)
+            return ProposalItem(productID: object.productID, category: object.category,
+                                priceCents: product?.priceCents, title: product?.title, sourceType: product?.sourceType)
+        }
+        return (proposed + staged).filter { !removedDesignItems.contains(designItemID(for: $0)) }
+    }
+
+    /// Purchases currently selected for this room, excluding owned, hidden and removed items.
+    /// A candidate group contributes only its chosen option, rather than all its alternatives.
+    var roomEstimateItems: [ProposalItem] {
+        let proposed = designProposalItems.compactMap { item -> ProposalItem? in
+            guard isDesignItemEnabled(designItemID(for: item)) else { return nil }
+            let original = state.scene.objects.first { $0.productID == item.productID }
+            let shown = original.flatMap { original in
+                displayedObjects.first { $0.objectID == original.objectID }
+            }
+            let chosen = shown.flatMap { displayedProduct(for: $0) } ?? product(item.productID)
+            return ProposalItem(productID: chosen?.id ?? item.productID,
+                                category: chosen?.category ?? item.category,
+                                priceCents: chosen?.priceCents ?? item.priceCents,
+                                title: chosen?.title ?? item.title, sourceType: chosen?.sourceType ?? item.sourceType)
+        }
+        let selected = candidateGroups.compactMap { group -> ProposalItem? in
+            guard isDesignItemEnabled(group.objectID),
+                  let id = group.showingProductID ?? group.productIDs.first else { return nil }
+            let chosen = product(id)
+            return ProposalItem(productID: id, category: chosen?.category ?? group.category ?? "other",
+                                priceCents: chosen?.priceCents, title: chosen?.title, sourceType: chosen?.sourceType)
+        }
+        return proposed + selected
+    }
+
+    var roomEstimateCents: Int { roomEstimateItems.reduce(0) { $0 + ($1.priceCents ?? 0) } }
+
+    var roomEstimateHasUnknownPrices: Bool { roomEstimateItems.contains { $0.priceCents == nil } }
+
+    /// The budget estimate is split evenly; approved payment amounts remain in the proposal.
+    var roomEstimateShares: [String: Int] {
+        let ids = state.members.map(\.id)
+        guard !ids.isEmpty else { return [:] }
+        let total = roomEstimateCents
+        return Dictionary(uniqueKeysWithValues: ids.enumerated().map { index, id in
+            (id, total / ids.count + (index < total % ids.count ? 1 : 0))
+        })
     }
 
     func isDesignItemEnabled(_ id: String) -> Bool {
@@ -470,6 +535,7 @@ final class AppModel {
     }
 
     func setDesignItemEnabled(_ id: String, enabled: Bool) {
+        guard actingMemberInScope else { return }
         if enabled { hiddenDesignItems.remove(id) } else { hiddenDesignItems.insert(id) }
         select(nil)
         detailProductID = nil
@@ -477,6 +543,7 @@ final class AppModel {
     }
 
     func removeDesignProposalItem(_ item: ProposalItem) {
+        guard actingMemberInScope else { return }
         removedDesignItems.insert(designItemID(for: item))
         select(nil)
         detailProductID = nil
@@ -496,6 +563,7 @@ final class AppModel {
     }
 
     func removeCandidateGroup(_ group: CandidateGroup) {
+        guard actingMemberInScope else { return }
         for productID in group.productIDs { removeFromGroup(group.id, productID: productID) }
         hiddenDesignItems.remove(group.objectID)
         select(nil)
@@ -535,7 +603,8 @@ final class AppModel {
 
     /// Backend-served copy first (`/product_images/...`), retailer URL as fallback.
     func imageURLs(for product: Product) -> [URL] {
-        if let raw = product.imageURL, raw.hasPrefix("file:"), let url = URL(string: raw) {
+        if let raw = product.imageURL, raw.hasPrefix("file:"), let url = URL(string: raw),
+           FileManager.default.fileExists(atPath: url.path) {
             return [url]
         }
         return [client?.resolve(product.localImage), client?.resolve(product.imageURL)].compactMap { $0 }
@@ -562,6 +631,7 @@ final class AppModel {
     }
 
     func chooseDesignOption(_ product: Product, objectID: String) {
+        guard actingMemberInScope else { return }
         guard product.placeableDimensions != nil else { return }
         remember(product)
         appliedPreviews[objectID] = product.id
@@ -576,12 +646,13 @@ final class AppModel {
     }
 
     func removeDesignOption(_ product: Product, objectID: String, current: Product) {
+        guard actingMemberInScope else { return }
         dismissedDesignOptions[optionKey(objectID), default: []].insert(product.id)
         if product.id == current.id {
             if let next = designOptions(for: current, objectID: objectID).first {
                 chooseDesignOption(next, objectID: objectID)
             } else if let original = state.scene.objects.first(where: { $0.objectID == objectID }),
-                      let item = state.proposal?.items.first(where: { $0.productID == original.productID }) {
+                      let item = designProposalItems.first(where: { $0.productID == original.productID }) {
                 removeDesignProposalItem(item)
             }
         }
@@ -657,12 +728,16 @@ final class AppModel {
     }
 
     func ownedImageURL(_ item: OwnedItem) -> URL? {
-        guard let name = item.imageFilename else { return nil }
-        return Self.ownedImagesDirectory.appendingPathComponent(name)
+        if let name = item.imageFilename {
+            let local = Self.ownedImagesDirectory.appendingPathComponent(name)
+            if FileManager.default.fileExists(atPath: local.path) { return local }
+        }
+        return product("owned-\(item.id.uuidString)").flatMap { imageURLs(for: $0).first }
     }
 
     func addOwnedItem(name: String, category: String, link: String?, image: UIImage?,
                       widthM: Double, depthM: Double, heightM: Double) {
+        guard actingMemberInScope else { return }
         let filename = image.flatMap(Self.writeOwnedImage)
         let item = OwnedItem(id: UUID(), householdID: currentHouseholdID, name: name, category: category,
                              link: link, imageFilename: filename, widthM: widthM, depthM: depthM, heightM: heightM,
@@ -678,6 +753,7 @@ final class AppModel {
     }
 
     func removeOwnedItem(_ id: UUID) {
+        guard actingMemberInScope else { return }
         if let item = ownedItems.first(where: { $0.id == id }), let name = item.imageFilename {
             try? FileManager.default.removeItem(at: Self.ownedImagesDirectory.appendingPathComponent(name))
         }
@@ -852,6 +928,7 @@ final class AppModel {
     }
 
     func addToGroup(named raw: String, productID: String) {
+        guard actingMemberInScope else { return }
         guard let product = product(productID) ?? inspirationResults.first(where: { $0.id == productID }) else { return }
         remember(product)
         let name = Self.normalizedGroupName(raw.isEmpty ? product.title : raw)
@@ -875,6 +952,7 @@ final class AppModel {
     }
 
     func removeFromGroup(_ groupID: UUID, productID: String) {
+        guard actingMemberInScope else { return }
         guard let index = candidateGroups.firstIndex(where: { $0.id == groupID }) else { return }
         candidateGroups[index].productIDs.removeAll { $0 == productID }
         if candidateGroups[index].showingProductID == productID {
@@ -891,6 +969,7 @@ final class AppModel {
     }
 
     func showInGroup(_ groupID: UUID, productID: String) {
+        guard actingMemberInScope else { return }
         guard let index = candidateGroups.firstIndex(where: { $0.id == groupID }),
               candidateGroups[index].productIDs.contains(productID),
               let product = product(productID) else { return }
@@ -1066,14 +1145,105 @@ final class AppModel {
         }
     }
 
-    private func persistCurrentExtras() {
-        extrasByHousehold[currentHouseholdID] = LocalSceneExtras(
+    private func persistCurrentExtras(sync: Bool = true) {
+        let before = extrasByHousehold[currentHouseholdID] ?? LocalSceneExtras()
+        let after = LocalSceneExtras(
             objects: extraObjects, products: extraProducts, applied: appliedPreviews, groups: candidateGroups,
-            hiddenItems: hiddenDesignItems, removedItems: removedDesignItems, dismissedOptions: dismissedDesignOptions)
+            hiddenItems: hiddenDesignItems, removedItems: removedDesignItems, dismissedOptions: dismissedDesignOptions,
+            poses: localPoses, owned: currentOwnedItems)
+        extrasByHousehold[currentHouseholdID] = after
+        saveExtras()
+        if sync, source == .live, let epoch = designEpochs[currentHouseholdID], before != after {
+            designOutbox[currentHouseholdID, default: []].append(RoomDesignPatch(
+                memberID: actingMemberID, epoch: epoch, before: before, after: after))
+            saveDesignOutbox()
+            syncDesignEdits(for: currentHouseholdID)
+        }
+    }
+
+    private func saveExtras() {
         if let data = try? JSONEncoder().encode(extrasByHousehold) {
             UserDefaults.standard.set(data, forKey: Self.extrasKey)
         }
         syncDesignLinks()
+    }
+
+    private func saveDesignOutbox() {
+        persistJSON(designOutbox, key: Self.designOutboxKey)
+        persistJSON(designEpochs, key: Self.designEpochsKey)
+    }
+
+    private func acceptDesignEdits(_ snapshot: RoomDesignSnapshot, householdID: String) {
+        guard !retiredDesignEpochs[householdID, default: []].contains(snapshot.epoch) else { return }
+        let reset = designEpochs[householdID] != snapshot.epoch
+        if reset {
+            if let previous = designEpochs[householdID] {
+                retiredDesignEpochs[householdID, default: []].insert(previous)
+            }
+            designSyncTasks[householdID]?.cancel()
+            designSyncTasks[householdID] = nil
+            designOutbox[householdID] = []
+            designEpochs[householdID] = snapshot.epoch
+            if householdID == currentHouseholdID, currentGroupID == nil {
+                chat = []
+                searchInspiration("")
+                pendingInspirationQuery = nil
+                inspirationShots = []
+                inspirationPreview = nil
+                persistJSON(inspirationShots, key: Self.inspirationShotsKey)
+                demoResetToken += 1
+            }
+            saveDesignOutbox()
+        }
+        guard designOutbox[householdID, default: []].isEmpty else { return }
+        extrasByHousehold[householdID] = snapshot.edits
+        ownedItems.removeAll { $0.householdID == householdID }
+        ownedItems.append(contentsOf: snapshot.edits.owned)
+        persistOwnedItems()
+        saveExtras()
+        if householdID == currentHouseholdID {
+            restoreExtras(for: householdID)
+            if let selectedObjectID, !displayedObjects.contains(where: { $0.objectID == selectedObjectID }) {
+                select(nil)
+                detailProductID = nil
+            }
+        }
+    }
+
+    private func syncDesignEdits(for householdID: String) {
+        guard designSyncTasks[householdID] == nil, !designOutbox[householdID, default: []].isEmpty,
+              var scoped = client else { return }
+        scoped.householdID = householdID
+        let syncID = UUID()
+        designSyncIDs[householdID] = syncID
+        designSyncTasks[householdID] = Task { [weak self] in
+            guard let self else { return }
+            defer {
+                if self.designSyncIDs[householdID] == syncID {
+                    self.designSyncTasks[householdID] = nil
+                    self.designSyncIDs[householdID] = nil
+                }
+            }
+            while let patch = self.designOutbox[householdID]?.first, !Task.isCancelled {
+                do {
+                    let snapshot = try await scoped.patchDesignEdits(patch)
+                    guard !Task.isCancelled, self.designEpochs[householdID] == patch.epoch else { return }
+                    self.designOutbox[householdID]?.removeFirst()
+                    self.saveDesignOutbox()
+                    self.acceptDesignEdits(snapshot, householdID: householdID)
+                } catch BackendError.http(status: 409, _) {
+                    if let fresh = try? await scoped.state(memberID: patch.memberID), let snapshot = fresh.designEdits {
+                        self.acceptDesignEdits(snapshot, householdID: householdID)
+                    }
+                    return
+                } catch {
+                    if !Task.isCancelled {
+                        self.errorMessage = "Room edits are saved on this iPad. Sync will retry when connected: \(Self.message(error))"
+                    }
+                    return
+                }
+            }
+        }
     }
 
     private func restoreExtras(for householdID: String) {
@@ -1085,6 +1255,7 @@ final class AppModel {
         hiddenDesignItems = extras.hiddenItems
         removedDesignItems = extras.removedItems
         dismissedDesignOptions = extras.dismissedOptions
+        localPoses = extras.poses
     }
 
     private static func loadExtras() -> [String: LocalSceneExtras] {
@@ -1292,6 +1463,10 @@ final class AppModel {
     }
 
     private func apply(_ newState: HouseholdState) {
+        if let epoch = newState.designEdits?.epoch,
+           retiredDesignEpochs[currentHouseholdID, default: []].contains(epoch) { return }
+        if source == .live, !stateIsPlaceholder, newState.stateVersion < state.stateVersion,
+           newState.designEdits?.epoch == state.designEdits?.epoch { return }
         let oldObjects = Dictionary(state.scene.objects.map { ($0.objectID, $0) }, uniquingKeysWith: { a, _ in a })
         for (id, pose) in localPoses {
             guard let incoming = newState.scene.objects.first(where: { $0.objectID == id }) else { localPoses[id] = nil; continue }
@@ -1311,9 +1486,25 @@ final class AppModel {
         reachedBackend = true
         stateIsPlaceholder = false
         scopeNotice = nil
+        if let edits = newState.designEdits {
+            acceptDesignEdits(edits, householdID: currentHouseholdID)
+            syncDesignEdits(for: currentHouseholdID)
+        }
         if connection == .connecting { connection = .polling }
         lastUpdated = Date()
         if changed { Task { await refreshApartment() } }
+        Task { await refreshMissingProducts(in: newState) }
+    }
+
+    /// Scene pieces from live search are not in the verified catalog until `/products` includes them.
+    private var catalogRefreshIDs = Set<String>()
+
+    private func refreshMissingProducts(in state: HouseholdState) async {
+        let missing = Set((state.proposal?.items.map(\.productID) ?? []) + state.scene.objects.map(\.productID))
+            .filter { product($0) == nil && !catalogRefreshIDs.contains($0) }
+        guard !missing.isEmpty, let client, source == .live else { return }
+        catalogRefreshIDs.formUnion(missing)
+        if let list = try? await client.products() { products = list }
     }
 
     private func markUnreachable(_ error: Error) {
@@ -1341,11 +1532,13 @@ final class AppModel {
     }
 
     func moveLocally(_ objectID: String, x: Double, z: Double) {
+        guard actingMemberInScope else { return }
         let current = displayedObjects.first { $0.objectID == objectID }
         localPoses[objectID] = LocalPose(x: x, z: z, rotation: current?.rotationYRad ?? 0)
     }
 
     func rotateLocally(_ objectID: String, to angle: Double) {
+        guard actingMemberInScope else { return }
         guard let current = displayedObjects.first(where: { $0.objectID == objectID }) else { return }
         localPoses[objectID] = LocalPose(x: current.x, z: current.z, rotation: angle)
     }
@@ -1362,6 +1555,10 @@ final class AppModel {
 
     /// Called at the end of a gesture. Persists the move only if the user enabled it in Settings.
     func commitMove(_ objectID: String) {
+        if source == .live, state.designEdits != nil {
+            persistCurrentExtras()
+            return
+        }
         guard UserDefaults.standard.bool(forKey: Self.patchMovesKey), source == .live, let client,
               !objectID.hasPrefix("local-"), let pose = localPoses[objectID] else { return }
         Task {
@@ -1466,15 +1663,69 @@ final class AppModel {
 
     func resetDemo() async {
         guard currentGroupID == nil else { errorMessage = "Demo reset is only available in demo mode."; return }
-        resetLocalEdits()
-        await perform("reset", offline: {
+        guard busy.isEmpty else { return }
+        connectionTask?.cancel()
+        defer { restartConnection() }
+        let offline = source == .fixture
+        let reset = await perform("reset", offline: {
+            UserDefaults.standard.removeObject(forKey: Self.emptyDemoKey)
             let fixtures = Self.loadFixtures()
-            state = currentHouseholdID == Self.defaultHouseholdID ? fixtures.state : Self.fixtureState(forScope: currentHouseholdID)
+            state = currentHouseholdID == Self.defaultHouseholdID
+                ? fixtures.state : Self.fixtureState(forScope: currentHouseholdID)
             if productsFromFixture { products = fixtures.products }
         }) { try await $0.resetDemo() }
-        // `/demo/reset` reseeds every scope, so other rooms' snapshots are stale either way.
+        guard reset || offline else { return }
+        busy.insert("reset")
+        defer { busy.remove("reset") }
+        UserDefaults.standard.removeObject(forKey: Self.emptyDemoKey)
+        let demoItems = ownedItems.filter { $0.householdID == "demo" || $0.householdID.hasPrefix("demo-bed-") }
+        let filenames = demoItems.compactMap(\.imageFilename) + inspirationShots.map(\.filename)
+            + extraPeople.compactMap(\.photoFilename) + Array(memberPhotos.values)
+        for filename in filenames {
+            try? FileManager.default.removeItem(at: Self.ownedImagesDirectory.appendingPathComponent(filename))
+        }
+        ownedItems.removeAll { $0.householdID == "demo" || $0.householdID.hasPrefix("demo-bed-") }
+        persistOwnedItems()
+        inspirationShots = []
+        persistJSON(inspirationShots, key: Self.inspirationShotsKey)
+        inspirationPreview = nil
+        searchInspiration("")
+        pendingInspirationQuery = nil
+        extraObjects = []
+        extraProducts = []
+        appliedPreviews = [:]
+        candidateGroups = []
+        hiddenDesignItems = []
+        removedDesignItems = []
+        dismissedDesignOptions = [:]
+        extrasByHousehold = extrasByHousehold.filter { $0.key != "demo" && !$0.key.hasPrefix("demo-bed-") }
+        for hid in designOutbox.keys where hid == "demo" || hid.hasPrefix("demo-bed-") {
+            designOutbox[hid] = []
+            designSyncTasks[hid]?.cancel()
+            designSyncTasks[hid] = nil
+        }
+        saveDesignOutbox()
+        persistCurrentExtras(sync: false)
+        extraPeople = []
+        memberPhotos = [:]
+        persistRoster()
+        inviteCode = Self.makeInviteCode()
+        UserDefaults.standard.set(inviteCode, forKey: Self.inviteKey)
+        resetLocalEdits()
+        select(nil)
+        detailProductID = nil
+        chat = []
+        scopeNotice = nil
         scopeCache = [:]
-        await refreshApartment()
+        liveSummaries = [:]
+        fetchedApartment = nil
+        demoResetToken += 1
+        cameraResetToken += 1
+        await AssetCache.shared.clear()
+        await refreshApartment(force: true)
+        if let fetchedApartment, fetchedApartment.room(forHousehold: currentHouseholdID) == nil {
+            switchScope(to: currentGroupID ?? Self.defaultHouseholdID)
+        }
     }
 
     func designRoom(_ text: String) async {

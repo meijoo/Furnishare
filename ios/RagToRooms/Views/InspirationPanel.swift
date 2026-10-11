@@ -12,6 +12,11 @@ struct InspirationPanel: View {
             lookupSection
             designSection
         }
+        .onChange(of: model.demoResetToken) { _, _ in
+            draft = ""
+            designDraft = ""
+            photoItem = nil
+        }
         .onChange(of: photoItem) { _, item in
             guard let item else { return }
             Task {

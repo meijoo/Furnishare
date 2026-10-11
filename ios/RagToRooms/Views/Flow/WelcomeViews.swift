@@ -3,6 +3,7 @@ import SwiftUI
 struct WelcomeView: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
+    @State private var choosingDemoMember = false
 
     var body: some View {
         VStack(spacing: 28) {
@@ -17,14 +18,7 @@ struct WelcomeView: View {
                 Button("Log in") { nav.screen = .login }
                     .buttonStyle(AeroWideButtonStyle(outlined: true))
                 Button("Try demo") {
-                    Task {
-                        await model.signOut()
-                        nav.profileName = "Emily"; nav.profileEmail = ""
-                        nav.groupName = "Demo apartment"; nav.groupLocation = "Chapel Hill, NC"
-                        nav.selectedRoomIDs = []
-                        nav.skipToDemo(apartment: model.apartment, actingName: "Emily")
-                        nav.enterSelectedRoom(model: model)
-                    }
+                    choosingDemoMember = true
                 }
             }
             .frame(maxWidth: 320)
@@ -32,6 +26,29 @@ struct WelcomeView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(32)
+        .confirmationDialog("Choose who uses this iPad", isPresented: $choosingDemoMember, titleVisibility: .visible) {
+            ForEach([("emily", "Emily"), ("maya", "Michelle"), ("alex", "Annabel")], id: \.0) { member, name in
+                Button(name) {
+                    Task {
+                        await model.signOut()
+                        model.setActingMember(member)
+                        nav.profileName = name; nav.profileEmail = ""
+                        nav.groupName = "Demo apartment"; nav.groupLocation = "Chapel Hill, NC"
+                        nav.selectedRoomIDs = []
+                        nav.skipToDemo(apartment: model.apartment, actingName: name)
+                        if let living = model.apartment?.furnishableRooms.first(where: { $0.householdID == AppModel.defaultHouseholdID }) {
+                            nav.enterRoom(living, model: model)
+                        } else {
+                            model.switchScope(to: AppModel.defaultHouseholdID)
+                            nav.roomTab = .design
+                            nav.screen = .room
+                        }
+                    }
+                }
+            }
+        } message: {
+            Text("Use the same backend address on each iPad to share the demo.")
+        }
     }
 }
 

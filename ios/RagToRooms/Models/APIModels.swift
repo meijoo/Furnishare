@@ -583,6 +583,7 @@ struct ActivityEntry: Codable, Hashable, Sendable {
 }
 
 struct HouseholdState: Decodable, Hashable, Sendable {
+    var designEdits: RoomDesignSnapshot?
     var householdID: String
     var stateVersion: Int
     var members: [Member]
@@ -601,6 +602,7 @@ struct HouseholdState: Decodable, Hashable, Sendable {
         case stateVersion = "state_version"
         case budgetCents = "budget_cents"
         case catalogMode = "catalog_mode"
+        case designEdits = "design_edits"
     }
 
     init(householdID: String, stateVersion: Int, members: [Member], room: Room, budgetCents: Int?, proposal: Proposal?,
@@ -623,6 +625,7 @@ struct HouseholdState: Decodable, Hashable, Sendable {
         finance = (try? c.decode(Finance.self, forKey: .finance)) ?? Finance(payerID: "")
         activity = (try? c.decode([LossyElement<ActivityEntry>].self, forKey: .activity))?.compactMap(\.value) ?? []
         catalogMode = try? c.decode(String.self, forKey: .catalogMode)
+        designEdits = try c.decodeIfPresent(RoomDesignSnapshot.self, forKey: .designEdits)
     }
 
     func member(_ id: String?) -> Member? { members.first { $0.id == id } }
@@ -630,6 +633,22 @@ struct HouseholdState: Decodable, Hashable, Sendable {
 }
 
 // MARK: - Requests / responses
+
+struct RoomDesignSnapshot: Codable, Hashable, Sendable {
+    var epoch: String
+    var edits: LocalSceneExtras
+}
+
+struct RoomDesignPatch: Codable, Sendable {
+    var memberID: String
+    var epoch: String
+    var before: LocalSceneExtras
+    var after: LocalSceneExtras
+    enum CodingKeys: String, CodingKey {
+        case memberID = "member_id"
+        case epoch, before, after
+    }
+}
 
 struct MemberBody: Encodable, Sendable {
     let memberID: String

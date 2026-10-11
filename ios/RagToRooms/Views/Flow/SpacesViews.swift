@@ -142,7 +142,7 @@ struct MembersView: View {
     private var addSheet: some View {
         NavigationStack {
             Form {
-                Section("Name") { TextField("Maya", text: $newName) }
+                Section("Name") { TextField("Michelle", text: $newName) }
                 Section("Photo") {
                     PhotosPicker(selection: $addPhotoItem, matching: .images) {
                         if let newPhoto {

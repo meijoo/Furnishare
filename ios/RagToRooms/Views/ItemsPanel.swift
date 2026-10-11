@@ -14,10 +14,12 @@ struct ItemsPanel: View {
                     .foregroundStyle(Color.figmaMuted)
             }
 
-            if let proposal = model.state.proposal {
+            if !model.designProposalItems.isEmpty {
                 VStack(spacing: 6) {
                     ForEach(model.designProposalItems, id: \.productID) { item in itemRow(item) }
                 }
+            }
+            if let proposal = model.state.proposal {
                 if !proposal.objections.isEmpty {
                     VStack(alignment: .leading, spacing: 4) {
                         ForEach(proposal.objections.sorted(by: { $0.key < $1.key }), id: \.key) { member, reason in
@@ -65,39 +67,17 @@ struct ItemsPanel: View {
             HStack {
                 Button { nav.showAddItem = true } label: { Label("Add", systemImage: "plus") }
                     .buttonStyle(AeroButtonStyle(tint: .aeroGrass, compact: true))
+                    .disabled(!model.actingMemberInScope)
                 Button { nav.showCatalog = true } label: { Label("Catalog", systemImage: "square.grid.2x2") }
                     .buttonStyle(AeroButtonStyle(compact: true))
+                    .disabled(!model.actingMemberInScope)
             }
         }
     }
 
-    private var bundleTotal: Int {
-        let proposed = model.designProposalItems.reduce(0) { sum, item in
-            guard model.isDesignItemEnabled(model.designItemID(for: item)) else { return sum }
-            let object = proposalObject(item)
-            let price = object.flatMap { model.displayedProduct(for: $0)?.priceCents }
-                ?? model.product(item.productID)?.priceCents ?? item.priceCents
-            return sum + (price ?? 0)
-        }
-        let extras = model.candidateGroups.reduce(0) { sum, group in
-            guard model.isDesignItemEnabled(group.objectID) else { return sum }
-            let id = group.showingProductID ?? group.productIDs.first
-            return sum + (id.flatMap { model.product($0)?.priceCents } ?? 0)
-        }
-        return proposed + extras
-    }
+    private var bundleTotal: Int { model.roomEstimateCents }
 
-    private var hasUnknownPrices: Bool {
-        let proposedUnknown = model.designProposalItems.contains { item in
-            model.isDesignItemEnabled(model.designItemID(for: item)) &&
-            (proposalObject(item).flatMap { model.displayedProduct(for: $0)?.priceCents }
-                ?? model.product(item.productID)?.priceCents ?? item.priceCents) == nil
-        }
-        return proposedUnknown || model.candidateGroups.contains { group in
-            model.isDesignItemEnabled(group.objectID) &&
-            model.product(group.showingProductID ?? group.productIDs.first)?.priceCents == nil
-        }
-    }
+    private var hasUnknownPrices: Bool { model.roomEstimateHasUnknownPrices }
 
     private func sharedFurnitureRow(_ item: SharedFurnitureLink) -> some View {
         let open = expandedSharedLinks.contains(item.id)
@@ -224,7 +204,7 @@ struct ItemsPanel: View {
                     ProductImage(urls: shown.map { model.imageURLs(for: $0) } ?? [], category: item.category)
                         .frame(width: 64, height: 64)
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(shown?.title ?? item.title ?? item.productID)
+                        Text(shown?.title ?? item.title ?? item.category.categoryLabel)
                             .font(.headline).lineLimit(2)
                         HStack(spacing: 6) {
                             Text("\(item.category.categoryLabel) · Proposed").font(.caption).foregroundStyle(.secondary)
@@ -337,6 +317,7 @@ struct ItemsPanel: View {
             .accessibilityLabel("Remove \(name)")
         }
         .padding(.horizontal, 8)
+        .disabled(!model.actingMemberInScope)
     }
 
     private func itemCard(_ group: CandidateGroup, _ product: Product) -> some View {
