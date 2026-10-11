@@ -169,6 +169,18 @@ struct HowItWorksRow: View {
     }
 }
 
+struct SettingsGearButton: View {
+    @Environment(AppNavigation.self) private var nav
+    static let reservedWidth: CGFloat = 56
+
+    var body: some View {
+        Button { nav.showSettings = true } label: {
+            Image(systemName: "gearshape").accessibilityLabel("Settings")
+        }
+        .buttonStyle(GlassChipStyle())
+    }
+}
+
 struct SidebarRow: View {
     let title: String
     let symbol: String

@@ -4,6 +4,7 @@ import json
 import os
 import re
 import threading
+import time
 from pathlib import Path
 
 import httpx
@@ -44,6 +45,16 @@ LIVE_KEY = 'live_products'
 
 _lock = threading.Lock()
 _cache = {'mtime': None, 'products': []}
+_LIVE_TTL = 15 * 60
+_live_cache: dict[str, tuple[float, list]] = {}
+_http: httpx.Client | None = None
+
+
+def _http_client() -> httpx.Client:
+    global _http
+    if _http is None:
+        _http = httpx.Client(timeout=6.0)
+    return _http
 
 
 def _demo_products() -> list[dict]:
@@ -358,10 +369,16 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
     """Google Shopping via SerpAPI, shaped like catalog products so they can be placed."""
     if not config.SHOPPING_API_KEY:
         return []
+    key = (query or '').strip().lower()
+    now = time.monotonic()
+    hit = _live_cache.get(key)
+    if hit and now - hit[0] < _LIVE_TTL:
+        return hit[1][:limit]
+    want = max(1, min(limit, 12))
     try:
-        r = httpx.get('https://serpapi.com/search.json', timeout=12, params={
+        r = _http_client().get('https://serpapi.com/search.json', params={
             'engine': 'google_shopping', 'q': query, 'api_key': config.SHOPPING_API_KEY,
-            'gl': 'us', 'hl': 'en', 'num': max(limit, 24)})
+            'gl': 'us', 'hl': 'en', 'num': want})
         r.raise_for_status()
     except httpx.HTTPError:
         return []
@@ -370,7 +387,7 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
     data = r.json()
     raw = list(data.get('shopping_results') or []) + list(data.get('inline_shopping_results') or [])
     out = []
-    for item in raw[: max(limit, 24)]:
+    for item in raw[:want]:
         title = item.get('title') or 'Item'
         url = item.get('product_link') or item.get('link') or title
         price = item.get('extracted_price')
@@ -394,7 +411,8 @@ def live_search(query: str, limit: int = 16) -> list[dict]:
             'source_type': 'live',
             'retrieved_at': db.now(),
         })
-    return out
+    _live_cache[key] = (now, out)
+    return out[:limit]
 
 
 _STOP = {'the', 'and', 'for', 'a', 'an', 'of', 'with'}
@@ -457,7 +475,7 @@ def search(query: str, limit: int = 20) -> list[dict]:
     category = infer_category(q)
     tokens = [t for t in re.findall(r"[a-z0-9']+", q.lower()) if t not in _STOP]
     live, seen = [], set()
-    for p in live_search(q, limit=max(limit, 24)):
+    for p in live_search(q, limit=limit):
         title = (p.get('title') or '').lower()
         if not p.get('id') or title in seen or p['id'] in seen:
             continue

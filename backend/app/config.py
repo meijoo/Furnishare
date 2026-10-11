@@ -19,6 +19,8 @@ SEED_DEMO = os.getenv('RTR_SEED_DEMO', '1').strip().lower() in ('1', 'true', 'ye
 
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '').strip()
 GEMINI_MODEL = os.getenv('GEMINI_MODEL', '').strip() or 'gemini-flash-latest'
+# Floor-plan reads are a short JSON extract; override to a lite model if you want them cheaper/faster.
+GEMINI_FLOORPLAN_MODEL = os.getenv('GEMINI_FLOORPLAN_MODEL', '').strip() or GEMINI_MODEL
 # Portable AI Studio key first so teammates can share .env. Vertex ADC is laptop-local.
 VERTEX_API_KEY = os.getenv('VERTEX_API_KEY', '').strip()
 GOOGLE_CLOUD_PROJECT = os.getenv('GOOGLE_CLOUD_PROJECT', '').strip()

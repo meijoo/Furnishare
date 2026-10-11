@@ -132,9 +132,16 @@ struct InspirationPanel: View {
                 Text("No matches").foregroundStyle(Color.figmaMuted)
             }
         } else {
-            Text(model.inspirationCategory?.categoryLabel ?? "Results")
-                .font(.headline)
-                .foregroundStyle(Color.aeroInk)
+            HStack {
+                Text(model.inspirationCategory?.categoryLabel ?? "Results")
+                    .font(.headline)
+                    .foregroundStyle(Color.aeroInk)
+                if model.busy.contains("inspiration-search") {
+                    Text("Checking live listings…")
+                        .font(.caption)
+                        .foregroundStyle(Color.figmaMuted)
+                }
+            }
             LazyVGrid(columns: [GridItem(.adaptive(minimum: 168), spacing: 12)], spacing: 12) {
                 ForEach(model.inspirationResults) { product in
                     card(product, picked: model.inspirationPicks.contains(product.id))

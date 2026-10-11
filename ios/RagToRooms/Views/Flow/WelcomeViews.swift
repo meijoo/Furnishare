@@ -8,7 +8,7 @@ struct WelcomeView: View {
         VStack(spacing: 28) {
             Spacer()
             BrandMark()
-            Text("Design your space.")
+            Text("Design your space")
                 .font(.system(size: 40, weight: .bold))
                 .foregroundStyle(Color.aeroInk)
             VStack(spacing: 12) {

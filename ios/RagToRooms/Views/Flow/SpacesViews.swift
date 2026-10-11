@@ -56,9 +56,7 @@ struct SpacesHubView: View {
             .padding(.vertical, 8)
             .background(Capsule().fill(Color.white))
             .overlay(Capsule().strokeBorder(Color.black.opacity(0.05), lineWidth: 1))
-            Spacer()
-            Button { nav.showSettings = true } label: { Image(systemName: "gearshape").accessibilityLabel("Settings") }
-                .buttonStyle(GlassChipStyle())
+            Spacer().frame(minWidth: SettingsGearButton.reservedWidth)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 14)
@@ -76,10 +74,6 @@ struct SpacesHubView: View {
             }
             .buttonStyle(.plain)
             Spacer()
-            Button { nav.showSettings = true } label: {
-                SidebarRow(title: "Settings", symbol: "gearshape")
-            }
-            .buttonStyle(.plain)
         }
         .padding(16)
     }

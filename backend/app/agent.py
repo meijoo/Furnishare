@@ -7,13 +7,11 @@ from . import catalog, config, core, db, planner, ranking, workflow
 from .money import dollars
 
 SYSTEM = """You are the RAG to Rooms furnishing agent for roommates furnishing a shared apartment, one room at a time.
-Use tools to search the catalog and live listings, rank candidates, and propose ONE bundle with one product per requested category.
-Rules: only use product ids returned by tools or supplied as picks; never invent dimensions, prices, or products; the backend rejects bundles over
-budget, over combined contribution limits, without placeable sizes, or failing layout checks. Live listings with sizes may be proposed.
-Prefer the user's selected pick ids when they fit. Skip categories they already own. If a proposal is rejected,
-adjust and retry at most 3 times, then explain which constraints conflict. You cannot approve, pay, or settle anything.
-Never reveal one roommate's private limit to others. After a successful proposal, call render_room_preview once.
-Finish with a short friendly explanation grounded in retrieved evidence."""
+Propose ONE bundle with one product per requested category.
+Rules: only use product ids listed in the prompt, returned by tools, or supplied as picks; never invent dimensions, prices, or products.
+Prefer listed candidates and the user's pick ids. Skip categories they already own. If a proposal is rejected, retry at most twice.
+You cannot approve, pay, or settle anything. Never reveal one roommate's private limit.
+Call propose_bundle as soon as you have a valid set. Do not render a preview. Finish with a short friendly explanation."""
 
 START_OVER = re.compile(r'\b(start over|start again|from scratch|new plan|redesign)\b', re.I)
 
@@ -162,15 +160,17 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
     state = {'published': None, 'products': []}
 
     def search_products(category: str, max_price_dollars: float = 0, query: str = '') -> dict:
-        """Search catalog and live listings that have placeable sizes. category: one of the requested categories."""
+        """Placeable catalog and already-fetched live items. category: one of the requested categories."""
         allowed = room_categories(core.household(hid))
         if category not in allowed:
             return {'error': f'category must be one of {allowed} for this room'}
         room = core.household(hid)['room']
         cap = round(max_price_dollars * 100) if max_price_dollars and max_price_dollars > 0 else None
-        found = catalog.search(query or category.replace('_', ' '), limit=12)
-        pool = catalog.design_pool(category, room, cap, extra=found + (picks or []))
-        return {'products': [_product_summary(p) for p in pool][:15]}
+        extra = list(picks or [])
+        if query:
+            extra += catalog.live_search(query, limit=8)
+        pool = catalog.design_pool(category, room, cap, extra=extra)
+        return {'products': [_product_summary(p) for p in pool][:12]}
 
     def rank_candidates(category: str) -> dict:
         """Rank placeable products in one category by visual compatibility with the room/inspiration image."""
@@ -179,11 +179,6 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
                                    planner.room_image(h), style_text=h['style_text'] or '')
         return {'mode': mode, 'note': 'Scores only compare items within this category.',
                 'ranked': [_product_summary(p, s) for p, s in ranked[:8]]}
-
-    def search_live_listings(query: str) -> dict:
-        """Live shopping results. Listings with sizes can be proposed."""
-        found = catalog.search(query, limit=12)
-        return {'results': [_product_summary(p) for p in found]}
 
     def propose_bundle(product_ids: list[str], explanation: str) -> dict:
         """Propose one product per category. The backend validates budget, limits, dimensions and layout, then shows it on the iPad."""
@@ -213,14 +208,6 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
         return {'ok': True, 'version': p['version'], 'total': dollars(p['known_total_cents']),
                 'unknown_costs': p['unknown_costs'], 'note': 'Shares are private to each roommate; do not list limits.'}
 
-    def render_room_preview() -> dict:
-        """After proposing, rebuild the layout in Blender through the custom Blender MCP server and render a preview."""
-        from . import blender_mcp_client
-        try:
-            return blender_mcp_client.render_scene_preview(hid)
-        except Exception as e:  # noqa: BLE001
-            return {'error': f'Blender preview unavailable: {e}'}
-
     h = core.household(hid)
     lims = core.limits(hid)
     cap = None if any(v is None for v in lims.values()) else sum(lims.values())
@@ -235,19 +222,30 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
     if refine and current:
         refine_line = (' Refine the current proposal; keep it unless the user asks to change a piece. Current items: '
                        + ', '.join(f"{i.get('title')} ({i.get('category')})" for i in current.get('items', [])) + '.')
+    if not refine and config.SHOPPING_API_KEY and (text or '').strip():
+        catalog.remember(catalog.live_search(text, limit=8))
+    listed = []
+    for cat in [c for c in h['needs'] if c not in (skip or [])] or room_categories(h):
+        pool = catalog.design_pool(cat, h['room'], extra=picks)[:6]
+        if pool:
+            listed.append(cat + ': ' + '; '.join(
+                f"{p['id']} ({p.get('title')}, {dollars(p.get('price_cents') or 0)})" for p in pool))
+    listed_line = (' Candidates already retrieved — pick from these ids: ' + ' | '.join(listed) + '.') if listed else ''
     context = (f"Room: {h['name']} ({kind}{owner}), {h['room']['width_m']} m x {h['room']['depth_m']} m. Budget {dollars(h['budget_cents'])}. "
                f"Requested categories: {', '.join(h['needs'])}. "
                + (f'Combined contribution limits: {dollars(cap)}. ' if cap is not None else '')
                + ('An inspiration image is uploaded. ' if planner.room_image(h) else 'No inspiration image yet. ')
-               + pick_line + skip_line + refine_line)
+               + pick_line + skip_line + refine_line + listed_line)
+    thinking = types.ThinkingConfig(thinking_budget=0, thinking_level=types.ThinkingLevel.MINIMAL)
     response = _gemini().models.generate_content(
         model=config.GEMINI_MODEL,
         contents=f'{context}\nRequest: {text}',
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM,
-            tools=[search_products, rank_candidates, search_live_listings, propose_bundle, render_room_preview],
-            automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=12),
-            temperature=0.3,
+            tools=[search_products, rank_candidates, propose_bundle],
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(maximum_remote_calls=6),
+            temperature=0.2,
+            thinking_config=thinking,
         ))
     reply = (response.text or '').strip()
     if not state['published']:

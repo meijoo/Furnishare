@@ -116,12 +116,14 @@ struct ApartmentPlanView: View {
     @Environment(AppModel.self) private var model
     let apartment: Apartment
     var showImage = true
+    var compact = false
+    var maxHeight: Double = 520
     var selection: Binding<Set<String>>?
 
     var body: some View {
         let drawImage = showImage && apartment.isImported
         let bounds = apartment.drawingBounds(includingImage: drawImage)
-        PlanSizing(aspect: bounds.widthM / bounds.depthM, maxHeight: 520) {
+        PlanSizing(aspect: bounds.widthM / bounds.depthM, maxHeight: maxHeight) {
             GeometryReader { proxy in
                 let scale = min(proxy.size.width / bounds.widthM, proxy.size.height / bounds.depthM)
                 let size = CGSize(width: bounds.widthM * scale, height: bounds.depthM * scale)
@@ -141,7 +143,7 @@ struct ApartmentPlanView: View {
                             ?? (room.householdID == model.currentHouseholdID)
                         let showFootprints = selection == nil && isCurrent
                         RoomTile(room: room, title: apartment.shortName(room), scale: scale, isCurrent: isCurrent,
-                                 selecting: selection != nil,
+                                 selecting: selection != nil, compact: compact,
                                  footprints: showFootprints ? model.displayedObjects : [],
                                  sceneRoom: room.roomM ?? (showFootprints ? PlanSize(widthM: model.state.room.widthM, depthM: model.state.room.depthM) : nil),
                                  selection: selection)
@@ -187,6 +189,7 @@ private struct RoomTile: View {
     let scale: Double
     let isCurrent: Bool
     var selecting = false
+    var compact = false
     let footprints: [SceneObject]
     /// The scope's real 3D room (`room_m`); footprints are scaled from it onto the plan rectangle.
     let sceneRoom: PlanSize?
@@ -213,12 +216,12 @@ private struct RoomTile: View {
             shape.fill(fill)
             if !footprints.isEmpty { footprintLayer.clipShape(shape) }
             labels
-                .padding(.horizontal, 5).padding(.vertical, 4)
+                .padding(.horizontal, compact ? 0 : 5).padding(.vertical, compact ? 0 : 4)
                 .background {
-                    if !footprints.isEmpty { RoundedRectangle(cornerRadius: 6).fill(.white.opacity(0.72)) }
+                    if !compact, !footprints.isEmpty { RoundedRectangle(cornerRadius: 6).fill(.white.opacity(0.72)) }
                 }
-                .padding(4)
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .padding(compact ? 0 : 4)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: compact ? .center : .topLeading)
         }
         .overlay(shape.strokeBorder(isCurrent ? Color.aeroSky : .white.opacity(0.85), lineWidth: isCurrent ? 3 : 1))
         .overlay(alignment: .bottomTrailing) {
@@ -251,35 +254,46 @@ private struct RoomTile: View {
     }
 
     @ViewBuilder private var labels: some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Label(title, systemImage: room.kind.symbol)
-                .font(.caption.weight(.bold))
+        if compact {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(room.isFurnishable ? Color.aeroInk : .secondary)
+                .multilineTextAlignment(.center)
                 .lineLimit(2)
-            if let label = room.distinctLabel {
-                Text(label).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-            }
-            if let interior = room.interiorM, footprints.isEmpty {
-                Text(String(format: "%.2f × %.2f m", interior.widthM, interior.depthM))
-                    .font(.caption2.monospacedDigit()).foregroundStyle(.secondary).lineLimit(1)
-            }
-            // With furniture drawn, the summary moves below the plan so it doesn't hide the footprints.
-            if room.isFurnishable {
-                if footprints.isEmpty {
-                    if room.shared {
-                        StatusBadge(text: "Shared", symbol: "person.3.fill", tint: .aeroInk)
-                    } else if room.ownerID != nil {
-                        StatusBadge(text: "Private", symbol: "lock.fill", tint: .aeroInk)
-                    }
-                    summary
+                .minimumScaleFactor(0.65)
+                .padding(6)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            VStack(alignment: .leading, spacing: 3) {
+                Label(title, systemImage: room.kind.symbol)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(room.isFurnishable ? Color.aeroInk : .secondary)
+                    .lineLimit(2)
+                if let label = room.distinctLabel {
+                    Text(label).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
                 }
-            } else if room.kind == .kitchen, !room.name.localizedCaseInsensitiveContains("coming soon") {
-                Label("Coming soon", systemImage: "clock").font(.caption2).foregroundStyle(.secondary)
-            } else if room.kind == .living || room.kind == .bedroom {
-                Label("Not furnished in the app", systemImage: "minus.circle").font(.caption2).foregroundStyle(.secondary)
+                if let interior = room.interiorM, footprints.isEmpty {
+                    Text(String(format: "%.2f × %.2f m", interior.widthM, interior.depthM))
+                        .font(.caption2.monospacedDigit()).foregroundStyle(.secondary).lineLimit(1)
+                }
+                // With furniture drawn, the summary moves below the plan so it doesn't hide the footprints.
+                if room.isFurnishable {
+                    if footprints.isEmpty {
+                        if room.shared {
+                            StatusBadge(text: "Shared", symbol: "person.3.fill", tint: .aeroInk)
+                        } else if room.ownerID != nil {
+                            StatusBadge(text: "Private", symbol: "lock.fill", tint: .aeroInk)
+                        }
+                        summary
+                    }
+                } else if room.kind == .kitchen, !room.name.localizedCaseInsensitiveContains("coming soon") {
+                    Label("Coming soon", systemImage: "clock").font(.caption2).foregroundStyle(.secondary)
+                } else if room.kind == .living || room.kind == .bedroom {
+                    Label("Not furnished in the app", systemImage: "minus.circle").font(.caption2).foregroundStyle(.secondary)
+                }
             }
+            .minimumScaleFactor(0.75)
         }
-        .minimumScaleFactor(0.75)
     }
 
     @ViewBuilder private var summary: some View {

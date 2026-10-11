@@ -155,7 +155,8 @@ Proposal `status`: `draft`, `awaiting_approval`, `approved`, `superseded`, `purc
 | POST   | `/households/{hid}/finance/setup`                           | Create Nessie customers, accounts and the merchant (done automatically on first operation)                                                                              |
 | PUT    | `/households/{hid}/members/{mid}/handle`                    | `{"handle"}` maps a phone number or iMessage email to a member                                                                                                          |
 | POST   | `/households/{hid}/scene/preview`                           | Rebuilds the current layout in Blender through the Blender MCP server and renders a PNG; returns `{"preview_url", "blender_validation"}`; 503 if Blender is unavailable |
-| POST   | `/demo/reset?clear_handles=true`                            | Reseed the demo household; `clear_handles` also forgets registered handles                                                                                              |
+| POST   | `/demo/reset?clear_handles=true`                            | Reseed the demo household with starter furniture; `clear_handles` also forgets registered handles                                                                       |
+| POST   | `/demo/blank`                                               | Same members and plan as reset, but every room has no proposal or furniture (new-user start)                                                                            |
 | GET    | `/debug/timings`                                            | Per-stage latency averages                                                                                                                                              |
 | GET    | `/debug/outbound`                                           | Recent outbound message jobs                                                                                                                                            |
 | GET    | `/uploads/{path}`                                           | Uploaded inspiration images and rendered previews                                                                                                                       |
@@ -237,7 +238,8 @@ Rooms with a scope also carry `room_m` `{width_m, depth_m}`: the scope's actual 
 
 `kind` is one of `living`, `kitchen`, `bedroom`, `bathroom`, `hall`. `summary` is `null` for rooms without a scope. `totals` sums the current proposal of every scope. `by_member_cents` is what each person pays across the whole apartment: their shared-room shares plus their own bedroom.
 
-`POST /demo/reset` reseeds every scope of the demo apartment.
+`POST /demo/reset` reseeds every scope of the demo apartment with starter furniture.
+`POST /demo/blank` keeps the same plan and members but leaves every room empty.
 
 ### Bedroom categories
 

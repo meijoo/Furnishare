@@ -13,8 +13,11 @@ struct UploadImage: Sendable {
         await Task.detached(priority: .userInitiated) {
             guard let image = UIImage(data: data) else { return nil }
             let isPNG = data.starts(with: [0x89, 0x50, 0x4E, 0x47])
-            if keepPNG, isPNG, max(image.size.width, image.size.height) * image.scale <= maxLongSide {
-                return UploadImage(data: data, mimeType: "image/png", filename: "\(name).png")
+            if keepPNG, isPNG {
+                if max(image.size.width, image.size.height) * image.scale <= maxLongSide {
+                    return UploadImage(data: data, mimeType: "image/png", filename: "\(name).png")
+                }
+                return png(from: image, maxLongSide: maxLongSide, name: name)
             }
             return jpeg(from: image, maxLongSide: maxLongSide, name: name)
         }.value
@@ -24,7 +27,18 @@ struct UploadImage: Sendable {
         await Task.detached(priority: .userInitiated) { jpeg(from: image, maxLongSide: maxLongSide, name: name) }.value
     }
 
+    private static func png(from image: UIImage, maxLongSide: CGFloat, name: String) -> UploadImage? {
+        guard let rendered = raster(image, maxLongSide: maxLongSide), let data = rendered.pngData() else { return nil }
+        return UploadImage(data: data, mimeType: "image/png", filename: "\(name).png")
+    }
+
     private static func jpeg(from image: UIImage, maxLongSide: CGFloat, name: String) -> UploadImage? {
+        guard let rendered = raster(image, maxLongSide: maxLongSide),
+              let data = rendered.jpegData(compressionQuality: 0.9) else { return nil }
+        return UploadImage(data: data, mimeType: "image/jpeg", filename: "\(name).jpg")
+    }
+
+    private static func raster(_ image: UIImage, maxLongSide: CGFloat) -> UIImage? {
         let pixels = CGSize(width: image.size.width * image.scale, height: image.size.height * image.scale)
         let longSide = max(pixels.width, pixels.height)
         guard longSide > 0 else { return nil }
@@ -33,12 +47,10 @@ struct UploadImage: Sendable {
         let format = UIGraphicsImageRendererFormat()
         format.scale = 1
         format.opaque = true
-        let rendered = UIGraphicsImageRenderer(size: target, format: format).image { context in
+        return UIGraphicsImageRenderer(size: target, format: format).image { context in
             UIColor.white.setFill()
             context.fill(CGRect(origin: .zero, size: target))
             image.draw(in: CGRect(origin: .zero, size: target))
         }
-        guard let data = rendered.jpegData(compressionQuality: 0.85) else { return nil }
-        return UploadImage(data: data, mimeType: "image/jpeg", filename: "\(name).jpg")
     }
 }

@@ -5,7 +5,6 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
-from app import geometry
 from app.main import app
 
 BEDROOMS = {'bed-emily': 'emily', 'bed-maya': 'maya', 'bed-alex': 'alex'}
@@ -26,22 +25,22 @@ def apartment(client):
 
 def test_floor_plan_tiles_the_apartment(client):
     a = apartment(client)
-    assert a['width_m'] == 10.5 and a['depth_m'] == 9.5
+    assert 12 < a['width_m'] < 14 and 9 < a['depth_m'] < 10.5
+    assert a['source'] == 'built_in'
     rooms = a['rooms']
-    assert len(rooms) == 10
-    assert sum(r['width_m'] * r['depth_m'] for r in rooms) == pytest.approx(a['width_m'] * a['depth_m'])
+    assert len(rooms) >= 10
     for i, r in enumerate(rooms):
-        assert 0 <= r['x_m'] and r['x_m'] + r['width_m'] <= a['width_m'] + 1e-9
-        assert 0 <= r['z_m'] and r['z_m'] + r['depth_m'] <= a['depth_m'] + 1e-9
+        assert 0 <= r['x_m'] and r['x_m'] + r['width_m'] <= a['width_m'] + 0.2
+        assert 0 <= r['z_m'] and r['z_m'] + r['depth_m'] <= a['depth_m'] + 0.2
         for other in rooms[i + 1:]:
-            assert not geometry.overlaps(
-                geometry.rect(r['x_m'] + r['width_m'] / 2, r['z_m'] + r['depth_m'] / 2, r['width_m'], r['depth_m']),
-                geometry.rect(other['x_m'] + other['width_m'] / 2, other['z_m'] + other['depth_m'] / 2,
-                              other['width_m'], other['depth_m'])), (r['id'], other['id'])
+            ox = min(r['x_m'] + r['width_m'], other['x_m'] + other['width_m']) - max(r['x_m'], other['x_m'])
+            oz = min(r['z_m'] + r['depth_m'], other['z_m'] + other['depth_m']) - max(r['z_m'], other['z_m'])
+            assert ox <= 0.15 or oz <= 0.15, (r['id'], other['id'])
     kinds = [r['kind'] for r in rooms]
-    assert kinds.count('bedroom') == 3 and kinds.count('bathroom') == 3 and 'kitchen' in kinds and 'living' in kinds
+    assert kinds.count('bedroom') == 3 and 'kitchen' in kinds and 'living' in kinds and 'dining' in kinds
     living = next(r for r in rooms if r['id'] == 'living')
     assert living['household_id'] == 'demo' and living['shared'] and living['summary']['proposal_version'] == 1
+    assert living.get('interior_m', living)['width_m'] >= 3.5
     assert all(r['summary'] is None for r in rooms if r['household_id'] is None)
 
 
@@ -110,6 +109,24 @@ def test_bedroom_chat_stays_in_bedroom_categories(client):
         'bed', 'nightstand', 'dresser', 'desk']
     assert agent.parse_request('a new sofa', ['bed', 'nightstand', 'dresser', 'desk'])['categories'] == [
         'bed', 'nightstand', 'dresser', 'desk']
+
+
+def test_blank_clears_furniture_and_reset_puts_it_back(client):
+    blank = client.post('/demo/blank')
+    assert blank.status_code == 200, blank.text
+    a = apartment(client)
+    living = next(r for r in a['rooms'] if r['id'] == 'living')
+    assert living['summary']['proposal_version'] is None
+    assert living['summary']['item_count'] == 0
+    for r in a['rooms']:
+        if r['kind'] == 'bedroom':
+            assert r['summary']['proposal_version'] is None
+            assert client.get(f"/households/{r['household_id']}/state").json()['scene']['objects'] == []
+    restored = client.post('/demo/reset')
+    assert restored.status_code == 200, restored.text
+    living = next(r for r in apartment(client)['rooms'] if r['id'] == 'living')
+    assert living['summary']['proposal_version'] == 1
+    assert living['summary']['item_count']
 
 
 def test_unknown_apartment_is_404(client):

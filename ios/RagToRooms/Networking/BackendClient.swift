@@ -105,7 +105,7 @@ struct BackendClient: Sendable {
     }
 
     func searchProducts(_ query: String) async throws -> [Product] {
-        let list: ProductList = try await send("GET", "/products/search", query: ["q": query], timeout: 20)
+        let list: ProductList = try await send("GET", "/products/search", query: ["q": query], timeout: 10)
         return list.products
     }
 
@@ -191,6 +191,10 @@ struct BackendClient: Sendable {
 
     func resetDemo() async throws {
         try await sendIgnoringBody("POST", "/demo/reset")
+    }
+
+    func blankApartment() async throws {
+        try await sendIgnoringBody("POST", "/demo/blank")
     }
 
     func uploadInspiration(jpegData: Data, filename: String = "inspiration.jpg") async throws {
