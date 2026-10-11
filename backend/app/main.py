@@ -32,6 +32,7 @@ async def lifespan(_app):
         seed.reset()
     if config.SEED_DEMO:
         apartment.ensure()
+        seed.refresh_demo_names()
     finance.recover_on_startup()
     stop = threading.Event()
     worker = threading.Thread(target=finance.worker_loop, args=(stop,), name='finance', daemon=True)

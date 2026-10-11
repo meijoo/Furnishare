@@ -27,7 +27,7 @@ struct WelcomeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(32)
         .confirmationDialog("Choose who uses this iPad", isPresented: $choosingDemoMember, titleVisibility: .visible) {
-            ForEach([("emily", "Emily"), ("maya", "Maya"), ("alex", "Alex")], id: \.0) { member, name in
+            ForEach([("emily", "Emily"), ("maya", "Michelle"), ("alex", "Annabel")], id: \.0) { member, name in
                 Button(name) {
                     Task {
                         await model.signOut()

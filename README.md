@@ -109,7 +109,7 @@ also live in SQLite and photo files are stored in `backend/static/uploads/`.
 Saved inspiration appears in each room's Inspiration tab. Back up both the
 database and uploads folder.
 
-Use **Try demo** on the welcome screen for Emily, Maya, and Alex. Demo resets
+Use **Try demo** on the welcome screen for Emily, Michelle, and Annabel. Demo resets
 preserve real users, groups, memberships, and their invitation jobs. Set
 `RTR_SEED_DEMO=0` to disable automatic demo seeding on backend startup; existing
 demo records remain until explicitly reset or removed. The default is `1`.
@@ -157,7 +157,7 @@ payment operation, and confirmation is sent after the reimbursement succeeds.
 Run one backend on your Mac with `backend/scripts/serve.sh`. All three iPads must
 reach that Mac on the same network. In each app's Settings, connect to the same
 Mac IP address (port 8000); `127.0.0.1` refers to the iPad itself and will not work.
-Choose **Try demo → Emily**, **Try demo → Maya**, or **Try demo → Alex**, one person
+Choose **Try demo → Emily**, **Try demo → Michelle**, or **Try demo → Annabel**, one person
 per iPad. Existing demo installs can change their identity with **Settings → Acting as**.
 Make sure each device shows a live backend connection rather than Offline demo.
 
@@ -168,5 +168,5 @@ simulated payments also share the same state. Offline fixture demos are independ
 
 **Reset demo household** on any connected iPad clears saved changes and restores
 fixed catalog furniture with photos and retailer details in the living room and all three bedrooms. Each
-device keeps its own Emily/Maya/Alex identity. Reset reloads any contacts in
+device keeps its own Emily/Michelle/Annabel identity. Reset reloads any contacts in
 `backend/data/members.json`, clears old demo messages, and sends no reset texts.

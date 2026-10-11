@@ -372,7 +372,7 @@ private struct RoomTile: View {
     }
 }
 
-/// Compact chip row for the top bar: Living room · Emily's room · Maya's room · Alex's room.
+/// Compact chip row for the top bar: Living room · Emily's room · Michelle's room · Annabel's room.
 struct RoomSwitcher: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav

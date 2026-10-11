@@ -12,7 +12,7 @@
     },
     {
       "id": "maya",
-      "name": "Maya",
+      "name": "Michelle",
       "is_payer": false,
       "has_limit": true,
       "connected": false,
@@ -20,7 +20,7 @@
     },
     {
       "id": "alex",
-      "name": "Alex",
+      "name": "Annabel",
       "is_payer": false,
       "has_limit": true,
       "connected": false,

@@ -86,7 +86,7 @@ Every component (iPad, Photon adapter, Blender tools, ranker) builds against thi
     "shares": {"emily": 17500, "maya": 17500, "alex": 10000},
     "approvals": {"emily": true, "maya": false, "alex": false},
     "objections": {"maya": "too dark"},
-    "explanation": "Alex's limit is $100, so ...",
+    "explanation": "Annabel's limit is $100, so ...",
     "created_at": "..."
   },
   "scene": {"objects": [/* Scene object */], "validation": {"ok": true, "issues": []},
@@ -99,7 +99,7 @@ Every component (iPad, Photon adapter, Blender tools, ranker) builds against thi
                         "amount_cents": 17500, "operation": {/* or null */}}],
     "settled": false
   },
-  "activity": [{"at": "...", "text": "Alex updated their limit"}]
+  "activity": [{"at": "...", "text": "Annabel updated their limit"}]
 }
 ```
 
@@ -218,7 +218,7 @@ Plan coordinates are meters, top-down: `x_m` grows to the right, `z_m` grows tow
 ```json
 {
   "id": "demo", "name": "3 bed / 3 bath apartment", "width_m": 10.5, "depth_m": 9.5,
-  "members": [{"id": "emily", "name": "Emily"}, {"id": "maya", "name": "Maya"}, {"id": "alex", "name": "Alex"}],
+  "members": [{"id": "emily", "name": "Emily"}, {"id": "maya", "name": "Michelle"}, {"id": "alex", "name": "Annabel"}],
   "rooms": [
     {"id": "living", "name": "Living room", "kind": "living", "shared": true, "owner_id": null,
      "household_id": "demo", "x_m": 0.0, "z_m": 5.5, "width_m": 4.5, "depth_m": 4.0,

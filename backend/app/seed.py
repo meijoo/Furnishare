@@ -11,12 +11,31 @@ ROOM = {
                  {'kind': 'window', 'wall': 'left', 'offset_m': 0.0, 'width_m': 1.4}],
     'clearances': [{'label': 'door swing', 'x_m': 1.8, 'z_m': 1.2, 'width_m': 0.9, 'depth_m': 0.9}],
 }
-MEMBERS = [('emily', 'Emily'), ('maya', 'Maya'), ('alex', 'Alex')]
+MEMBERS = [('emily', 'Emily'), ('maya', 'Michelle'), ('alex', 'Annabel')]
 # Private contribution caps for the shared living room (USD cents).
 SEED_LIMITS = {'emily': 20000, 'maya': 25000, 'alex': 30000}
 # Scene staging budget keeps the full demo layout; the room budget sums contributions.
 BUDGET_CENTS = 150000
 STYLE = 'Light wood and blue accents'
+
+
+def refresh_demo_names() -> None:
+    """Refresh demo labels without replacing member IDs or any saved room data."""
+    with db.tx() as c:
+        scopes = c.execute("SELECT id FROM households WHERE id='demo' OR id LIKE 'demo-bed-%'").fetchall()
+        for scope in scopes:
+            hid = scope['id']
+            changed = False
+            for mid, name in MEMBERS:
+                changed |= c.execute(
+                    'UPDATE members SET name=? WHERE household_id=? AND id=? AND name<>?',
+                    (name, hid, mid, name)).rowcount > 0
+            for mid, name in MEMBERS:
+                if hid == f'demo-bed-{mid}':
+                    changed |= c.execute('UPDATE households SET name=? WHERE id=? AND name<>?',
+                                         (f"{name}'s bedroom", hid, f"{name}'s bedroom")).rowcount > 0
+            if changed:
+                c.execute('UPDATE households SET state_version=state_version+1 WHERE id=?', (hid,))
 
 
 def _handles() -> dict:

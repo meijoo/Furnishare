@@ -56,7 +56,7 @@ def test_mock_setup_purchase_transfer_and_reconcile():
     mock = nessie.MockNessie()
     cid = mock.create_customer('Emily', 'Roommate')
     aid = mock.create_account(cid, 'checking', 200000)
-    payee = mock.create_account(mock.create_customer('Maya', 'Roommate'), 'checking', 200000)
+    payee = mock.create_account(mock.create_customer('Michelle', 'Roommate'), 'checking', 200000)
     mid = mock.create_merchant('Furniture')
     assert mock.balance_cents(aid) == 200000
     tid, status, body = mock.create_purchase(aid, mid, 45000, 'RAG to Rooms [purchase:demo:v1]')
