@@ -6,11 +6,10 @@ struct BrandMark: View {
 
     var body: some View {
         HStack(spacing: prominent ? 16 : 8) {
-            Image(systemName: "house.fill")
-                .font(prominent ? .system(size: 34) : compact ? .body : .title3)
-                .foregroundStyle(.white)
+            Image("FurnishareLogo")
+                .resizable()
+                .scaledToFit()
                 .frame(width: prominent ? 72 : compact ? 32 : 38, height: prominent ? 72 : compact ? 32 : 38)
-                .background(RoundedRectangle(cornerRadius: prominent ? 18 : 10, style: .continuous).fill(Color.aeroSky))
             Text("Furnishare")
                 .font(prominent ? .system(size: 44, weight: .bold) : compact ? .headline : .title3.weight(.semibold))
                 .foregroundStyle(Color.aeroInk)
