@@ -14,6 +14,11 @@ struct ContentView: View {
                 SuccessOverlay(kind: success)
             }
         }
+        .overlay(alignment: .topTrailing) {
+            SettingsGearButton()
+                .padding(.top, 14)
+                .padding(.trailing, 20)
+        }
         .sheet(isPresented: $nav.showSettings) { SettingsSheet().environment(model).environment(self.nav) }
         .sheet(isPresented: $nav.showRoomSetup) { RoomSetupSheet(room: model.state.room).environment(model) }
         .sheet(isPresented: $nav.showCatalog) { CatalogSheet().environment(model).environment(self.nav) }

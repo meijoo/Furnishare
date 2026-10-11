@@ -1,42 +1,233 @@
 {
   "id": "demo",
-  "name": "3 bed / 3 bath apartment",
-  "width_m": 10.5,
-  "depth_m": 9.5,
+  "name": "3-bedroom apartment",
+  "source": "built_in",
+  "width_m": 13.1,
+  "depth_m": 9.7,
   "members": [
-    {"id": "emily", "name": "Emily"},
-    {"id": "maya", "name": "Maya"},
-    {"id": "alex", "name": "Alex"}
+    {
+      "id": "emily",
+      "name": "Emily"
+    },
+    {
+      "id": "maya",
+      "name": "Maya"
+    },
+    {
+      "id": "alex",
+      "name": "Alex"
+    }
   ],
   "rooms": [
-    {"id": "bed-emily", "name": "Emily's bedroom", "kind": "bedroom", "shared": false, "owner_id": "emily",
-     "household_id": "demo-bed-emily", "x_m": 0.0, "z_m": 0.0, "width_m": 3.5, "depth_m": 3.5,
-     "summary": {"proposal_version": 1, "status": "awaiting_approval", "known_total_cents": 90600,
-                 "shares": {"emily": 90600}, "item_count": 4,
-                 "approvals_done": 0, "approvals_needed": 1, "settled": false}},
-    {"id": "bed-maya", "name": "Maya's bedroom", "kind": "bedroom", "shared": false, "owner_id": "maya",
-     "household_id": "demo-bed-maya", "x_m": 3.5, "z_m": 0.0, "width_m": 3.5, "depth_m": 3.5, "summary": {}},
-    {"id": "bed-alex", "name": "Alex's bedroom", "kind": "bedroom", "shared": false, "owner_id": "alex",
-     "household_id": "demo-bed-alex", "x_m": 7.0, "z_m": 0.0, "width_m": 3.5, "depth_m": 3.5, "summary": {}},
-
-    {"id": "bath-1", "name": "Bathroom", "kind": "bathroom", "shared": false, "owner_id": null,
-     "household_id": null, "x_m": 0.0, "z_m": 3.5, "width_m": 2.5, "depth_m": 2.0, "summary": null},
-    {"id": "bath-2", "name": "Bathroom", "kind": "bathroom", "shared": false, "owner_id": null,
-     "household_id": null, "x_m": 2.5, "z_m": 3.5, "width_m": 2.5, "depth_m": 2.0, "summary": null},
-    {"id": "hall", "name": "Hall", "kind": "hall", "shared": true, "owner_id": null,
-     "household_id": null, "x_m": 5.0, "z_m": 3.5, "width_m": 3.0, "depth_m": 2.0, "summary": null},
-    {"id": "bath-3", "name": "Bathroom", "kind": "bathroom", "shared": false, "owner_id": null,
-     "household_id": null, "x_m": 8.0, "z_m": 3.5, "width_m": 2.5, "depth_m": 2.0, "summary": null},
-
-    {"id": "living", "name": "Living room", "kind": "living", "shared": true, "owner_id": null,
-     "household_id": "demo", "x_m": 0.0, "z_m": 5.5, "width_m": 4.5, "depth_m": 4.0,
-     "summary": {"proposal_version": 1, "status": "awaiting_approval", "known_total_cents": 110000,
-                 "shares": {"emily": 45000, "maya": 45000, "alex": 20000}, "item_count": 4,
-                 "approvals_done": 1, "approvals_needed": 3, "settled": false}},
-    {"id": "kitchen", "name": "Kitchen (coming soon)", "kind": "kitchen", "shared": true, "owner_id": null,
-     "household_id": null, "x_m": 4.5, "z_m": 5.5, "width_m": 3.0, "depth_m": 4.0, "summary": null},
-    {"id": "entry", "name": "Entry", "kind": "hall", "shared": true, "owner_id": null,
-     "household_id": null, "x_m": 7.5, "z_m": 5.5, "width_m": 3.0, "depth_m": 4.0, "summary": null}
+    {
+      "id": "bed-emily",
+      "name": "Emily's bedroom",
+      "kind": "bedroom",
+      "shared": false,
+      "owner_id": "emily",
+      "household_id": "demo-bed-emily",
+      "x_m": 0.45,
+      "z_m": 0.0,
+      "width_m": 3.65,
+      "depth_m": 3.85,
+      "interior_m": {
+        "width_m": 3.65,
+        "depth_m": 3.95
+      },
+      "summary": {}
+    },
+    {
+      "id": "patio-1",
+      "name": "Patio/ Deck",
+      "kind": "patio",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 4.85,
+      "z_m": 0.2,
+      "width_m": 4.05,
+      "depth_m": 1.9,
+      "summary": null
+    },
+    {
+      "id": "bed-maya",
+      "name": "Maya's bedroom",
+      "kind": "bedroom",
+      "shared": false,
+      "owner_id": "maya",
+      "household_id": "demo-bed-maya",
+      "x_m": 8.85,
+      "z_m": 0.2,
+      "width_m": 3.65,
+      "depth_m": 3.9,
+      "interior_m": {
+        "width_m": 3.65,
+        "depth_m": 3.95
+      },
+      "summary": {}
+    },
+    {
+      "id": "closet-1",
+      "name": "Closet",
+      "kind": "closet",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 4.1,
+      "z_m": 1.1,
+      "width_m": 0.75,
+      "depth_m": 2.75,
+      "summary": null
+    },
+    {
+      "id": "living",
+      "name": "Living room",
+      "kind": "living",
+      "shared": true,
+      "owner_id": null,
+      "household_id": "demo",
+      "x_m": 4.85,
+      "z_m": 2.1,
+      "width_m": 4.05,
+      "depth_m": 4.5,
+      "interior_m": {
+        "width_m": 3.95,
+        "depth_m": 4.9
+      },
+      "summary": {}
+    },
+    {
+      "id": "bathroom-1",
+      "name": "Bath",
+      "kind": "bathroom",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 0.45,
+      "z_m": 3.85,
+      "width_m": 2.35,
+      "depth_m": 2.8,
+      "summary": null
+    },
+    {
+      "id": "hall-1",
+      "name": "hall",
+      "kind": "hall",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 2.8,
+      "z_m": 3.85,
+      "width_m": 2.0,
+      "depth_m": 2.75,
+      "summary": null
+    },
+    {
+      "id": "closet-2",
+      "name": "Closet",
+      "kind": "closet",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 9.85,
+      "z_m": 4.1,
+      "width_m": 2.6,
+      "depth_m": 0.9,
+      "summary": null
+    },
+    {
+      "id": "bathroom-2",
+      "name": "Bath",
+      "kind": "bathroom",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 9.85,
+      "z_m": 5.0,
+      "width_m": 2.6,
+      "depth_m": 1.65,
+      "summary": null
+    },
+    {
+      "id": "dining-1",
+      "name": "Dining",
+      "kind": "dining",
+      "shared": true,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 1.05,
+      "z_m": 6.65,
+      "width_m": 3.95,
+      "depth_m": 3.05,
+      "interior_m": {
+        "width_m": 3.8,
+        "depth_m": 3.05
+      },
+      "summary": null
+    },
+    {
+      "id": "kitchen-1",
+      "name": "Kitchen",
+      "kind": "kitchen",
+      "shared": true,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 5.0,
+      "z_m": 6.65,
+      "width_m": 3.0,
+      "depth_m": 3.05,
+      "summary": null
+    },
+    {
+      "id": "hall-2",
+      "name": "hall",
+      "kind": "hall",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 8.0,
+      "z_m": 6.6,
+      "width_m": 0.8,
+      "depth_m": 3.1,
+      "summary": null
+    },
+    {
+      "id": "bed-alex",
+      "name": "Alex's bedroom",
+      "kind": "bedroom",
+      "shared": false,
+      "owner_id": "alex",
+      "household_id": "demo-bed-alex",
+      "x_m": 8.8,
+      "z_m": 6.65,
+      "width_m": 4.3,
+      "depth_m": 3.05,
+      "interior_m": {
+        "width_m": 4.25,
+        "depth_m": 3.05
+      },
+      "summary": {}
+    },
+    {
+      "id": "laundry-1",
+      "name": "laundry",
+      "kind": "laundry",
+      "shared": false,
+      "owner_id": null,
+      "household_id": null,
+      "x_m": 0.0,
+      "z_m": 7.85,
+      "width_m": 1.05,
+      "depth_m": 1.85,
+      "summary": null
+    }
   ],
-  "totals": {"known_total_cents": 200600, "by_member_cents": {"emily": 135600, "maya": 45000, "alex": 20000}}
+  "totals": {
+    "known_total_cents": 0,
+    "by_member_cents": {
+      "emily": 0,
+      "maya": 0,
+      "alex": 0
+    }
+  }
 }

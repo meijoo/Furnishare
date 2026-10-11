@@ -1,4 +1,5 @@
 """The demo apartment: a floor plan grouping room scopes (households). Shared rooms split; bedrooms are owner-paid."""
+import copy
 import json
 import logging
 import time
@@ -6,7 +7,9 @@ import time
 from . import catalog, config, core, db, floorplan, planner, seed
 
 AID = 'demo'
-NAME = '3 bed / 3 bath apartment'
+NAME = '3-bedroom apartment'
+DEFAULT_PLAN_PATH = config.DATA_DIR / 'default_floorplan.json'
+# Fallback grid if the recorded plan file is missing (tests / a broken checkout).
 WIDTH_M, DEPTH_M = 10.5, 9.5
 BEDROOM_SIZE = 3.5
 
@@ -54,13 +57,33 @@ ROOMS = [
 PLAN_KEY = 'apartment_plan'
 
 
+def _name_owned_rooms(rooms: list[dict]) -> list[dict]:
+    names = dict(seed.MEMBERS)
+    for r in rooms:
+        if r.get('owner_id') and r['owner_id'] in names:
+            r.setdefault('label', r['name'])
+            r['name'] = f"{names[r['owner_id']]}'s bedroom"
+    return rooms
+
+
+def built_in_plan() -> dict:
+    """Default demo layout from Annabel's recorded 3-bed read, through the same builder as an upload."""
+    if not DEFAULT_PLAN_PATH.exists():
+        return {'name': NAME, 'source': 'built_in', 'width_m': WIDTH_M, 'depth_m': DEPTH_M, 'rooms': copy.deepcopy(ROOMS),
+                'image_url': None, 'image_frame_m': None, 'warnings': []}
+    raw = json.loads(DEFAULT_PLAN_PATH.read_text())
+    built = floorplan.build_plan(raw['rooms'], raw['width_px'], raw['height_px'],
+                                 [mid for mid, _ in seed.MEMBERS])
+    _name_owned_rooms(built['rooms'])
+    return {'name': NAME, 'source': 'built_in', 'image_url': None, 'image_frame_m': None, **built}
+
+
 def plan() -> dict:
     """The current floor plan: an imported one if present, else the built-in demo apartment."""
     stored = db.kv_get(PLAN_KEY)
     if stored:
         return stored
-    return {'name': NAME, 'source': 'built_in', 'width_m': WIDTH_M, 'depth_m': DEPTH_M, 'rooms': ROOMS,
-            'image_url': None, 'image_frame_m': None, 'warnings': []}
+    return built_in_plan()
 
 
 def rooms() -> list[dict]:
@@ -77,7 +100,7 @@ def _bedroom_size(room: dict) -> tuple[float, float]:
     return size['width_m'], size['depth_m']
 
 
-def reset_bedroom(room: dict) -> dict:
+def reset_bedroom(room: dict, furnished: bool = True) -> dict:
     hid, owner = room['household_id'], room['owner_id']
     name = dict(seed.MEMBERS)[owner]
     with db.tx() as c:
@@ -97,7 +120,7 @@ def reset_bedroom(room: dict) -> dict:
         c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, NULL, NULL)',
                   (hid, owner, name))
         db.log(c, hid, f"{room['name']} created; {name} pays for it alone")
-    if config.SHOPPING_API_KEY:
+    if not furnished:
         return {'ok': True, 'household_id': hid, 'proposal_version': None, 'total_cents': 0}
     pick = planner.select_bundle(hid, list(catalog.BEDROOM_CATEGORIES), BEDROOM_BUDGETS[owner],
                                 BEDROOM_STYLES.get(owner, BEDROOM_STYLE))
@@ -113,9 +136,9 @@ def _owned_bedrooms() -> list[dict]:
     return [r for r in rooms() if r['kind'] == 'bedroom' and r.get('household_id')]
 
 
-def _seed(room: dict) -> dict:
+def _seed(room: dict, furnished: bool = True) -> dict:
     try:
-        result = reset_bedroom(room)
+        result = reset_bedroom(room, furnished=furnished)
     except Exception as e:  # noqa: BLE001 - one bad bedroom must not take down the apartment
         result = {'ok': False, 'household_id': room['household_id'], 'notes': [str(e)]}
     if not result['ok']:
@@ -123,23 +146,32 @@ def _seed(room: dict) -> dict:
     return result
 
 
-def reset(clear_handles: bool = False) -> dict:
-    out = {'living': seed.reset(seed.HID, clear_handles=clear_handles)}
+def _living_seed_room() -> dict:
+    living = next((r for r in plan()['rooms'] if r.get('household_id') == seed.HID), None)
+    if not living:
+        return seed.ROOM
+    size = living.get('interior_m') or living
+    return {**seed.ROOM, 'width_m': size['width_m'], 'depth_m': size['depth_m']}
+
+
+def reset(clear_handles: bool = False, furnished: bool = True) -> dict:
+    out = {'living': seed.reset(seed.HID, clear_handles=clear_handles, room=_living_seed_room(),
+                                furnished=furnished)}
     for room in _owned_bedrooms():
-        out[room['id']] = _seed(room)
+        out[room['id']] = _seed(room, furnished=furnished)
     return out
 
 
 def ensure() -> None:
-    """Seed bedrooms that are missing or have no proposal. Never fails startup; the living room must stay up."""
+    """Create bedroom scopes that do not exist yet. Empty rooms stay empty."""
     for room in _owned_bedrooms():
-        if not db.one('SELECT 1 FROM proposals WHERE household_id = ?', room['household_id']):
+        if not db.one('SELECT 1 FROM households WHERE id = ?', room['household_id']):
             _seed(room)
 
 
 def import_plan(data: bytes, mime: str, image_url: str, plan_width_m: float | None = None) -> dict:
-    """Replace the floor plan from an image, then re-seed every bedroom at its new size. The living room's
-    live demo scope keeps its own room geometry."""
+    """Replace the floor plan from an image, then open every bedroom at its new size with no furniture.
+    The living room's live demo scope keeps its own room geometry."""
     reads = floorplan.extract(data, mime)
     w, h = floorplan.image_size(data)
     built = floorplan.build_plan(reads, w, h, [mid for mid, _ in seed.MEMBERS], plan_width_m)
@@ -151,7 +183,7 @@ def import_plan(data: bytes, mime: str, image_url: str, plan_width_m: float | No
               'source': 'imported', 'image_url': image_url, **built}
     db.kv_set(PLAN_KEY, stored)
     started = time.perf_counter()
-    seeded = {r['id']: _seed(r) for r in _owned_bedrooms()}
+    seeded = {r['id']: _seed(r, furnished=False) for r in _owned_bedrooms()}
     logging.getLogger('uvicorn.error').info('Floor-plan bedroom setup: %.1f s', time.perf_counter() - started)
     return {'apartment': snapshot(), 'warnings': built['warnings'], 'seeded': seeded,
             'scale_m_per_px': built['scale_m_per_px']}

@@ -81,13 +81,31 @@ def test_build_plan_from_square_footage():
     ('WASHROOM', 'laundry', 'bathroom'),
     ('W.C.', 'other', 'bathroom'),
     ('Master Bath', 'other', 'bathroom'),
+    ('Powder Room', 'other', 'bathroom'),
     ('LAUNDRY / W/D', 'other', 'laundry'),
     ('FAMILY ROOM', 'other', 'living'),
     ('Sitting Room 145 sq ft', 'other', 'living'),
+    ('Master Bedroom', 'other', 'bedroom'),
+    ('Primary Bedroom', 'living', 'bedroom'),
+    ('DINING AREA', 'other', 'dining'),
+    ('Breakfast Nook', 'kitchen', 'dining'),
+    ('FOYER', 'other', 'hall'),
+    ('BALCONY', 'other', 'patio'),
     ('Kitchen', 'kitchen', 'kitchen'),
 ])
 def test_kind_from_label(label, kind, expect):
     assert floorplan.kind_from_label(label, kind) == expect
+
+
+@pytest.mark.parametrize('label,expect', [
+    ("Bedroom 13'x 12'", 'Bedroom'),
+    ('Sitting Room 145 sq ft', 'Sitting Room'),
+    ('Closet', 'Closet'),
+    ('W.C.', 'W.C.'),
+    ('Dining 12\'6" x 10\'', 'Dining'),
+])
+def test_clean_label_strips_printed_sizes(label, expect):
+    assert floorplan.clean_label(label) == expect
 
 
 def test_image_size_png_and_jpeg():
@@ -160,8 +178,9 @@ def test_import_reseeds_bedrooms_at_plan_size(client):
     assert client.get('/apartments/demo').json()['source'] == 'imported'
 
     restored = client.delete('/apartments/demo/floorplan').json()
-    assert restored['source'] == 'built_in' and restored['width_m'] == apartment.WIDTH_M
-    assert client.get('/households/demo-bed-emily/state').json()['room']['width_m'] == apartment.BEDROOM_SIZE
+    assert restored['source'] == 'built_in' and restored['width_m'] == apartment.built_in_plan()['width_m']
+    emily = next(r for r in apartment.built_in_plan()['rooms'] if r['id'] == 'bed-emily')
+    assert client.get('/households/demo-bed-emily/state').json()['room']['width_m'] == emily['interior_m']['width_m']
 
 
 def test_import_rejects_bad_uploads(client, monkeypatch):

@@ -433,6 +433,12 @@ def demo_reset(clear_handles: bool = False):
     return apartment.reset(clear_handles=clear_handles)
 
 
+@app.post('/demo/blank')
+def demo_blank():
+    """Same members and plan as reset, but every room starts with no proposal or furniture."""
+    return apartment.reset(furnished=False)
+
+
 @app.get('/apartments/{aid}')
 def get_apartment(aid: str):
     try:

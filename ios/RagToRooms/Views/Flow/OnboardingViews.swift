@@ -36,6 +36,7 @@ struct LivingSituationView: View {
                     .background(.white, in: RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
+            Color.clear.frame(width: SettingsGearButton.reservedWidth, height: 1)
         }
     }
 
@@ -167,44 +168,31 @@ struct FloorPlanUploadView: View {
     @State private var showImage = true
 
     var body: some View {
-        FlowScreen(maxWidth: 760) {
-            VStack(alignment: .leading, spacing: 18) {
+        FlowScreen(maxWidth: 640) {
+            VStack(alignment: .leading, spacing: 22) {
                 onboardingChrome(step: 2, back: nav.livingMode == .createGroup ? .groupSetup : nav.livingMode == .joinGroup ? .joinGroup : .livingSituation)
                 VStack(spacing: 8) {
                     Text("Upload your floor plan").font(.largeTitle.bold()).foregroundStyle(Color.aeroInk)
-                    Text("Upload a photo of your apartment or house floor plan to get started.")
+                    Text("Take a photo or pick one from the library. We’ll read the rooms and sizes.")
                         .foregroundStyle(Color.figmaMuted)
                 }
                 .frame(maxWidth: .infinity)
-                VStack(spacing: 20) {
-                    VStack(spacing: 14) {
-                        Image(systemName: "doc.fill")
-                            .font(.system(size: 40))
-                            .foregroundStyle(Color.aeroSky)
-                        Text("Drag and drop your floor plan here").font(.headline).foregroundStyle(Color.aeroInk)
-                        Text("or").font(.subheadline).foregroundStyle(Color.figmaMuted)
-                        if let apartment = model.apartment {
-                            FloorPlanImportControls(apartment: apartment, showImage: $showImage)
-                        } else {
-                            Label("The apartment plan isn’t loaded yet. You can continue with the demo rooms.", systemImage: "info.circle")
-                                .font(.caption).foregroundStyle(Color.figmaMuted)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 36)
-                    .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color.figmaWash.opacity(0.65)))
-                    .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.aeroSky.opacity(0.25), style: StrokeStyle(lineWidth: 1.5, dash: [8, 6])))
-                    HStack(spacing: 16) {
-                        tip("doc", "Photo format", "PNG, JPEG, or a camera photo")
-                        tip("square.split.2x2", "Include all rooms", "Make sure the full layout is visible")
-                        tip("internaldrive", "Max file size", "Up to 10 MB")
-                    }
+                if let apartment = model.apartment {
+                    FloorPlanImportControls(apartment: apartment, showImage: $showImage, prominent: true)
+                } else {
+                    Label("The apartment plan isn’t loaded yet. You can continue with the demo rooms.", systemImage: "info.circle")
+                        .font(.caption).foregroundStyle(Color.figmaMuted)
+                }
+                HStack(spacing: 16) {
+                    tip("photo", "Photo or Files", "PNG, JPEG, or the Camera")
+                    tip("square.split.2x2", "Include all rooms", "The full layout should be visible")
+                    tip("internaldrive", "Max file size", "Up to 10 MB")
                 }
                 HStack {
                     Button("Back") { nav.screen = nav.livingMode == .createGroup ? .groupSetup : .livingSituation }
                         .buttonStyle(GlassChipStyle())
                     Spacer()
-                    Button { goNext() } label: { Label("Continue", systemImage: "arrow.right") }
+                    Button(action: goNext) { continueLabel("Continue") }
                         .buttonStyle(AeroButtonStyle())
                 }
             }
@@ -235,9 +223,10 @@ struct FloorPlanUploadView: View {
 struct RoomSelectView: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
+    @State private var submitting = false
 
     var body: some View {
-        FlowScreen(maxWidth: 1100) {
+        FlowScreen(maxWidth: 1280) {
             VStack(alignment: .leading, spacing: 18) {
                 onboardingChrome(step: 3, back: .floorPlan)
                 groupBanner
@@ -245,17 +234,20 @@ struct RoomSelectView: View {
                 Text("Choose every room you can furnish. Bathrooms and halls stay on the plan for reference but aren’t selectable.")
                     .foregroundStyle(Color.figmaMuted)
                 ViewThatFits(in: .horizontal) {
-                    HStack(alignment: .top, spacing: 16) { planCard; roomCards }
-                    VStack(alignment: .leading, spacing: 16) { planCard; roomCards }
+                    HStack(alignment: .top, spacing: 20) {
+                        roomCards.frame(width: 340)
+                        planCard.layoutPriority(1)
+                    }
+                    VStack(alignment: .leading, spacing: 16) { roomCards; planCard }
                 }
                 HStack {
                     Button("Back") { nav.screen = .floorPlan }.buttonStyle(GlassChipStyle())
                     Spacer()
                     Button { nav.showShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
                         .buttonStyle(GlassChipStyle())
-                    Button { finish() } label: { Label("Submit", systemImage: "arrow.right") }
+                    Button(action: finish) { continueLabel(submitting ? "Setting up…" : "Submit") }
                         .buttonStyle(AeroButtonStyle())
-                        .disabled(nav.selectedRoomIDs.isEmpty)
+                        .disabled(submitting || nav.selectedRoomIDs.isEmpty)
                 }
             }
         }
@@ -278,7 +270,7 @@ struct RoomSelectView: View {
             Text("Floor plan preview").font(.headline)
             Text("Tap a furnishable room to include or leave it out.").font(.caption).foregroundStyle(.secondary)
             if let apartment = model.apartment {
-                ApartmentPlanView(apartment: apartment, showImage: true,
+                ApartmentPlanView(apartment: apartment, showImage: true, compact: true, maxHeight: 780,
                                  selection: Binding(get: { nav.selectedRoomIDs }, set: { nav.selectedRoomIDs = $0 }))
             } else {
                 Text("Plan unavailable.").foregroundStyle(.secondary)
@@ -338,9 +330,21 @@ struct RoomSelectView: View {
     }
 
     private func finish() {
+        guard !submitting else { return }
+        submitting = true
         nav.persistProfile()
-        nav.finishOnboarding()
-        nav.showSuccess(.roomsSaved(nav.selectedRoomIDs.count))
+        Task {
+            await model.startBlankApartment()
+            nav.finishOnboarding()
+            nav.showSuccess(.roomsSaved(nav.selectedRoomIDs.count))
+        }
+    }
+}
+
+private func continueLabel(_ title: String) -> some View {
+    HStack(spacing: 8) {
+        Text(title)
+        Image(systemName: "arrow.right")
     }
 }
 
@@ -361,6 +365,7 @@ private struct OnboardingChrome: View {
             FlowStepBar(current: step, total: 3, captions: ["Group setup", "Floor plan", "Select rooms"])
             Spacer()
             Button("Back") { nav.screen = back }.buttonStyle(GlassChipStyle())
+            Color.clear.frame(width: SettingsGearButton.reservedWidth, height: 1)
         }
     }
 }

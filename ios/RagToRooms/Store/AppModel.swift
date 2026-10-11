@@ -1123,6 +1123,23 @@ final class AppModel {
         }
     }
 
+    /// Empty every room (no proposals or furniture). Used after a new user finishes setup.
+    func startBlankApartment() async {
+        resetLocalEdits()
+        await perform("blank", offline: {
+            state = HouseholdState(
+                householdID: state.householdID, stateVersion: state.stateVersion + 1,
+                members: state.members, room: state.room, budgetCents: state.budgetCents,
+                proposal: nil, scene: SceneState(objects: [], validation: nil),
+                finance: Finance(payerID: state.finance.payerID, simulator: state.finance.simulator),
+                activity: [], catalogMode: state.catalogMode)
+        }) { try await $0.blankApartment() }
+        scopeCache = [:]
+        liveSummaries = [:]
+        await refreshApartment(force: true)
+        if let client { try? await refresh(client) }
+    }
+
     func resetDemo() async {
         resetLocalEdits()
         await perform("reset", offline: {

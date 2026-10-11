@@ -32,7 +32,8 @@ def demo_sofa() -> dict | None:
     return near[0] if near else None
 
 
-def reset(hid: str = HID, clear_handles: bool = False) -> dict:
+def reset(hid: str = HID, clear_handles: bool = False, room: dict | None = None,
+          furnished: bool = True) -> dict:
     keep = {} if clear_handles else {
         m['id']: m['handle'] for m in db.all_('SELECT id, handle FROM members WHERE household_id = ?', hid)}
     handles = {**_handles(), **{k: v for k, v in keep.items() if v}}
@@ -45,7 +46,7 @@ def reset(hid: str = HID, clear_handles: bool = False) -> dict:
         c.execute('DELETE FROM households WHERE id = ?', (hid,))
         c.execute('INSERT INTO households (id, name, budget_cents, payer_id, state_version, room_json, needs_json, style_text) '
                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, 'Our living room', BUDGET_CENTS, 'emily', version + 1,
-                                                      json.dumps(ROOM), json.dumps(list(catalog.CATEGORIES)), STYLE))
+                                                      json.dumps(room or ROOM), json.dumps(list(catalog.CATEGORIES)), STYLE))
         for mid, name in MEMBERS:
             c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, ?, ?)',
                       (hid, mid, name, core.normalize_handle(handles[mid]) if handles.get(mid) else None, SEED_LIMITS[mid]))
@@ -56,7 +57,7 @@ def reset(hid: str = HID, clear_handles: bool = False) -> dict:
     if client.mode == 'mock' and hasattr(client, 'reset'):
         client.reset()
         db.kv_set('nessie_accounts:mock', {})
-    if config.SHOPPING_API_KEY:
+    if not furnished:
         return {'ok': True, 'proposal_version': None, 'sofa': None, 'shares': {}, 'scene': []}
     sofa = demo_sofa()
     if not sofa:

@@ -8,6 +8,7 @@ struct FloorPlanImportControls: View {
     @Environment(AppModel.self) private var model
     let apartment: Apartment
     @Binding var showImage: Bool
+    var prominent = false
 
     @State private var showPhotos = false
     @State private var photoItem: PhotosPickerItem?
@@ -26,27 +27,11 @@ struct FloorPlanImportControls: View {
     private var working: Bool { preparing || model.busy.contains("floorplan") }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            FlowButtons {
-                Menu {
-                    Button("Choose from Photos", systemImage: "photo.on.rectangle") { showPhotos = true }
-                    Button("Choose a PNG or JPEG file", systemImage: "folder") { showFiles = true }
-                } label: {
-                    Label("Import floor plan", systemImage: "square.and.arrow.down.on.square")
-                }
-                .buttonStyle(AeroButtonStyle(compact: true))
-                .disabled(!model.backendReachable || working)
-                if apartment.isImported {
-                    Button { showImage.toggle() } label: {
-                        Label(showImage ? "Hide plan image" : "Show plan image", systemImage: showImage ? "eye.slash" : "eye")
-                    }
-                    .buttonStyle(GlassChipStyle(selected: showImage))
-                    Button { confirmRestore = true } label: {
-                        Label("Restore built-in plan", systemImage: "arrow.uturn.backward")
-                    }
-                    .buttonStyle(GlassChipStyle())
-                    .disabled(!model.backendReachable || working)
-                }
+        VStack(alignment: prominent ? .center : .leading, spacing: 10) {
+            if prominent {
+                importHero
+            } else {
+                compactControls
             }
             if !model.backendReachable {
                 Label(model.isOfflineDemo
@@ -92,6 +77,55 @@ struct FloorPlanImportControls: View {
         }
     }
 
+    private var importHero: some View {
+        VStack(spacing: 18) {
+            Image(systemName: "photo.on.rectangle")
+                .font(.system(size: 44, weight: .medium))
+                .foregroundStyle(Color.aeroSky)
+            Menu {
+                Button("Choose from Photos", systemImage: "photo.on.rectangle") { showPhotos = true }
+                Button("Choose a PNG or JPEG file", systemImage: "folder") { showFiles = true }
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "square.and.arrow.down.on.square")
+                    Text("Import floor plan")
+                }
+            }
+            .buttonStyle(AeroWideButtonStyle())
+            .disabled(!model.backendReachable || working)
+            .frame(maxWidth: 420)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 44)
+        .padding(.horizontal, 28)
+        .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Color.figmaWash.opacity(0.65)))
+        .overlay(RoundedRectangle(cornerRadius: 20, style: .continuous).strokeBorder(Color.aeroSky.opacity(0.18), lineWidth: 1.5))
+    }
+
+    private var compactControls: some View {
+        FlowButtons {
+            Menu {
+                Button("Choose from Photos", systemImage: "photo.on.rectangle") { showPhotos = true }
+                Button("Choose a PNG or JPEG file", systemImage: "folder") { showFiles = true }
+            } label: {
+                Label("Import floor plan", systemImage: "square.and.arrow.down.on.square")
+            }
+            .buttonStyle(AeroButtonStyle(compact: true))
+            .disabled(!model.backendReachable || working)
+            if apartment.isImported {
+                Button { showImage.toggle() } label: {
+                    Label(showImage ? "Hide plan image" : "Show plan image", systemImage: showImage ? "eye.slash" : "eye")
+                }
+                .buttonStyle(GlassChipStyle(selected: showImage))
+                Button { confirmRestore = true } label: {
+                    Label("Restore built-in plan", systemImage: "arrow.uturn.backward")
+                }
+                .buttonStyle(GlassChipStyle())
+                .disabled(!model.backendReachable || working)
+            }
+        }
+    }
+
     private var progress: some View {
         HStack(spacing: 10) {
             ProgressView()
@@ -100,7 +134,7 @@ struct FloorPlanImportControls: View {
                     .font(.subheadline.weight(.semibold))
                 if let startedAt {
                     TimelineView(.periodic(from: startedAt, by: 1)) { context in
-                        Text("\(Int(context.date.timeIntervalSince(startedAt))) s · usually 10–30 s")
+                        Text("\(Int(context.date.timeIntervalSince(startedAt))) s · usually 5–15 s")
                             .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
                     }
                 }
@@ -173,7 +207,7 @@ struct FloorPlanImportControls: View {
         warnings = []
         widthPrompt = nil
         preparing = true
-        let image = await UploadImage.prepare(data, maxLongSide: 2500, keepPNG: true, name: "floorplan")
+        let image = await UploadImage.prepare(data, maxLongSide: 1600, keepPNG: true, name: "floorplan")
         preparing = false
         guard let image else { failure = "Couldn't read that image. Use a PNG, JPEG or a photo."; return }
         pending = image

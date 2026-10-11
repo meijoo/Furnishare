@@ -15,17 +15,33 @@ KINDS = ('bedroom', 'bathroom', 'living', 'kitchen', 'dining', 'hall', 'closet',
 FT = 0.3048
 MIN_BEDROOM_M = 2.4
 
-PROMPT = """This image is an apartment floor plan. List every room or space drawn on it, including closets, patios,
-halls and laundry. Ignore furniture, fixtures and text that is not a room label. For each space return:
-- label: the room name as written (or a short description if unlabelled)
-- kind: one of bedroom, bathroom, living, kitchen, dining, hall, closet, patio, laundry, other.
-  A toilet room is bathroom even if labelled washroom or W.C. Washer/dryer or W/D is laundry.
-  Family room or great room is living.
-- dimension_text: the size text printed in that room exactly as written. Copy width×depth such as
-  10'-10"X14'-5" or 12'6" x 10', or square footage such as 137 sq ft / 78sqft. Also copy a lone
-  exterior tick like 17'-1" if that is all that is printed. Null only if no size is printed.
-- box_2d: [ymin, xmin, ymax, xmax] normalized to 0-1000, tight to the inside of the room's walls.
-If a space is L-shaped or has a bay, box its main rectangle."""
+PROMPT = """This is a residential floor-plan drawing. Return every enclosed space that has its own walls
+or a clear partition: bedrooms, bathrooms, living/family/great rooms, kitchen, dining, halls, closets,
+laundry, patio/deck/porch, pantry, foyer.
+
+Do not return furniture, fixtures, doors, windows, stairs, north arrows, scale bars, legends, title
+blocks, addresses, sheet notes, or overall building dimensions that sit outside a room. Do not list
+the same space twice.
+
+For each space:
+- label: the printed room name only. No sizes, no sq ft, no owner names. If unlabelled, use a short
+  kind name (Closet, Hall, Bath).
+- kind: bedroom, bathroom, living, kitchen, dining, hall, closet, patio, laundry, or other.
+  master / primary / guest bedroom → bedroom.
+  washroom, W.C., powder, toilet, half bath, en-suite bath → bathroom.
+  family / great / sitting / lounge / living → living.
+  dining / dinette / breakfast → dining.
+  washer/dryer, W/D, laundry → laundry.
+  deck / balcony / porch / patio → patio.
+  foyer / entry / corridor / hallway → hall.
+- dimension_text: copy the size printed inside THAT room, exactly (10'-10"X14'-5", 12'6" x 10',
+  9' x 12', 137 sq ft). Null if that room has no size. Never copy a neighbor's size or a title-block
+  overall width.
+- box_2d: [ymin, xmin, ymax, xmax] in 0-1000 image coordinates, tight to the inside of that room's
+  walls. Do not swallow an adjoining closet, bath, or hall. For an L-shape or bay, box the main
+  rectangle only.
+
+List rooms left-to-right, top-to-bottom."""
 
 RESPONSE_SCHEMA = {
     'type': 'object',
@@ -147,13 +163,40 @@ def kind_from_label(label: str | None, kind: str) -> str:
     """Correct obvious Gemini kind mistakes from the printed name."""
     t = re.sub(r'[^a-z0-9]+', ' ', (label or '').lower()).strip()
     words = set(t.split())
-    if words & {'washroom', 'wc'} or t.startswith('w c') or 'bath' in t:
+    if (words & {'washroom', 'wc', 'powder', 'toilet'} or t.startswith('w c')
+            or 'bath' in t or 'half bath' in t):
         return 'bathroom'
     if 'laundry' in words or re.search(r'\bw\s*d\b', t):
         return 'laundry'
+    if 'bedroom' in t or (words & {'master', 'primary'} and not (words & {'bath', 'bathroom'})):
+        return 'bedroom'
     if words & {'family', 'great', 'sitting', 'lounge'} or 'living' in t:
         return 'living'
+    if words & {'dining', 'dinette', 'breakfast'}:
+        return 'dining'
+    if words & {'deck', 'balcony', 'porch', 'patio'}:
+        return 'patio'
+    if words & {'foyer', 'hallway', 'corridor', 'entry', 'entryway'}:
+        return 'hall'
     return kind if kind in KINDS else 'other'
+
+
+_SIZE_IN_LABEL = re.compile(
+    rf'(?:{_FT_IN}\s*x\s*{_FT_IN}'
+    r'|\d+(?:\.\d+)?\s*m?\s*x\s*\d+(?:\.\d+)?\s*m\b'
+    r'|\d+(?:\.\d+)?\s*(?:sq\.?\s*ft|sqft|sf|square\s*feet)\b'
+    r'|\d+(?:\.\d+)?\s*(?:m2|m\^2|sq\.?\s*m|square\s*metres?)\b)',
+    re.I,
+)
+
+
+def clean_label(label: str | None) -> str:
+    """Drop printed sizes Gemini sometimes glues onto the room name."""
+    raw = (label or '').strip() or 'Room'
+    t = _SIZE_IN_LABEL.sub('', raw)
+    t = re.sub(r'[\s,;:/–—-]+$', '', t)
+    t = re.sub(r'\s+', ' ', t).strip()
+    return (t or raw)[:40]
 
 
 def extract(data: bytes, mime: str) -> list[dict]:
@@ -161,15 +204,16 @@ def extract(data: bytes, mime: str) -> list[dict]:
     from google.genai import types
 
     from . import agent
-    # Extraction needs a short structured answer, not extended reasoning or retries.
-    thinking = (types.ThinkingConfig(thinking_budget=0) if '2.5' in config.GEMINI_MODEL
-                else types.ThinkingConfig(thinking_level='low'))
+    # Short JSON extract: no thinking, medium image tokens, one try.
+    thinking = types.ThinkingConfig(thinking_budget=0, thinking_level=types.ThinkingLevel.MINIMAL)
     started = time.perf_counter()
     resp = agent._gemini().models.generate_content(
-        model=config.GEMINI_MODEL,
+        model=config.GEMINI_FLOORPLAN_MODEL,
         contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
         config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=RESPONSE_SCHEMA,
                                            temperature=0, thinking_config=thinking,
+                                           max_output_tokens=4096,
+                                           media_resolution=types.MediaResolution.MEDIA_RESOLUTION_MEDIUM,
                                            http_options=types.HttpOptions(
                                                timeout=40_000,
                                                retry_options=types.HttpRetryOptions(attempts=1))),
@@ -239,7 +283,7 @@ def build_plan(reads: list[dict], width_px: int, height_px: int, members: list[s
         dims = size_from_read(r)
         if not dims and (area := area_from_read(r)):
             dims = dims_from_area(area, w_px, h_px)
-        spaces.append({'label': str(r.get('label') or kind.title())[:40], 'kind': kind,
+        spaces.append({'label': clean_label(r.get('label') or kind.title()), 'kind': kind,
                        'dims': dims, 'dimension_text': r.get('dimension_text') or r.get('label'),
                        'px': (x0, y0, x1, y1)})
     if not spaces:

@@ -175,6 +175,10 @@ struct BackendClient: Sendable {
         try await sendIgnoringBody("POST", "/demo/reset")
     }
 
+    func blankApartment() async throws {
+        try await sendIgnoringBody("POST", "/demo/blank")
+    }
+
     func uploadInspiration(jpegData: Data, filename: String = "inspiration.jpg") async throws {
         _ = try await upload("\(household)/inspiration", file: UploadImage(data: jpegData, mimeType: "image/jpeg", filename: filename),
                              timeout: 60)

@@ -49,9 +49,7 @@ struct RoomWorkspaceView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 12) {
                 title
-                Spacer(minLength: 8)
-                Button { nav.showSettings = true } label: { Image(systemName: "gearshape.fill").accessibilityLabel("Settings") }
-                    .buttonStyle(GlassChipStyle())
+                Spacer(minLength: SettingsGearButton.reservedWidth)
             }
             RoomSwitcher()
         }
