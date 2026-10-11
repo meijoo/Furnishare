@@ -204,7 +204,8 @@ def decide(hid: str, version: int, mid: str, decision: str, reason: str | None =
             db.log(c, hid, f'Everyone approved v{version}')
             queue_message(c, hid, payer, (
                 f'Everyone approved proposal v{version}. Reply PAY to authorize the simulated Nessie purchase of '
-                f'{dollars(total)} from your account. No real money moves.'), dedupe_key=f'pay-request:{hid}:v{version}')
+                f'{dollars(total)} from your account and automatically send room payment requests after confirmation. '
+                'No real money moves.'), dedupe_key=f'pay-request:{hid}:v{version}')
         db.bump(c, hid)
     return proposal(hid, version)
 

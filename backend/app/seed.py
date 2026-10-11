@@ -44,6 +44,8 @@ def reset(hid: str = HID, clear_handles: bool = True, room: dict | None = None,
                       'financial_ops', 'activity', 'members'):
             c.execute(f'DELETE FROM {table} WHERE household_id = ?', (hid,))
         c.execute("DELETE FROM outbound_jobs WHERE household_id = ?", (hid,))
+        c.execute("DELETE FROM kv WHERE key=?", (f'design-links:{hid}',))
+        c.execute("DELETE FROM kv WHERE key=? OR key LIKE ?", (f'shared-furniture:{hid}', f'auto-payment-request:{hid}:v%'))
         c.execute('DELETE FROM households WHERE id = ?', (hid,))
         c.execute('INSERT INTO households (id, name, budget_cents, payer_id, state_version, room_json, needs_json, style_text) '
                   'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, 'Our living room', sum(SEED_LIMITS.values()), 'emily', version + 1,

@@ -59,7 +59,7 @@ def _next_key(c, base: str) -> tuple[str, dict | None]:
     return (base if not rows else f'{base}#{len(rows) + 1}'), None
 
 
-def authorize_purchase(hid: str, mid: str, version: int, via: str = 'app') -> dict:
+def authorize_purchase(hid: str, mid: str, version: int, via: str = 'app', request_payment: bool = False) -> dict:
     h = core.household(hid)
     if mid != h['payer_id']:
         raise core.Forbidden('Only the designated payer can authorize the purchase')
@@ -76,6 +76,9 @@ def authorize_purchase(hid: str, mid: str, version: int, via: str = 'app') -> di
             raise core.Conflict(f"Prices changed since approval; v{revised['version']} needs everyone's approval first")
     with db.tx() as c:
         op_key, existing = _next_key(c, f'purchase:{hid}:v{version}')
+        if request_payment:
+            c.execute('INSERT INTO kv VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value',
+                      (f'auto-payment-request:{hid}:v{version}', json.dumps({'payer': mid})))
         if existing:
             return existing
         c.execute('INSERT INTO financial_ops (op_key, household_id, kind, from_member, to_member, amount_cents, currency, '
@@ -215,7 +218,7 @@ def _after_state_change(op_key: str) -> None:
                 lid = f"liab-{hid}-v{v}-{s['member_id']}"
                 inserted = c.execute('INSERT OR IGNORE INTO liabilities VALUES (?, ?, ?, ?, ?, ?, ?)', (
                     lid, hid, v, s['member_id'], op['from_member'], s['amount_cents'], db.now())).rowcount
-                if inserted:
+                if inserted and not db.kv_get(f'auto-payment-request:{hid}:v{v}'):
                     core.queue_message(c, hid, s['member_id'], (
                         f"{names[op['from_member']]}'s simulated purchase for v{v} is confirmed. You owe "
                         f"{names[op['from_member']]} {dollars(s['amount_cents'])}. Reply SEND to authorize that "
@@ -228,6 +231,10 @@ def _after_state_change(op_key: str) -> None:
                 db.log(c, hid, f'v{v} is settled: {names[op["from_member"]]} paid the whole amount')
         elif op['kind'] == 'transfer' and op['state'] == 'confirmed':
             db.log(c, hid, f"{names[op['from_member']]}'s {dollars(op['amount_cents'])} reimbursement confirmed")
+            if op['authorized_via'] == 'imessage-pay':
+                core.queue_message(c, hid, op['from_member'],
+                                   f"Payment complete. Your simulated payment of {dollars(op['amount_cents'])} to {names[op['to_member']]} is confirmed.",
+                                   dedupe_key=f'reimbursement-complete:{op_key}')
             open_liabs = c.execute(
                 'SELECT COUNT(*) AS n FROM liabilities l WHERE household_id = ? AND version = ? AND NOT EXISTS ('
                 "SELECT 1 FROM financial_ops f WHERE f.liability_id = l.id AND f.state = 'confirmed')", (hid, v)).fetchone()['n']
@@ -242,6 +249,8 @@ def _after_state_change(op_key: str) -> None:
             core.queue_message(c, hid, op['from_member'], f"The simulated {op['kind']} of {dollars(op['amount_cents'])} "
                                f"failed: {op['error']}", dedupe_key=f'failed:{op_key}')
         db.bump(c, hid)
+    if op['kind'] == 'purchase' and op['state'] == 'confirmed' and db.kv_get(f'auto-payment-request:{hid}:v{v}'):
+        send_auto_payment_request(hid, v, op['from_member'])
 
 
 def worker_loop(stop: threading.Event) -> None:
@@ -298,10 +307,28 @@ def request_room_payment(hid: str, mid: str, version: int, request_id: str) -> d
         room_name = next((r['name'] for r in plan['rooms'] if r.get('household_id') == hid), h['name'].removeprefix('Our '))
         room_name = room_name[0].upper() + room_name[1:]
         text = (f"{room_name}'s furniture is purchased! Please send your share to {core.names(hid)[mid]}. "
-                "Open Furnishare's Budget tab and tap Pay.")
+                "Pay in Furnishare's Budget tab or reply PAY to authorize your simulated payment to the payer.")
         for member in recipients:
             core.queue_message(c, hid, member['id'], text,
                                dedupe_key=f"room-payment:{hid}:v{version}:{request_id}:{member['id']}")
         db.log(c, hid, 'Payer requested payment from room members')
         db.bump(c, hid)
     return {'queued': len(recipients), 'message': text}
+
+
+def send_auto_payment_request(hid, version, payer):
+    if not db.one("SELECT 1 FROM financial_ops WHERE household_id=? AND proposal_version=? "
+                  "AND kind='purchase' AND state='confirmed'", hid, version):
+        return
+    try:
+        if len(core.members(hid)) > 1:
+            request_room_payment(hid, payer, version, f'auto-v{version}')
+            text = 'Payment complete. Your simulated furniture purchase is confirmed, and payment requests were queued for your room members.'
+        else:
+            text = 'Payment complete. Your simulated furniture purchase is confirmed.'
+        with db.tx() as c:
+            core.queue_message(c, hid, payer, text, dedupe_key=f'auto-payment-complete:{hid}:v{version}')
+    except (core.Conflict, core.Forbidden) as error:
+        with db.tx() as c:
+            core.queue_message(c, hid, payer, f'The purchase is confirmed, but I could not send payment requests: {error}',
+                               dedupe_key=f'auto-payment-error:{hid}:v{version}')

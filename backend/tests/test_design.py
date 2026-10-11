@@ -114,6 +114,9 @@ def test_sparse_live_listing_can_be_proposed(client, monkeypatch):
 def test_design_with_picks_publishes_live_product(client, monkeypatch):
     monkeypatch.setattr(realize._pool, 'submit', lambda *a, **k: None)
     catalog.remember([LIVE])
+    for mid, phone in [('emily', '+15550000001'), ('maya', '+15550000002'), ('alex', '+15550000003')]:
+        assert client.put(f'/households/{H}/members/{mid}/handle', json={'handle': phone}).status_code == 200
+    jobs_before = db.all_('SELECT job_id FROM outbound_jobs WHERE household_id=?', H)
     before = client.get(f'/households/{H}/state').json()['proposal']['version']
     r = client.post(f'/households/{H}/chat', json={
         'member_id': 'emily',
@@ -127,6 +130,8 @@ def test_design_with_picks_publishes_live_product(client, monkeypatch):
     assert s['proposal']['version'] > before
     ids = [i['product_id'] for i in s['proposal']['items']]
     assert 'live-brown-couch' in ids
+    assert db.all_('SELECT job_id FROM outbound_jobs WHERE household_id=?', H) == jobs_before
+    assert 'got their exact share privately' not in r.json()['reply']
 
 
 def test_design_skips_owned_category(client, monkeypatch):

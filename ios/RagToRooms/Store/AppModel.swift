@@ -483,6 +483,18 @@ final class AppModel {
         persistCurrentExtras()
     }
 
+    func setSharedFurnitureEnabled(_ item: SharedFurnitureLink, enabled: Bool) async {
+        await perform("shared-\(item.id)", offline: {}) {
+            try await $0.setSharedFurnitureEnabled(item.id, enabled: enabled)
+        }
+    }
+
+    func removeSharedFurniture(_ item: SharedFurnitureLink) async {
+        await perform("shared-\(item.id)", offline: {}) {
+            try await $0.removeSharedFurniture(item.id)
+        }
+    }
+
     func removeCandidateGroup(_ group: CandidateGroup) {
         for productID in group.productIDs { removeFromGroup(group.id, productID: productID) }
         hiddenDesignItems.remove(group.objectID)
@@ -1035,6 +1047,25 @@ final class AppModel {
         }
     }
 
+    @ObservationIgnored private var designLinkSyncTask: Task<Void, Never>?
+
+    private func syncDesignLinks() {
+        guard let client, source == .live, !stateIsPlaceholder else { return }
+        let candidates = Set(candidateGroups.flatMap(\.productIDs) + extraObjects.map(\.productID))
+        let items = candidates.compactMap { id -> DesignLinkItem? in
+            guard let product = product(id) else { return nil }
+            return DesignLinkItem(id: id, title: product.title, category: product.category, source_url: product.sourceURL)
+        }
+        let removed = (state.proposal?.items ?? []).filter { removedDesignItems.contains(designItemID(for: $0)) }.map(\.productID)
+        let body = DesignLinksRequest(proposal_version: state.proposal?.version, removed_product_ids: removed, items: items)
+        designLinkSyncTask?.cancel()
+        designLinkSyncTask = Task {
+            try? await Task.sleep(for: .milliseconds(250))
+            guard !Task.isCancelled else { return }
+            try? await client.syncDesignLinks(body)
+        }
+    }
+
     private func persistCurrentExtras() {
         extrasByHousehold[currentHouseholdID] = LocalSceneExtras(
             objects: extraObjects, products: extraProducts, applied: appliedPreviews, groups: candidateGroups,
@@ -1042,6 +1073,7 @@ final class AppModel {
         if let data = try? JSONEncoder().encode(extrasByHousehold) {
             UserDefaults.standard.set(data, forKey: Self.extrasKey)
         }
+        syncDesignLinks()
     }
 
     private func restoreExtras(for householdID: String) {
@@ -1227,6 +1259,7 @@ final class AppModel {
     private func loadAll(_ client: BackendClient) async throws {
         try await refresh(client)
         if let list = try? await client.products() { products = list }
+        syncDesignLinks()
     }
 
     private func refresh(_ client: BackendClient) async throws {

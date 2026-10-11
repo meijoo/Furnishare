@@ -20,7 +20,7 @@ def test_payer_requests_send_to_every_roommate_once(client):
     assert first.json()['queued'] == 2
     assert first.json()['message'].startswith("Living room's furniture is purchased!")
     assert 'Please send your share to Emily' in first.json()['message']
-    jobs = db.all_("SELECT * FROM outbound_jobs WHERE dedupe_key LIKE 'room-payment:%'")
+    jobs = db.all_("SELECT * FROM outbound_jobs WHERE household_id='demo' AND dedupe_key LIKE 'room-payment:%'")
     assert {r['to_handle'] for r in jobs} == {'+15552222222', '+15553333333'}
     assert all(r['household_id'] == 'demo' and r['text'] == first.json()['message'] for r in jobs)
     assert client.post('/households/demo/payment-requests', json=body).status_code == 200
@@ -40,7 +40,7 @@ def test_no_request_before_purchase_or_without_all_numbers(client):
     with db.tx() as c:
         c.execute("UPDATE members SET handle=NULL WHERE household_id='demo'")
     assert client.post('/households/demo/payment-requests', json=body).status_code == 409
-    assert db.all_("SELECT * FROM outbound_jobs WHERE dedupe_key LIKE 'room-payment:%'") == []
+    assert db.all_("SELECT * FROM outbound_jobs WHERE household_id='demo' AND dedupe_key LIKE 'room-payment:%'") == []
 
 
 def test_real_group_requests_only_selected_room_members(client):
@@ -77,7 +77,7 @@ def test_real_group_requests_only_selected_room_members(client):
         'member_id': payer, 'proposal_version': version, 'request_id': 'selected-room-only'})
     assert response.status_code == 200, response.text
     assert response.json()['queued'] == 1
-    jobs = db.all_("SELECT * FROM outbound_jobs WHERE dedupe_key LIKE 'room-payment:%'")
+    jobs = db.all_("SELECT * FROM outbound_jobs WHERE household_id=? AND dedupe_key LIKE 'room-payment:%'", gid)
     assert len(jobs) == 1 and jobs[0]['to_handle'] == selected[0]['phone']
     forged = client.post(f'/households/{gid}/payment-requests', headers=selected[2], json={
         'member_id': payer, 'proposal_version': version, 'request_id': 'forged'})

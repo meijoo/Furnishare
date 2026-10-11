@@ -41,7 +41,8 @@ def _publish(s: PlanState) -> PlanState:
     picks = ', '.join(f"{p['title']} ({dollars(p['price_cents'])})" for p in s['products'])
     explanation = f"Picked the best visual matches (ranker: {s['rank_mode']}) that fit the room and budget: {picks}."
     try:
-        p = planner.propose(s['household_id'], s['products'], explanation, activity='New furnishing plan proposed')
+        p = planner.propose(s['household_id'], s['products'], explanation,
+                            activity='New furnishing plan proposed', notify=False)
     except (ValueError, Conflict) as e:
         return {'error': str(e)}
     return {'proposal_version': p['version']}
@@ -53,7 +54,7 @@ def _explain(s: PlanState) -> PlanState:
     p = core.proposal(s['household_id'], s['proposal_version'])
     unknown = f" Not included: {', '.join(p['unknown_costs'])}." if p['unknown_costs'] else ''
     return {'message': f"Proposal v{p['version']} is on the iPad: {dollars(p['known_total_cents'])} known cost.{unknown} "
-                       'Each roommate got their exact share privately for approval.'}
+                       'Review the proposal and your share in the app.'}
 
 
 def _route(s: PlanState) -> str:

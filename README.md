@@ -134,3 +134,19 @@ After purchase confirmation, Request previews a room-specific payment reminder.
 Send queues one Photon message for every other member who selected that room.
 Retries of the same request do not duplicate messages; this action sends reminders
 and does not initiate a money transfer.
+
+Linked members can also text Photon a furniture shopping link to save a product
+card in the room's **Design** tab. Unknown products keep their price and dimensions
+unset; saving a link does not create a 3D model. Links persist in SQLite.
+Text **Update my budget to $200** to change your contribution to that room's
+budget. Text **I bought the proposal** as the payer after everyone approves to
+authorize the existing simulated purchase flow and automatically queue the room's
+payment reminders once the purchase is confirmed. Repeated purchase messages do
+not duplicate the purchase or automatic reminders. Keep the backend and Photon
+adapter running to process and deliver messages.
+Replying **PAY** to the everyone-approved notification uses the same purchase and
+automatic request flow. The payer receives **Payment complete** after the simulated
+purchase is confirmed; pending or failed purchases are not reported as complete.
+Roommates receiving a request can pay in the app or reply **PAY** to authorize
+their own simulated reimbursement to the payer. Repeated replies reuse the same
+payment operation, and confirmation is sent after the reimbursement succeeds.

@@ -208,7 +208,7 @@ struct RequestMoneySheet: View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 if purchased {
-                    Text("\(model.currentRoomName)'s furniture is purchased! Please send your share to \(model.state.name(of: model.state.finance.payerID)). Open Furnishare's Budget tab and tap Pay.")
+                    Text("\(model.currentRoomName)'s furniture is purchased! Please send your share to \(model.state.name(of: model.state.finance.payerID)). Pay in Furnishare's Budget tab or reply PAY to authorize your simulated payment to the payer.")
                 } else {
                     Text("Purchase this room's furniture before requesting money from your roommates.")
                 }

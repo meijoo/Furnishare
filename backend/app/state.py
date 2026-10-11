@@ -12,6 +12,7 @@ def snapshot(hid: str, viewer: str | None = None) -> dict:
     room['inspiration_description'] = (db.one('SELECT description FROM room_inspiration WHERE household_id=?', hid) or {}).get('description', '')
     room['inspiration_images'] = [{'id': r['id'], 'url': '/uploads/' + r['path'].rsplit('/', 1)[-1]}
                                   for r in db.all_('SELECT id,path FROM room_inspiration_images WHERE household_id=? ORDER BY created_at,id', hid)]
+    room['shared_furniture_links'] = db.kv_get(f'shared-furniture:{hid}', [])
     members = []
     for m in ms:
         entry = {'id': m['id'], 'name': m['name'], 'is_payer': m['id'] == h['payer_id'], 'has_limit': m['limit_cents'] is not None,

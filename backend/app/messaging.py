@@ -5,7 +5,7 @@ Financial actions require explicit keywords (PAY, SEND) from the member who owns
 import re
 import time
 
-from . import agent, core, db, finance, planner, invitations
+from . import agent, core, db, finance, planner, invitations, design_links, photon_actions
 from .money import dollars
 
 HID = 'demo'
@@ -119,6 +119,12 @@ def process(handle: str, text: str) -> str | None:
             return f"Create an account in Furnishare, then join {invite['name']} with code {invite['group_code']} before sharing preferences."
         return register(handle, text)
     mid = m['id']
+    action_reply = photon_actions.handle(m['household_id'], m, text)
+    if action_reply is not None:
+        return action_reply
+    design_reply = design_links.reply(m['household_id'], text)
+    if design_reply is not None:
+        return design_reply
     if m['household_id'] != HID:
         if re.search(r'\b(limit|budget|pay|send|approve|reimburse|status)\b|\$', text, re.I):
             return 'Use this room in the app for limits, approvals, and payments.'

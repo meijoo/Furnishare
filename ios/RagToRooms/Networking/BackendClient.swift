@@ -181,6 +181,18 @@ struct BackendClient: Sendable {
                                    body: PurchaseAuthorizeBody(memberID: memberID, proposalVersion: version), timeout: 30)
     }
 
+    func syncDesignLinks(_ body: DesignLinksRequest) async throws {
+        try await sendIgnoringBody("PUT", "\(household)/design-links", body: body)
+    }
+
+    func setSharedFurnitureEnabled(_ id: String, enabled: Bool) async throws {
+        try await sendIgnoringBody("PUT", "\(household)/shared-furniture/\(id)", body: ["enabled": enabled])
+    }
+
+    func removeSharedFurniture(_ id: String) async throws {
+        try await sendIgnoringBody("DELETE", "\(household)/shared-furniture/\(id)")
+    }
+
     func requestRoomPayment(memberID: String, version: Int, requestID: String) async throws {
         try await sendIgnoringBody("POST", "\(household)/payment-requests",
             body: RoomPaymentRequest(member_id: memberID, proposal_version: version, request_id: requestID))
@@ -408,4 +420,16 @@ struct RoomPaymentRequest: Encodable {
     let member_id: String
     let proposal_version: Int
     let request_id: String
+}
+
+struct DesignLinkItem: Encodable, Sendable {
+    let id: String
+    let title: String
+    let category: String
+    let source_url: String?
+}
+struct DesignLinksRequest: Encodable, Sendable {
+    let proposal_version: Int?
+    let removed_product_ids: [String]
+    let items: [DesignLinkItem]
 }

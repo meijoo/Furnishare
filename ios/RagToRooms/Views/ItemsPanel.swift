@@ -3,6 +3,7 @@ import SwiftUI
 struct ItemsPanel: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
+    @State private var expandedSharedLinks: Set<String> = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -27,6 +28,9 @@ struct ItemsPanel: View {
                     }
                 }
             }
+            ForEach(model.state.room.sharedFurnitureLinks) { item in
+                sharedFurnitureRow(item)
+            }
             ForEach(model.candidateGroups) { group in
                 groupBlock(group)
             }
@@ -40,7 +44,7 @@ struct ItemsPanel: View {
     }
 
     private var isEmpty: Bool {
-        model.currentOwnedItems.isEmpty && model.designProposalItems.isEmpty && model.candidateGroups.isEmpty
+        model.state.room.sharedFurnitureLinks.isEmpty && model.currentOwnedItems.isEmpty && model.designProposalItems.isEmpty && model.candidateGroups.isEmpty
     }
 
     private var header: some View {
@@ -93,6 +97,63 @@ struct ItemsPanel: View {
             model.isDesignItemEnabled(group.objectID) &&
             model.product(group.showingProductID ?? group.productIDs.first)?.priceCents == nil
         }
+    }
+
+    private func sharedFurnitureRow(_ item: SharedFurnitureLink) -> some View {
+        let open = expandedSharedLinks.contains(item.id)
+        return VStack(alignment: .leading, spacing: 6) {
+            Button {
+                if open { expandedSharedLinks.remove(item.id) }
+                else { expandedSharedLinks.insert(item.id) }
+            } label: {
+                HStack(spacing: 10) {
+                    ProductImage(urls: [model.client?.resolve(item.image_url)].compactMap { $0 }, category: item.category)
+                        .frame(width: 64, height: 64)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.title).font(.headline).lineLimit(2)
+                        Text("\(item.category.categoryLabel) · Shared by \(item.member_name)")
+                            .font(.caption).foregroundStyle(Color.figmaMuted)
+                    }
+                    Spacer()
+                    Text(item.price_cents.map(dollars) ?? "Price unknown")
+                        .font(.subheadline.monospacedDigit().weight(.semibold))
+                    Image(systemName: open ? "chevron.up" : "chevron.down")
+                        .foregroundStyle(Color.figmaMuted)
+                }
+                .foregroundStyle(Color.aeroInk)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            HStack(spacing: 12) {
+                Spacer()
+                Toggle("Include in design", isOn: Binding(
+                    get: { item.enabled ?? true },
+                    set: { value in Task { await model.setSharedFurnitureEnabled(item, enabled: value) } }))
+                    .labelsHidden().fixedSize().toggleStyle(.switch)
+                    .accessibilityLabel("Include \(item.title) in design")
+                Button(role: .destructive) {
+                    Task { await model.removeSharedFurniture(item) }
+                } label: {
+                    Image(systemName: "trash").frame(minWidth: 24, minHeight: 24)
+                }
+                .buttonStyle(GlassChipStyle())
+                .accessibilityLabel("Remove \(item.title)")
+            }
+            .disabled(model.busy.contains("shared-\(item.id)"))
+            .padding(.horizontal, 8)
+            if open {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Shared by \(item.member_name)").font(.subheadline)
+                    if let url = URL(string: item.url) {
+                        Link("View furniture", destination: url)
+                    }
+                }
+                .padding(8)
+            }
+        }
+        .padding(8)
+        .background(RoundedRectangle(cornerRadius: 14, style: .continuous)
+            .fill(open ? Color.aeroSky.opacity(0.18) : Color.figmaWash.opacity(0.6)))
     }
 
     private func ownedRow(_ item: OwnedItem) -> some View {

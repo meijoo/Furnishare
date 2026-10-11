@@ -11,6 +11,7 @@ Propose ONE bundle with one product per requested category.
 Rules: only use product ids listed in the prompt, returned by tools, or supplied as picks; never invent dimensions, prices, or products.
 Prefer listed candidates and the user's pick ids. Skip categories they already own. If a proposal is rejected, retry at most twice.
 You cannot approve, pay, or settle anything. Never reveal one roommate's private limit.
+Publishing a design saves it in the app without sending texts. Direct roommates to review and approve in the app.
 Call propose_bundle as soon as you have a valid set. Do not render a preview. Finish with a short friendly explanation."""
 
 START_OVER = re.compile(r'\b(start over|start again|from scratch|new plan|redesign)\b', re.I)
@@ -212,7 +213,8 @@ def _furnish_with_gemini(hid: str, text: str, picks: list[dict] | None = None,
         if total > h['budget_cents']:
             return {'error': f"Total {dollars(total)} exceeds the {dollars(h['budget_cents'])} budget"}
         try:
-            p = planner.propose(hid, products, explanation.strip()[:400], activity='New furnishing plan proposed')
+            p = planner.propose(hid, products, explanation.strip()[:400],
+                                activity='New furnishing plan proposed', notify=False)
         except (ValueError, core.Conflict) as e:
             return {'error': str(e)}
         state['published'] = p['version']

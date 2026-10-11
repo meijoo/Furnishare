@@ -1,4 +1,4 @@
-"""Durable invitations and room-bound, non-financial group preferences."""
+"""Durable invitations and authenticated room-bound Photon messages."""
 import json
 import re
 import secrets
@@ -163,8 +163,11 @@ def preference(hid, member, text):
         c.execute('UPDATE households SET style_text = ? WHERE id = ?', (context, hid))
         db.log(c, hid, f"{member['name']} shared furniture preferences; suggestions updated")
         db.bump(c, hid)
+    if links:
+        from .photon_actions import link_confirmation
+        return link_confirmation(len(links))
     picks = '\n'.join(p['title'] + (f" — {p['source_url']}" if p.get('source_url') else '') for p in products[:3] if p.get('title'))
-    return f'Saved your preferences{" and furniture links" if links else ""} in the app. ' + (f'Suggestions:\n{picks}' if picks else 'Share more details about the furniture you want.')
+    return 'Saved your preferences in the app. ' + (f'Suggestions:\n{picks}' if picks else 'Share more details about the furniture you want.')
 
 
 def group_reply(event):
@@ -175,6 +178,13 @@ def group_reply(event):
     if not member or member['household_id'] != group['household_id'] or core.normalize_handle(event['sender_handle']) not in group['participants']:
         return 'Please ask the group creator to invite your phone number through the app.'
     text = event['text'].strip()
+    from . import design_links, photon_actions
+    action_reply = photon_actions.handle(group['household_id'], member, text)
+    if action_reply is not None:
+        return action_reply
+    design_reply = design_links.reply(group['household_id'], text)
+    if design_reply is not None:
+        return design_reply
     if (re.search(r'\b(limit|budget|cap)\b|\$', text, re.I)
             or re.match(r'^(pay|send|reimburse|approve|yes|no|status)\s*(?:v\d+)?[.!?]*$', text, re.I)):
         return 'Please text me privately for budgets, limits, approvals, and payments. Share furniture preferences and links here.'

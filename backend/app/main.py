@@ -452,6 +452,44 @@ async def _save_image(file: UploadFile) -> tuple[bytes, str, Path]:
     return data, mime, path
 
 
+class DesignLinkItem(BaseModel):
+    id: str = Field(max_length=200)
+    title: str = Field(max_length=500)
+    category: str = Field(max_length=50)
+    source_url: str | None = Field(default=None, max_length=4000)
+
+
+class DesignLinksBody(BaseModel):
+    proposal_version: int | None = None
+    removed_product_ids: list[str] = Field(default_factory=list, max_length=200)
+    items: list[DesignLinkItem] = Field(default_factory=list, max_length=200)
+
+
+@app.put('/households/{hid}/design-links')
+def sync_design_links(hid: str, body: DesignLinksBody):
+    core.household(hid)
+    db.kv_set(f'design-links:{hid}', body.model_dump())
+    return {'ok': True}
+
+
+class SharedFurnitureBody(BaseModel):
+    enabled: bool
+
+
+@app.put('/households/{hid}/shared-furniture/{link_id}')
+def toggle_shared_furniture(hid: str, link_id: str, body: SharedFurnitureBody):
+    from . import photon_actions
+    photon_actions.update_link(hid, link_id, body.enabled)
+    return {'ok': True}
+
+
+@app.delete('/households/{hid}/shared-furniture/{link_id}')
+def delete_shared_furniture(hid: str, link_id: str):
+    from . import photon_actions
+    photon_actions.update_link(hid, link_id)
+    return {'ok': True}
+
+
 @app.post('/households/{hid}/inspiration')
 async def inspiration(hid: str, file: UploadFile = File(...)):
     core.household(hid)

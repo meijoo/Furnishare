@@ -245,6 +245,17 @@ struct SavedInspirationImage: Codable, Hashable, Sendable, Identifiable {
     let url: String
 }
 
+struct SharedFurnitureLink: Codable, Hashable, Sendable, Identifiable {
+    let id: String
+    let url: String
+    let title: String
+    let category: String
+    let member_name: String
+    let image_url: String?
+    let price_cents: Int?
+    let enabled: Bool?
+}
+
 struct Room: Codable, Hashable, Sendable {
     var widthM: Double
     var depthM: Double
@@ -252,6 +263,7 @@ struct Room: Codable, Hashable, Sendable {
     var openings: [Opening]
     var clearances: [Clearance]
     var inspirationImageURL: String?
+    var sharedFurnitureLinks: [SharedFurnitureLink] = []
     var inspirationDescription = ""
     var inspirationImages: [SavedInspirationImage] = []
 
@@ -263,6 +275,7 @@ struct Room: Codable, Hashable, Sendable {
         case inspirationImageURL = "inspiration_image_url"
         case inspirationDescription = "inspiration_description"
         case inspirationImages = "inspiration_images"
+        case sharedFurnitureLinks = "shared_furniture_links"
     }
 
     init(widthM: Double, depthM: Double, heightM: Double, openings: [Opening] = [], clearances: [Clearance] = [],
@@ -281,6 +294,7 @@ struct Room: Codable, Hashable, Sendable {
         inspirationImageURL = try? c.decode(String.self, forKey: .inspirationImageURL)
         inspirationDescription = (try? c.decode(String.self, forKey: .inspirationDescription)) ?? ""
         inspirationImages = (try? c.decode([SavedInspirationImage].self, forKey: .inspirationImages)) ?? []
+        sharedFurnitureLinks = (try? c.decode([SharedFurnitureLink].self, forKey: .sharedFurnitureLinks)) ?? []
     }
 }
 
