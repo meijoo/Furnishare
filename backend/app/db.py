@@ -45,6 +45,12 @@ CREATE TABLE IF NOT EXISTS members (
   household_id TEXT NOT NULL, id TEXT NOT NULL, name TEXT NOT NULL, handle TEXT,
   limit_cents INTEGER, limit_note TEXT, PRIMARY KEY (household_id, id)
 );
+CREATE TABLE IF NOT EXISTS room_budgets (
+  household_id TEXT NOT NULL REFERENCES households(id) ON DELETE CASCADE,
+  member_id TEXT NOT NULL, amount_cents INTEGER NOT NULL CHECK(amount_cents >= 0),
+  description TEXT NOT NULL DEFAULT '', PRIMARY KEY(household_id, member_id),
+  FOREIGN KEY(household_id, member_id) REFERENCES members(household_id, id) ON DELETE CASCADE
+);
 CREATE TABLE IF NOT EXISTS room_inspiration (
   household_id TEXT PRIMARY KEY REFERENCES households(id) ON DELETE CASCADE,
   description TEXT NOT NULL DEFAULT ''

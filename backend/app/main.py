@@ -144,12 +144,14 @@ class BudgetBody(BaseModel):
     budget_cents: int = Field(ge=0, le=50_000_000)
 
 
+class SetupRoomBody(BaseModel):
+    budget_cents: int = Field(ge=0, le=50_000_000)
+    description: str | None = Field(default=None, max_length=5000)
+
+
 class SetupPreferencesBody(BaseModel):
     member_id: str
-    group_budget_cents: int = Field(gt=0, le=50_000_000)
-    individual_budget_cents: int | None = Field(default=None, ge=0, le=50_000_000)
-    solo: bool = False
-    rooms: dict[str, str]
+    rooms: dict[str, SetupRoomBody]
 
 
 def _setup_member(request, aid, member_id):
@@ -167,12 +169,7 @@ def get_setup(aid: str, member_id: str, request: Request):
 @app.put('/apartments/{aid}/setup')
 def put_setup(aid: str, body: SetupPreferencesBody, request: Request):
     uid = _setup_member(request, aid, body.member_id)
-    if any(len(text) > 5000 for text in body.rooms.values()):
-        raise ValueError('Room descriptions must be 5,000 characters or fewer.')
-    individual = body.group_budget_cents if body.solo else body.individual_budget_cents
-    if individual is None:
-        raise ValueError('Enter your individual budget.')
-    return setup_preferences.save(aid, uid, body.group_budget_cents, individual, body.solo, body.rooms)
+    return setup_preferences.save(aid, uid, {hid: preference.model_dump() for hid, preference in body.rooms.items()})
 
 
 class HandleBody(BaseModel):
@@ -480,6 +477,8 @@ def chat(hid: str, body: ChatBody):
 @app.put('/households/{hid}/budget')
 def put_budget(hid: str, body: BudgetBody):
     core.household(hid)
+    if hid.startswith('grp_'):
+        raise core.Conflict('Room budgets add up member contributions. Edit your contribution instead.')
     with db.tx() as c:
         c.execute('UPDATE households SET budget_cents = ? WHERE id = ?', (body.budget_cents, hid))
         db.log(c, hid, f'Budget set to {dollars(body.budget_cents)}')

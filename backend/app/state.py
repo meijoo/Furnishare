@@ -48,7 +48,7 @@ def snapshot(hid: str, viewer: str | None = None) -> dict:
         'state_version': h['state_version'],
         'members': members,
         'room': room,
-        'budget_cents': h['budget_cents'],
+        'budget_cents': (None if hid.startswith('grp_') and not db.one('SELECT 1 FROM room_budgets WHERE household_id=?', hid) else h['budget_cents']),
         'proposal': proposal,
         'scene': {'objects': textures.apply(hid, scene), 'validation': geometry.validate_scene(h['room'], scene),
                   'preview': db.kv_get(f'preview:{hid}')},

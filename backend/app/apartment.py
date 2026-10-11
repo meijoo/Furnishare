@@ -117,8 +117,8 @@ def reset_bedroom(room: dict, furnished: bool = True) -> dict:
                                                       json.dumps(list(catalog.BEDROOM_CATEGORIES)),
                                                       BEDROOM_STYLES.get(owner, BEDROOM_STYLE)))
         # Handles are globally unique and bound to the living room, so bedroom members act through the app.
-        c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, NULL, NULL)',
-                  (hid, owner, name))
+        c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, NULL, ?)',
+                  (hid, owner, name, BEDROOM_BUDGETS[owner]))
         db.log(c, hid, f"{room['name']} created; {name} pays for it alone")
     if not furnished:
         return {'ok': True, 'household_id': hid, 'proposal_version': None, 'total_cents': 0}

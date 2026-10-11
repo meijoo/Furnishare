@@ -150,3 +150,15 @@ def test_verified_catalog_without_bedroom_listings_falls_back_to_fixtures(tmp_pa
     assert by_cat['sofa'] == {'real'}
     for cat in ('bed', 'nightstand', 'dresser', 'desk'):
         assert by_cat[cat] == {'demo'}
+
+
+def test_demo_budgets_are_seeded_and_private(client):
+    from app import apartment as demo, seed
+    client.post('/demo/reset', params={'clear_handles': 'true'})
+    for mid, limit in seed.SEED_LIMITS.items():
+        state = client.get('/households/demo/state', params={'member_id': mid}).json()
+        assert next(m for m in state['members'] if m['id'] == mid)['limit_cents'] == limit
+        assert all('limit_cents' not in m for m in state['members'] if m['id'] != mid)
+        bedroom = client.get(f'/households/demo-bed-{mid}/state', params={'member_id': mid}).json()
+        assert bedroom['members'][0]['limit_cents'] == demo.BEDROOM_BUDGETS[mid]
+        assert bedroom['budget_cents'] == demo.BEDROOM_BUDGETS[mid]

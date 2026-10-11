@@ -380,18 +380,20 @@ struct JoinedGroup: Decodable { let household_id: String; let group_name: String
 
 struct SignupRequest: Encodable { let name: String; let email: String; let phone: String; let username: String; let password: String }
 struct LoginRequest: Encodable { let username: String; let password: String }
-struct SetupRoomPreference: Decodable { let household_id: String; let description: String }
+struct SetupRoomPreference: Decodable {
+    let household_id: String
+    let budget_cents: Int?
+    let description: String
+}
 struct SetupPreferences: Decodable {
-    let group_budget_cents: Int?
-    let individual_budget_cents: Int?
-    let solo: Bool
     let rooms: [SetupRoomPreference]
+}
+struct SetupRoomRequest: Encodable {
+    let budget_cents: Int
+    var description: String? = nil
 }
 struct SetupPreferencesRequest: Encodable {
     let member_id: String
-    let group_budget_cents: Int
-    let individual_budget_cents: Int?
-    let solo: Bool
-    let rooms: [String: String]
+    let rooms: [String: SetupRoomRequest]
 }
 struct CreateGroupRequest: Encodable { let name: String; let location: String; let request_id: String }

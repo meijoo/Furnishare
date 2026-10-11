@@ -106,7 +106,10 @@ def test_signature_demo(client):
     assert len(ops) == 3 and all(o['state'] == 'confirmed' for o in ops)
 
 
-def test_infeasible_limits_explain(client):
+def test_infeasible_limits_explain(client, monkeypatch):
+    from app import seed
+    # Keep this infeasibility scenario at $400 combined, independent of demo defaults.
+    monkeypatch.setitem(seed.SEED_LIMITS, 'maya', 20000)
     client.post('/demo/reset')
     for who in H:
         text(client, who, f'JOIN {who}')

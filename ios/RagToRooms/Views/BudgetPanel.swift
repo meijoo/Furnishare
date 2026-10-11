@@ -7,6 +7,7 @@ struct BudgetPanel: View {
     @State private var showEdit = false
     @State private var budgetText = ""
 
+    private var memberFunded: Bool { model.currentHouseholdID.hasPrefix("grp_") }
     private var budget: Int? { model.state.budgetCents }
     private var spent: Int { model.state.proposal?.knownTotalCents ?? 0 }
     private var remaining: Int { (budget ?? 0) - spent }
@@ -26,12 +27,12 @@ struct BudgetPanel: View {
                 sharedCard
             }
         }
-        .alert("Edit room budget", isPresented: $showEdit) {
+        .alert(memberFunded ? "Your room budget" : "Edit room budget", isPresented: $showEdit) {
             TextField("Amount in USD, e.g. 1500", text: $budgetText).keyboardType(.decimalPad)
             Button("Cancel", role: .cancel) {}
             Button("Save") {
                 if let cents = ContributionsPanel.cents(from: budgetText) {
-                    Task { await model.setBudget(cents: cents) }
+                    Task { if memberFunded { await model.setLimit(cents: cents) } else { await model.setBudget(cents: cents) } }
                 } else {
                     model.errorMessage = "Enter a dollar amount like 1500 or 800.50"
                 }
@@ -45,10 +46,10 @@ struct BudgetPanel: View {
                 Text("Room budget").font(.title2.bold()).foregroundStyle(Color.aeroInk)
                 Spacer()
                 Button {
-                    budgetText = budget.map { String(format: "%.2f", Double($0) / 100) } ?? ""
+                    budgetText = (memberFunded ? model.actingMember?.limitCents : budget).map { String(format: "%.2f", Double($0) / 100) } ?? ""
                     showEdit = true
                 } label: {
-                    Text(budget == nil ? "Set budget" : "Edit budget")
+                    Text(memberFunded ? "Edit my budget" : budget == nil ? "Set budget" : "Edit budget")
                 }
                 .buttonStyle(OutlinePillStyle())
                 .disabled(model.busy.contains("budget"))
@@ -75,6 +76,10 @@ struct BudgetPanel: View {
                     .font(.subheadline.weight(.semibold).monospacedDigit())
                     .foregroundStyle(Color.figmaMuted)
                     .frame(width: 44, alignment: .trailing)
+            }
+            if memberFunded {
+                Text("Total of members' budgets for this room. Your budget: \(dollars(model.actingMember?.limitCents ?? 0)).")
+                    .font(.footnote).foregroundStyle(Color.figmaMuted)
             }
             breakdown
         }

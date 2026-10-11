@@ -216,6 +216,16 @@ def set_limit(hid: str, mid: str, limit_cents: int | None, note: str | None = No
     with db.tx() as c:
         c.execute('UPDATE members SET limit_cents = ?, limit_note = ? WHERE household_id = ? AND id = ?',
                   (limit_cents, note, hid, mid))
+        if hid.startswith('grp_'):
+            if limit_cents is None:
+                c.execute('DELETE FROM room_budgets WHERE household_id=? AND member_id=?', (hid, mid))
+                c.execute('UPDATE members SET limit_cents=0 WHERE household_id=? AND id=?', (hid, mid))
+            else:
+                c.execute("INSERT INTO room_budgets (household_id,member_id,amount_cents) VALUES (?,?,?) "
+                          "ON CONFLICT(household_id,member_id) DO UPDATE SET amount_cents=excluded.amount_cents",
+                          (hid, mid, limit_cents))
+            total = c.execute('SELECT COALESCE(SUM(amount_cents),0) AS total FROM room_budgets WHERE household_id=?', (hid,)).fetchone()['total']
+            c.execute('UPDATE households SET budget_cents=? WHERE id=?', (total, hid))
         db.log(c, hid, 'A roommate updated their contribution limit')
         db.bump(c, hid)
 

@@ -12,8 +12,8 @@ ROOM = {
     'clearances': [{'label': 'door swing', 'x_m': 1.8, 'z_m': 1.2, 'width_m': 0.9, 'depth_m': 0.9}],
 }
 MEMBERS = [('emily', 'Emily'), ('maya', 'Maya'), ('alex', 'Alex')]
-# Emily and Maya told the agent privately they can each put in up to $200 for the sofa; Alex has not set a limit yet.
-SEED_LIMITS = {'emily': 20000, 'maya': 20000, 'alex': None}
+# Private contribution caps for the shared living room (USD cents).
+SEED_LIMITS = {'emily': 20000, 'maya': 25000, 'alex': 30000}
 BUDGET_CENTS = 150000
 STYLE = 'Light wood and blue accents'
 

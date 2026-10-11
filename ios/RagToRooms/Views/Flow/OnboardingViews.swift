@@ -115,8 +115,9 @@ struct JoinGroupView: View {
                 }
                 nav.groupName = group.group_name
                 nav.joinCode = group.group_code
-                nav.finishOnboarding()
-                nav.enterSelectedRoom(model: model)
+                nav.selectedRoomIDs = []
+                nav.livingMode = .joinGroup
+                nav.screen = .roomSelect
             } catch { self.error = error.localizedDescription }
             return
         }
@@ -203,8 +204,8 @@ struct FloorPlanUploadView: View {
             }
         }
         .task {
-            if nav.selectedRoomIDs.isEmpty, let rooms = model.apartment?.furnishableRooms {
-                nav.selectedRoomIDs = Set(rooms.map(\.id))
+            if nav.selectedRoomIDs.isEmpty {
+                nav.selectedRoomIDs = Set(model.accessibleFurnishableRooms.map(\.id))
             }
         }
     }
@@ -218,8 +219,8 @@ struct FloorPlanUploadView: View {
     }
 
     private func goNext() {
-        if nav.selectedRoomIDs.isEmpty, let rooms = model.apartment?.furnishableRooms {
-            nav.selectedRoomIDs = Set(rooms.map(\.id))
+        if nav.selectedRoomIDs.isEmpty {
+            nav.selectedRoomIDs = Set(model.accessibleFurnishableRooms.map(\.id))
         }
         nav.screen = .roomSelect
     }
@@ -259,8 +260,8 @@ struct RoomSelectView: View {
     }
 
     private func seedSelection() {
-        guard nav.selectedRoomIDs.isEmpty, let rooms = model.apartment?.furnishableRooms else { return }
-        nav.selectedRoomIDs = Set(rooms.map(\.id))
+        guard nav.selectedRoomIDs.isEmpty else { return }
+        nav.selectedRoomIDs = Set(model.accessibleFurnishableRooms.map(\.id))
     }
 
 

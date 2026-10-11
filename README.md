@@ -96,13 +96,17 @@ Passwords are salted scrypt hashes; session tokens are hashed in SQLite, expire
 after 30 days, and are stored in the iOS Keychain. Phone/email verification is not
 yet implemented. Account and group creation require the backend to be running.
 
-**Select rooms** continues to **Budget and inspiration**. Set an overall group
-budget and your individual spending cap in USD (solo setup shows one budget),
-then optionally add photos and descriptions for each selected room. Submit saves
-these preferences before opening roommate invitations. Budget totals are split
-across selected room scopes; descriptions and photo records are stored in SQLite,
-and photo files are stored in `backend/static/uploads/`. Saved inspiration appears
-in each room’s Inspiration tab. Back up both the database and uploads folder.
+**Select rooms** continues to **Budget and inspiration**. Enter your own budget
+in USD for each selected room, then optionally add photos and descriptions.
+A shared room's budget is the sum of saved member contributions: $200 plus $300
+shows $500. Unselected rooms have no contribution from you. Joining a group
+opens room selection and budget setup; joining alone adds no money. Editing a
+room budget changes your contribution and recalculates the total. Adding rooms
+with **+** also asks for your budget, without opening invitations.
+Contributions and descriptions persist in SQLite (`room_budgets`); photo records
+also live in SQLite and photo files are stored in `backend/static/uploads/`.
+Saved inspiration appears in each room's Inspiration tab. Back up both the
+database and uploads folder.
 
 Use **Try demo** on the welcome screen for Emily, Maya, and Alex. Demo resets
 preserve real users, groups, memberships, and their invitation jobs. Set

@@ -17,7 +17,7 @@ struct RoomSelectionContent: View {
     }
 
     private var planSelection: Binding<Set<String>> {
-        Binding(get: { selection }, set: { selection = $0.union(savedRoomIDs) })
+        Binding(get: { selection }, set: { selection = $0.intersection(Set(model.accessibleFurnishableRooms.map(\.id))).union(savedRoomIDs) })
     }
 
     private var planCard: some View {
@@ -51,7 +51,7 @@ struct RoomSelectionContent: View {
 
     private func roomCard(_ room: ApartmentRoom, apartment: Apartment) -> some View {
         let selected = selection.contains(room.id)
-        let enabled = room.isFurnishable
+        let enabled = model.accessibleFurnishableRooms.contains { $0.id == room.id }
         let saved = savedRoomIDs.contains(room.id)
         return Button {
             if selected { selection.remove(room.id) } else { selection.insert(room.id) }
@@ -86,30 +86,70 @@ struct AddRoomsSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var selection: Set<String> = []
     @State private var savedRoomIDs: Set<String> = []
+    @State private var budgets: [String: String] = [:]
+    @State private var saving = false
+    @State private var errorMessage: String?
+
+    private var newRooms: [ApartmentRoom] {
+        model.accessibleFurnishableRooms.filter { selection.contains($0.id) && !savedRoomIDs.contains($0.id) }
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                RoomSelectionContent(selection: $selection, savedRoomIDs: savedRoomIDs)
-                    .padding(24)
+                VStack(alignment: .leading, spacing: 18) {
+                    RoomSelectionContent(selection: $selection, savedRoomIDs: savedRoomIDs)
+                    if model.account != nil {
+                        ForEach(newRooms) { room in
+                            if let hid = room.householdID {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Your budget for \(room.name) (USD)").font(.headline)
+                                    TextField("0.00", text: Binding(get: { budgets[hid] ?? "" }, set: { budgets[hid] = $0 }))
+                                        .keyboardType(.decimalPad).textFieldStyle(.roundedBorder)
+                                }
+                            }
+                        }
+                    }
+                    if let errorMessage { Text(errorMessage).foregroundStyle(.red) }
+                }.padding(24).disabled(saving)
             }
             .navigationTitle("Select more rooms")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        nav.addRooms(selection.union(savedRoomIDs))
-                        dismiss()
-                    }
+                    Button(saving ? "Saving…" : "Done") { Task { await save() } }.disabled(saving)
                 }
             }
         }
         .presentationDetents([.large])
         .onAppear {
-            let rooms = Set(model.apartment?.furnishableRooms.map(\.id) ?? [])
+            let rooms = Set(model.accessibleFurnishableRooms.map(\.id))
             savedRoomIDs = nav.selectedRoomIDs.isEmpty ? rooms : nav.selectedRoomIDs.intersection(rooms)
             selection = savedRoomIDs
         }
+    }
+
+    private func save() async {
+        if model.account != nil, !newRooms.isEmpty {
+            guard let client = model.client else { errorMessage = "Connect to save your room budgets."; return }
+            var preferences: [String: SetupRoomRequest] = [:]
+            for room in newRooms {
+                guard let hid = room.householdID,
+                      let amount = ContributionsPanel.cents(from: budgets[hid] ?? ""), amount <= 50_000_000 else {
+                    errorMessage = "Enter your budget for each new room."; return
+                }
+                preferences[hid] = SetupRoomRequest(budget_cents: amount)
+            }
+            saving = true
+            defer { saving = false }
+            do {
+                try await client.saveSetup(apartmentID: model.activeApartmentID,
+                    body: SetupPreferencesRequest(member_id: model.actingMemberID, rooms: preferences))
+                await model.refreshSetupState()
+            } catch { errorMessage = "Couldn't save your room budgets. Please try again."; return }
+        }
+        nav.addRooms(selection.union(savedRoomIDs))
+        dismiss()
     }
 }

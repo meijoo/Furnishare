@@ -120,11 +120,11 @@ def new_code(c):
 
 def create_room(c, gid, hid, name, owner, room, user_ids):
     c.execute('INSERT INTO households (id,name,budget_cents,payer_id,room_json,needs_json) VALUES (?,?,?,?,?,?)',
-              (hid, name, 150000, owner, json.dumps(room), json.dumps(list(catalog.BEDROOM_CATEGORIES if room.get('kind') == 'bedroom' else catalog.LIVING_CATEGORIES))))
+              (hid, name, 0, owner, json.dumps(room), json.dumps(list(catalog.BEDROOM_CATEGORIES if room.get('kind') == 'bedroom' else catalog.LIVING_CATEGORIES))))
     c.execute('INSERT INTO group_rooms VALUES (?,?)', (hid, gid))
     for uid in user_ids:
         user = c.execute('SELECT name FROM users WHERE id=?', (uid,)).fetchone()
-        c.execute('INSERT INTO members (household_id,id,name) VALUES (?,?,?)', (hid, uid, user['name']))
+        c.execute('INSERT INTO members (household_id,id,name,limit_cents) VALUES (?,?,?,0)', (hid, uid, user['name']))
 
 
 def create_group(uid, name, location, request_id):
@@ -162,7 +162,7 @@ def join_group(uid, code):
                 room = core.household(hid)['room']
                 if room.get('kind') == 'bedroom':
                     continue
-                c.execute('INSERT INTO members (household_id,id,name) VALUES (?,?,?)', (hid, uid, user['name']))
+                c.execute('INSERT INTO members (household_id,id,name,limit_cents) VALUES (?,?,?,0)', (hid, uid, user['name']))
                 c.execute("UPDATE proposals SET status='superseded' WHERE household_id=? AND status!='settled'", (hid,))
                 c.execute('DELETE FROM scene_objects WHERE household_id=?', (hid,))
                 db.log(c, hid, f"{user['name']} joined the group; request a new proposal including all roommates")

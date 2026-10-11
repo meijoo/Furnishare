@@ -189,6 +189,12 @@ final class AppModel {
         return base.overlaying(summaries)
     }
 
+    var accessibleFurnishableRooms: [ApartmentRoom] {
+        (apartment?.furnishableRooms ?? []).filter {
+            account == nil || $0.shared || $0.ownerID == actingMemberID
+        }
+    }
+
     var currentRoom: ApartmentRoom? { apartment?.room(forHousehold: currentHouseholdID) }
 
     var currentRoomName: String {
