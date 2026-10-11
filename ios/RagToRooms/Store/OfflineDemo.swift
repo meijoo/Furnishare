@@ -125,6 +125,8 @@ extension AppModel {
         if let index = state.members.firstIndex(where: { $0.id == member }) {
             state.members[index].hasLimit = true
             state.members[index].limitCents = cents
+            state.members[index].contributionBudgetCents = cents
+            state.budgetCents = state.members.reduce(0) { $0 + ($1.contributionBudgetCents ?? $1.limitCents ?? 0) }
         }
         appendActivity("\(state.name(of: member)) updated their limit")
     }

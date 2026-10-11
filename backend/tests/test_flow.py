@@ -102,7 +102,7 @@ def test_signature_demo(client):
     assert s['proposal']['status'] == 'settled'
 
     from app import db
-    ops = db.all_('SELECT op_key, state FROM financial_ops')
+    ops = db.all_('SELECT op_key, state FROM financial_ops WHERE household_id=?', 'demo')
     assert len(ops) == 3 and all(o['state'] == 'confirmed' for o in ops)
 
 

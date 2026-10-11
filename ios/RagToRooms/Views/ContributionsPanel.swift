@@ -4,16 +4,12 @@ struct ContributionsPanel: View {
     @Environment(AppModel.self) private var model
     @State private var showObjection = false
     @State private var objectionReason = ""
-    @State private var showLimit = false
-    @State private var limitText = ""
 
     var body: some View {
         let state = model.state
         VStack(alignment: .leading, spacing: 12) {
             PanelHeader(title: "Contributions", symbol: model.isPrivateScope ? "person.fill" : "person.3.fill")
-            if let proposal = state.proposal {
-                ForEach(state.members) { member in memberRow(member, proposal: proposal) }
-            }
+            ForEach(state.members) { member in memberRow(member, proposal: state.proposal) }
 
             Divider()
             if let note = model.notInScopeNote {
@@ -29,16 +25,6 @@ struct ContributionsPanel: View {
             Button("Send objection") { Task { await model.object(reason: objectionReason) } }
         } message: {
             Text("The agent will revise the proposal with your reason.")
-        }
-        .alert("Set my private limit", isPresented: $showLimit) {
-            TextField("Amount in USD, e.g. 200", text: $limitText).keyboardType(.decimalPad)
-            Button("Cancel", role: .cancel) {}
-            Button("Save") {
-                if let cents = Self.cents(from: limitText) { Task { await model.setLimit(cents: cents) } }
-                else { model.errorMessage = "Enter a dollar amount like 200 or 150.50" }
-            }
-        } message: {
-            Text("Only you and the backend see this number.")
         }
     }
 
@@ -68,12 +54,7 @@ struct ContributionsPanel: View {
                 action("Object", symbol: "hand.raised.fill", tint: .aeroAmber, key: "object", blocker: model.objectionBlocker) {
                     objectionReason = ""; showObjection = true
                 }
-                if !model.isPrivateScope {
-                    action("Limit", symbol: "lock.fill", tint: .aeroSky, key: "limit", blocker: nil) {
-                        limitText = model.actingMember?.limitCents.map { String(format: "%.2f", Double($0) / 100) } ?? ""
-                        showLimit = true
-                    }
-                }
+
             }
             blockerText(model.approvalBlocker.map { "Approve: \($0)" })
 
@@ -107,9 +88,9 @@ struct ContributionsPanel: View {
         return NSDecimalNumber(decimal: rounded).intValue
     }
 
-    private func memberRow(_ member: Member, proposal: Proposal) -> some View {
-        let approved = proposal.approvals[member.id] == true
-        let objection = proposal.objections[member.id]
+    private func memberRow(_ member: Member, proposal: Proposal?) -> some View {
+        let approved = proposal?.approvals[member.id] == true
+        let objection = proposal?.objections[member.id]
         return HStack(spacing: 10) {
             Image(systemName: member.id == model.actingMemberID ? "person.crop.circle.fill" : "person.crop.circle")
                 .font(.title2).foregroundStyle(Color.aeroSky)
@@ -118,24 +99,22 @@ struct ContributionsPanel: View {
                     Text(member.name).font(.headline)
                     if member.isPayer { StatusBadge(text: "Payer", symbol: "creditcard", tint: .aeroInk) }
                     if member.id == model.actingMemberID { Text("you").font(.caption).foregroundStyle(.secondary) }
-                    if let connected = member.connected {
-                        Image(systemName: connected ? "message.fill" : "message.badge.waveform")
-                            .font(.caption).foregroundStyle(connected ? Color.aeroGrass : .secondary)
-                            .accessibilityLabel(connected ? "iMessage linked" : "iMessage not linked")
-                    }
+
                 }
-                if let cents = member.limitCents {
-                    Text(dollars(cents)).font(.subheadline).foregroundStyle(Color.figmaMuted)
+                if let cents = member.contributionBudgetCents ?? member.limitCents {
+                    Text("Budget: \(dollars(cents))").font(.subheadline).foregroundStyle(Color.figmaMuted)
+                } else {
+                    Text("Budget not set").font(.subheadline).foregroundStyle(Color.figmaMuted)
                 }
             }
             Spacer()
             VStack(alignment: .trailing, spacing: 4) {
-                Text(proposal.shares[member.id].map(dollars) ?? "—").font(.headline.monospacedDigit())
+                Text(proposal?.shares[member.id].map(dollars) ?? "—").font(.headline.monospacedDigit())
                 if approved {
                     StatusBadge(text: "Approved", symbol: "checkmark.seal.fill", tint: Color(red: 0.13, green: 0.5, blue: 0.2))
                 } else if objection != nil {
                     StatusBadge(text: "Objected", symbol: "hand.raised.fill", tint: .aeroRed)
-                } else {
+                } else if proposal != nil {
                     StatusBadge(text: "Pending", symbol: "hourglass", tint: .aeroInk)
                 }
             }

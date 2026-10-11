@@ -14,6 +14,7 @@ ROOM = {
 MEMBERS = [('emily', 'Emily'), ('maya', 'Maya'), ('alex', 'Alex')]
 # Private contribution caps for the shared living room (USD cents).
 SEED_LIMITS = {'emily': 20000, 'maya': 25000, 'alex': 30000}
+# Scene staging budget keeps the full demo layout; the room budget sums contributions.
 BUDGET_CENTS = 150000
 STYLE = 'Light wood and blue accents'
 
@@ -45,7 +46,7 @@ def reset(hid: str = HID, clear_handles: bool = False, room: dict | None = None,
         c.execute("DELETE FROM outbound_jobs WHERE household_id = ?", (hid,))
         c.execute('DELETE FROM households WHERE id = ?', (hid,))
         c.execute('INSERT INTO households (id, name, budget_cents, payer_id, state_version, room_json, needs_json, style_text) '
-                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, 'Our living room', BUDGET_CENTS, 'emily', version + 1,
+                  'VALUES (?, ?, ?, ?, ?, ?, ?, ?)', (hid, 'Our living room', sum(SEED_LIMITS.values()), 'emily', version + 1,
                                                       json.dumps(room or ROOM), json.dumps(list(catalog.CATEGORIES)), STYLE))
         for mid, name in MEMBERS:
             c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, ?, ?)',

@@ -2,9 +2,9 @@
   "household_id": "demo",
   "state_version": 1,
   "members": [
-    {"id": "emily", "name": "Emily", "is_payer": true, "has_limit": true, "connected": false},
-    {"id": "maya", "name": "Maya", "is_payer": false, "has_limit": true, "connected": false},
-    {"id": "alex", "name": "Alex", "is_payer": false, "has_limit": true, "connected": false}
+    {"id": "emily", "name": "Emily", "is_payer": true, "has_limit": true, "connected": false, "contribution_budget_cents": 50000},
+    {"id": "maya", "name": "Maya", "is_payer": false, "has_limit": true, "connected": false, "contribution_budget_cents": 45000},
+    {"id": "alex", "name": "Alex", "is_payer": false, "has_limit": true, "connected": false, "contribution_budget_cents": 55000}
   ],
   "room": {
     "width_m": 4.5, "depth_m": 4.0, "height_m": 2.5,

@@ -180,6 +180,11 @@ struct BackendClient: Sendable {
                                    body: PurchaseAuthorizeBody(memberID: memberID, proposalVersion: version), timeout: 30)
     }
 
+    func requestRoomPayment(memberID: String, version: Int, requestID: String) async throws {
+        try await sendIgnoringBody("POST", "\(household)/payment-requests",
+            body: RoomPaymentRequest(member_id: memberID, proposal_version: version, request_id: requestID))
+    }
+
     func authorizeReimbursement(liabilityID: String, memberID: String) async throws {
         try await sendIgnoringBody("POST", "\(household)/reimbursements/\(liabilityID)/authorize",
                                    body: MemberBody(memberID: memberID), timeout: 30)
@@ -397,3 +402,9 @@ struct SetupPreferencesRequest: Encodable {
     let rooms: [String: SetupRoomRequest]
 }
 struct CreateGroupRequest: Encodable { let name: String; let location: String; let request_id: String }
+
+struct RoomPaymentRequest: Encodable {
+    let member_id: String
+    let proposal_version: Int
+    let request_id: String
+}

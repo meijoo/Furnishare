@@ -23,7 +23,12 @@ struct ContentView: View {
         .sheet(isPresented: $nav.showRoomSetup) { RoomSetupSheet(room: model.state.room).environment(model) }
         .sheet(isPresented: $nav.showCatalog) { CatalogSheet().environment(model).environment(self.nav) }
         .sheet(isPresented: $nav.showAddItem) { AddItemSheet().environment(model).environment(self.nav) }
-        .sheet(isPresented: $nav.showSendMoney) { SendMoneySheet().environment(model).environment(self.nav) }
+        .sheet(isPresented: $nav.showSendMoney) {
+            Group {
+                if model.actingMemberID == model.state.finance.payerID { RequestMoneySheet() }
+                else { SendMoneySheet() }
+            }.environment(model).environment(self.nav)
+        }
         .sheet(isPresented: $nav.showShare, onDismiss: {
             if nav.finishSetupAfterInvites {
                 nav.finishRoomSetup(model: model)

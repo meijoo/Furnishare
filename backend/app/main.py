@@ -529,6 +529,17 @@ def purchase(hid: str, body: PurchaseBody):
     return finance.public_op(finance.authorize_purchase(hid, body.member_id, body.proposal_version))
 
 
+class RoomPaymentRequestBody(BaseModel):
+    member_id: str
+    proposal_version: int = Field(gt=0)
+    request_id: str = Field(min_length=1, max_length=100)
+
+
+@app.post('/households/{hid}/payment-requests')
+def payment_requests(hid: str, body: RoomPaymentRequestBody):
+    return finance.request_room_payment(hid, body.member_id, body.proposal_version, body.request_id)
+
+
 @app.post('/households/{hid}/reimbursements/{liability_id}/authorize')
 def reimburse(hid: str, liability_id: str, body: MemberBody):
     return finance.public_op(finance.authorize_reimbursement(hid, liability_id, body.member_id))

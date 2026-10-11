@@ -7,13 +7,14 @@ struct BudgetPanel: View {
     @State private var showEdit = false
     @State private var budgetText = ""
 
-    private var memberFunded: Bool { model.currentHouseholdID.hasPrefix("grp_") }
     private var budget: Int? { model.state.budgetCents }
     private var spent: Int { model.state.proposal?.knownTotalCents ?? 0 }
     private var remaining: Int { (budget ?? 0) - spent }
-    private var progress: Double {
-        guard let budget, budget > 0 else { return spent > 0 ? 1 : 0 }
-        return min(1, Double(spent) / Double(budget))
+    private var individualBudget: Int? {
+        model.actingMember?.contributionBudgetCents ?? model.actingMember?.limitCents
+    }
+    private var individualUsed: Int {
+        model.state.proposal?.shares[model.actingMemberID] ?? 0
     }
 
     var body: some View {
@@ -27,12 +28,12 @@ struct BudgetPanel: View {
                 sharedCard
             }
         }
-        .alert(memberFunded ? "Your room budget" : "Edit room budget", isPresented: $showEdit) {
+        .alert("Edit your contribution", isPresented: $showEdit) {
             TextField("Amount in USD, e.g. 1500", text: $budgetText).keyboardType(.decimalPad)
             Button("Cancel", role: .cancel) {}
             Button("Save") {
                 if let cents = ContributionsPanel.cents(from: budgetText) {
-                    Task { if memberFunded { await model.setLimit(cents: cents) } else { await model.setBudget(cents: cents) } }
+                    Task { await model.setLimit(cents: cents) }
                 } else {
                     model.errorMessage = "Enter a dollar amount like 1500 or 800.50"
                 }
@@ -43,16 +44,16 @@ struct BudgetPanel: View {
     private var roomCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                Text("Room budget").font(.title2.bold()).foregroundStyle(Color.aeroInk)
+                Text("Total budget").font(.title2.bold()).foregroundStyle(Color.aeroInk)
                 Spacer()
                 Button {
-                    budgetText = (memberFunded ? model.actingMember?.limitCents : budget).map { String(format: "%.2f", Double($0) / 100) } ?? ""
+                    budgetText = (model.actingMember?.contributionBudgetCents ?? model.actingMember?.limitCents).map { String(format: "%.2f", Double($0) / 100) } ?? ""
                     showEdit = true
                 } label: {
-                    Text(memberFunded ? "Edit my budget" : budget == nil ? "Set budget" : "Edit budget")
+                    Text("Edit budget")
                 }
                 .buttonStyle(OutlinePillStyle())
-                .disabled(model.busy.contains("budget"))
+                .disabled(model.busy.contains("limit") || !model.actingMemberInScope)
             }
             if let budget {
                 Text("\(dollars(spent)) / \(dollars(budget))")
@@ -63,23 +64,20 @@ struct BudgetPanel: View {
                     .font(.system(size: 34, weight: .bold, design: .rounded).monospacedDigit())
                     .foregroundStyle(Color.aeroInk)
             }
-            HStack(spacing: 12) {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Capsule().fill(Color.figmaWash)
-                        Capsule().fill(remaining >= 0 ? Color.aeroSky : Color.aeroRed)
-                            .frame(width: max(8, geo.size.width * progress))
+            budgetBar(used: spent, limit: budget)
+            if model.actingMemberInScope {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Individual budget").font(.title3.bold()).foregroundStyle(Color.aeroInk)
+                    if let individualBudget {
+                        Text("\(dollars(individualUsed)) / \(dollars(individualBudget))")
+                            .font(.title2.bold().monospacedDigit())
+                            .foregroundStyle(individualUsed <= individualBudget ? Color.aeroInk : Color.aeroRed)
+                    } else {
+                        Text("\(dollars(individualUsed)) used · Budget not set")
+                            .font(.subheadline).foregroundStyle(Color.figmaMuted)
                     }
+                    budgetBar(used: individualUsed, limit: individualBudget)
                 }
-                .frame(height: 10)
-                Text("\(Int((progress * 100).rounded()))%")
-                    .font(.subheadline.weight(.semibold).monospacedDigit())
-                    .foregroundStyle(Color.figmaMuted)
-                    .frame(width: 44, alignment: .trailing)
-            }
-            if memberFunded {
-                Text("Total of members' budgets for this room. Your budget: \(dollars(model.actingMember?.limitCents ?? 0)).")
-                    .font(.footnote).foregroundStyle(Color.figmaMuted)
             }
             breakdown
         }
@@ -87,6 +85,27 @@ struct BudgetPanel: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: 24, style: .continuous).fill(Color.white))
         .overlay(RoundedRectangle(cornerRadius: 24, style: .continuous).strokeBorder(Color.black.opacity(0.04), lineWidth: 1))
+    }
+
+    private func budgetBar(used: Int, limit: Int?) -> some View {
+        let progress = limit.map { $0 > 0 ? min(1, Double(used) / Double($0)) : (used > 0 ? 1.0 : 0.0) } ?? 0
+        let overBudget = limit.map { used > $0 } ?? false
+        return HStack(spacing: 12) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.figmaWash)
+                    Capsule().fill(overBudget ? Color.aeroRed : Color.aeroSky)
+                        .frame(width: geo.size.width * progress)
+                }
+            }
+            .frame(height: 10)
+            Text(limit == nil ? "—" : "\(Int((progress * 100).rounded()))%")
+                .font(.subheadline.weight(.semibold).monospacedDigit())
+                .foregroundStyle(Color.figmaMuted)
+                .frame(width: 44, alignment: .trailing)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(limit.map { "\(dollars(used)) used of \(dollars($0))" } ?? "Budget not set")
     }
 
     private var breakdown: some View {
@@ -130,7 +149,7 @@ struct BudgetPanel: View {
                 }
             }
             Button { nav.showSendMoney = true } label: {
-                Label("Split expense", systemImage: "person.2")
+                Text(model.actingMemberID == model.state.finance.payerID ? "Request" : "Pay")
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(AeroWideButtonStyle(outlined: true))
@@ -158,13 +177,7 @@ struct BudgetPanel: View {
             Text(dollars(cents))
                 .font(.subheadline.monospacedDigit().weight(.semibold))
                 .foregroundStyle(Color.aeroInk)
-            if mine {
-                Button("Pay") { nav.showSendMoney = true }
-                    .buttonStyle(OutlinePillStyle(tint: .aeroSky))
-            } else {
-                Button("Request") { nav.showSendMoney = true }
-                    .buttonStyle(OutlinePillStyle())
-            }
+
         }
     }
 

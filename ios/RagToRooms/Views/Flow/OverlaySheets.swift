@@ -196,6 +196,48 @@ struct AddItemSheet: View {
     }
 }
 
+struct RequestMoneySheet: View {
+    @Environment(AppModel.self) private var model
+    @Environment(\.dismiss) private var dismiss
+    @State private var requestID = UUID().uuidString
+    @State private var sending = false
+    @State private var error: String?
+    private var purchased: Bool { model.state.finance.purchase?.state == .confirmed }
+
+    var body: some View {
+        NavigationStack {
+            VStack(alignment: .leading, spacing: 16) {
+                if purchased {
+                    Text("\(model.currentRoomName)'s furniture is purchased! Please send your share to \(model.state.name(of: model.state.finance.payerID)). Open Furnishare's Budget tab and tap Pay.")
+                } else {
+                    Text("Purchase this room's furniture before requesting money from your roommates.")
+                }
+                if let error { Text(error).foregroundStyle(.red) }
+                Spacer()
+            }.padding(24)
+            .navigationTitle("Request money")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() }.disabled(sending) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(sending ? "Sending…" : "Send") { Task { await send() } }
+                        .disabled(sending || !purchased || model.isOfflineDemo || model.state.members.count < 2)
+                }
+            }
+        }
+    }
+
+    private func send() async {
+        guard let client = model.client, let version = model.state.proposal?.version else { return }
+        sending = true
+        defer { sending = false }
+        do {
+            try await client.requestRoomPayment(memberID: model.actingMemberID, version: version, requestID: requestID)
+            dismiss()
+        } catch { self.error = "Couldn't send the requests. Check that your roommates have phone numbers and try again." }
+    }
+}
+
 struct SendMoneySheet: View {
     @Environment(AppModel.self) private var model
     @Environment(AppNavigation.self) private var nav
@@ -439,14 +481,6 @@ struct SuccessOverlay: View {
                         Button("Keep adding") { nav.dismissSuccess(continueAdding: true) }
                             .buttonStyle(AeroWideButtonStyle(outlined: true))
                     }
-                    if case .paymentSent = kind {
-                        Button("View room budget") {
-                            nav.dismissSuccess()
-                            nav.roomTab = .budget
-                            nav.screen = .room
-                        }
-                        .buttonStyle(AeroWideButtonStyle(outlined: true))
-                    }
                 }
             }
             .padding(28)
@@ -474,7 +508,7 @@ struct SuccessOverlay: View {
         case .itemAdded(let name):
             return "“\(name)” is saved with things you already have. It is not part of the room budget."
         case .paymentSent(let amount, let to):
-            return "\(amount) to \(to). Nessie is a sandbox, so this is a simulated transfer."
+            return "\(amount) to \(to)."
         case .linkCopied:
             return "Paste it in Messages or Notes. Housemates already on the demo can open the same apartment."
         }

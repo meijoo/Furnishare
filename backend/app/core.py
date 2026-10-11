@@ -226,6 +226,9 @@ def set_limit(hid: str, mid: str, limit_cents: int | None, note: str | None = No
                           (hid, mid, limit_cents))
             total = c.execute('SELECT COALESCE(SUM(amount_cents),0) AS total FROM room_budgets WHERE household_id=?', (hid,)).fetchone()['total']
             c.execute('UPDATE households SET budget_cents=? WHERE id=?', (total, hid))
+        elif hid == 'demo' or hid.startswith('demo-bed-'):
+            total = c.execute('SELECT COALESCE(SUM(limit_cents),0) AS total FROM members WHERE household_id=?', (hid,)).fetchone()['total']
+            c.execute('UPDATE households SET budget_cents=? WHERE id=?', (total, hid))
         db.log(c, hid, 'A roommate updated their contribution limit')
         db.bump(c, hid)
 

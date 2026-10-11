@@ -1,4 +1,4 @@
-"""Household snapshot for the iPad. Never includes another member's private limit."""
+"""Room budgets are shared; legacy private-limit fields remain viewer-specific."""
 from . import catalog, core, db, finance, geometry, textures
 
 
@@ -16,6 +16,8 @@ def snapshot(hid: str, viewer: str | None = None) -> dict:
     for m in ms:
         entry = {'id': m['id'], 'name': m['name'], 'is_payer': m['id'] == h['payer_id'], 'has_limit': m['limit_cents'] is not None,
                  'connected': bool(m['handle'] or db.one('SELECT phone FROM users WHERE id=?', m['id']))}
+        saved = db.one('SELECT amount_cents FROM room_budgets WHERE household_id=? AND member_id=?', hid, m['id'])
+        entry['contribution_budget_cents'] = saved['amount_cents'] if saved else (m['limit_cents'] if not hid.startswith('grp_') else None)
         if viewer == m['id']:
             entry['limit_cents'] = m['limit_cents']
         members.append(entry)

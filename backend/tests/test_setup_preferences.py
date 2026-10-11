@@ -110,3 +110,33 @@ def test_unselected_rooms_stay_unfunded_and_private_rooms_are_protected(client):
         'member_id': roommate['user']['id'], 'rooms': {gid: {'budget_cents': 30000}, private: {'budget_cents': 50000}}})
     assert response.status_code == 403
     assert db.one('SELECT budget_cents FROM households WHERE id=?', gid)['budget_cents'] == 0
+
+
+def test_budget_editor_only_changes_self_and_everyone_sees_room_budgets(client):
+    _, owner, owner_headers = signup(client)
+    group = create(client, owner_headers)
+    gid = group['id']
+    people = [(owner['user']['id'], owner_headers)]
+    for _ in range(2):
+        _, user, headers = signup(client)
+        joined = client.post('/groups/join', headers=headers, json={'code': group['group_code']})
+        assert joined.status_code == 200
+        people.append((user['user']['id'], headers))
+    for mid, headers in people:
+        response = client.put(f'/apartments/{gid}/setup', headers=headers, json={
+            'member_id': mid, 'rooms': {gid: {'budget_cents': 10000}}})
+        assert response.status_code == 200
+    me, my_headers = people[0]
+    state = client.get(f'/households/{gid}/state', headers=my_headers, params={'member_id': me}).json()
+    assert state['budget_cents'] == 30000
+    assert [m['contribution_budget_cents'] for m in state['members']] == [10000] * 3
+    other = people[1][0]
+    assert client.put(f'/households/{gid}/members/{other}/limit', headers=my_headers,
+                      json={'limit_cents': 20000}).status_code == 403
+    response = client.put(f'/households/{gid}/members/{me}/limit', headers=my_headers,
+                          json={'limit_cents': 20000})
+    assert response.status_code == 200, response.text
+    state = client.get(f'/households/{gid}/state', headers=my_headers, params={'member_id': me}).json()
+    assert state['budget_cents'] == 40000
+    assert {m['id']: m['contribution_budget_cents'] for m in state['members']} == {
+        mid: 20000 if mid == me else 10000 for mid, _ in people}

@@ -101,7 +101,8 @@ in USD for each selected room, then optionally add photos and descriptions.
 A shared room's budget is the sum of saved member contributions: $200 plus $300
 shows $500. Unselected rooms have no contribution from you. Joining a group
 opens room selection and budget setup; joining alone adds no money. Editing a
-room budget changes your contribution and recalculates the total. Adding rooms
+room budget changes only your contribution and recalculates the total.
+The Contributions panel shows each member's saved room budget below their name. Adding rooms
 with **+** also asks for your budget, without opening invitations.
 Contributions and descriptions persist in SQLite (`room_budgets`); photo records
 also live in SQLite and photo files are stored in `backend/static/uploads/`.
@@ -127,3 +128,9 @@ individual Photon messages. Recipients still need Photon permission to receive
 messages on your shared line. Text preferences target the most recently created
 or joined group for that phone. Floor-plan imports are saved per real group;
 bedroom scopes use the group's real member ids.
+
+In a room's Budget tab, the payer sees **Request** and other members see **Pay**.
+After purchase confirmation, Request previews a room-specific payment reminder.
+Send queues one Photon message for every other member who selected that room.
+Retries of the same request do not duplicate messages; this action sends reminders
+and does not initiate a money transfer.

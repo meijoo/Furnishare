@@ -266,3 +266,42 @@ def recover_on_startup() -> None:
     """An op left 'submitting' by a crash may or may not have reached Nessie."""
     for op in db.all_("SELECT op_key FROM financial_ops WHERE state = 'submitting'"):
         _set(op['op_key'], state='unknown', error='Process restarted mid-submission; reconciling')
+
+
+def request_room_payment(hid: str, mid: str, version: int, request_id: str) -> dict:
+    """Payer explicitly queues a room-scoped request; retries do not duplicate texts."""
+    with db.tx() as c:
+        h = core.household(hid)
+        core.member(hid, mid)
+        if mid != h['payer_id']:
+            raise core.Forbidden('Only the payer may request room payments.')
+        proposal = core.current_proposal(hid)
+        if not proposal or proposal['version'] != version:
+            raise core.Conflict('The room proposal has changed. Refresh before sending.')
+        purchase = c.execute("SELECT 1 FROM financial_ops WHERE household_id=? AND proposal_version=? "
+                             "AND kind='purchase' AND state='confirmed'", (hid, version)).fetchone()
+        if not purchase:
+            raise core.Conflict('Purchase the furniture before requesting payment.')
+        recipients = [m for m in core.members(hid) if m['id'] != mid]
+        if hid.startswith('grp_'):
+            recipients = [m for m in recipients if c.execute(
+                'SELECT 1 FROM room_budgets WHERE household_id=? AND member_id=?', (hid, m['id'])).fetchone()]
+        if not recipients:
+            raise core.Conflict('No other members have selected this room.')
+        for member in recipients:
+            user = c.execute('SELECT phone FROM users WHERE id=?', (member['id'],)).fetchone()
+            if not member['handle'] and not (user and user['phone']):
+                raise core.Conflict('Add phone numbers for all room members before sending.')
+        from . import accounts, apartment
+        group_id = accounts.group_for_room(hid)
+        plan = accounts.apartment_snapshot(group_id) if group_id else apartment.snapshot('demo')
+        room_name = next((r['name'] for r in plan['rooms'] if r.get('household_id') == hid), h['name'].removeprefix('Our '))
+        room_name = room_name[0].upper() + room_name[1:]
+        text = (f"{room_name}'s furniture is purchased! Please send your share to {core.names(hid)[mid]}. "
+                "Open Furnishare's Budget tab and tap Pay.")
+        for member in recipients:
+            core.queue_message(c, hid, member['id'], text,
+                               dedupe_key=f"room-payment:{hid}:v{version}:{request_id}:{member['id']}")
+        db.log(c, hid, 'Payer requested payment from room members')
+        db.bump(c, hid)
+    return {'queued': len(recipients), 'message': text}

@@ -181,6 +181,8 @@ struct Member: Codable, Hashable, Identifiable, Sendable {
     var hasLimit: Bool?
     /// Only present for the requesting member (`?member_id=`).
     var limitCents: Int?
+    /// Saved room contribution, visible to everyone in this room.
+    var contributionBudgetCents: Int? = nil
     /// True when the member has a linked messaging handle.
     var connected: Bool?
 
@@ -189,6 +191,7 @@ struct Member: Codable, Hashable, Identifiable, Sendable {
         case isPayer = "is_payer"
         case hasLimit = "has_limit"
         case limitCents = "limit_cents"
+        case contributionBudgetCents = "contribution_budget_cents"
     }
 
     init(id: String, name: String, isPayer: Bool, hasLimit: Bool? = nil, limitCents: Int? = nil, connected: Bool? = nil) {
@@ -203,6 +206,7 @@ struct Member: Codable, Hashable, Identifiable, Sendable {
         isPayer = (try? c.decode(Bool.self, forKey: .isPayer)) ?? false
         hasLimit = try? c.decode(Bool.self, forKey: .hasLimit)
         limitCents = try? c.decode(Int.self, forKey: .limitCents)
+        contributionBudgetCents = try? c.decode(Int.self, forKey: .contributionBudgetCents)
         connected = try? c.decode(Bool.self, forKey: .connected)
     }
 }
