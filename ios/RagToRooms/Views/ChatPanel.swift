@@ -8,7 +8,7 @@ struct ChatPanel: View {
         let suggestion = model.chatSuggestion
         let canSend = model.actingMemberInScope
         VStack(alignment: .leading, spacing: 10) {
-            PanelHeader(title: "Ask the agent", symbol: "bubble.left.and.text.bubble.right.fill", trailing: model.currentRoomName)
+            PanelHeader(title: "Refine", symbol: "bubble.left.and.text.bubble.right.fill", trailing: model.currentRoomName)
             if model.chat.isEmpty {
                 Button { draft = suggestion } label: { Label(suggestion, systemImage: "sparkles").multilineTextAlignment(.leading) }
                     .buttonStyle(GlassChipStyle())
@@ -19,7 +19,7 @@ struct ChatPanel: View {
                 }
             }
             HStack(spacing: 8) {
-                TextField(model.isPrivateScope ? "Furnish my bedroom for $1,000…" : "Furnish our \(model.currentRoomName.lowercased()) for $1,500…",
+                TextField(model.state.proposal == nil ? "Describe the room…" : "Cheaper sofa, more oak…",
                           text: $draft, axis: .vertical)
                     .lineLimit(1...4)
                     .padding(10)
@@ -34,11 +34,6 @@ struct ChatPanel: View {
             }
             if let note = model.notInScopeNote {
                 Label(note, systemImage: "eye").font(.caption).foregroundStyle(.secondary)
-            } else {
-                Text(model.isPrivateScope
-                     ? "Sent as \(model.actingMemberName). The agent replies here."
-                     : "Sent as \(model.actingMemberName). The agent replies here and in the group thread.")
-                    .font(.caption2).foregroundStyle(.secondary)
             }
         }
         .glassPanel()

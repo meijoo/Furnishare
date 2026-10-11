@@ -98,7 +98,6 @@ struct SignUpView: View {
 
     var body: some View {
         ZStack {
-            signupDecor
             FlowScreen(maxWidth: 480) {
                 VStack(spacing: 18) {
                     HStack {

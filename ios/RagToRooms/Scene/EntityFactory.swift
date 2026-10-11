@@ -173,7 +173,7 @@ final class FurnitureNode {
 
     private func applyPhotoIfNeeded() {
         photoTask?.cancel()
-        guard let raw = signature.photoURL else { return }
+        guard signature.category == "rug", let raw = signature.photoURL else { return }
         let url = raw.hasPrefix("file:") || raw.hasPrefix("http")
             ? URL(string: raw)
             : URL(fileURLWithPath: raw)

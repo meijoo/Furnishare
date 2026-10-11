@@ -171,9 +171,19 @@ def test_import_rejects_bad_uploads(client, monkeypatch):
     assert client.post('/apartments/demo/floorplan', files={'file': ('p.png', png(), 'image/png')}).status_code == 503
 
 
+def _demo_by_category(client, category):
+    return next(o for o in client.get('/households/demo/state').json()['scene']['objects'] if o['category'] == category)
+
+
+def test_texture_rejected_on_non_rugs(client):
+    sofa = _demo_by_category(client, 'sofa')
+    r = client.post(f"/households/demo/scene/objects/{sofa['object_id']}/texture",
+                    files={'file': ('t.png', png(8, 8), 'image/png')})
+    assert r.status_code == 422, r.text
+
+
 def test_texture_upload_and_delete(client):
-    objects = client.get('/households/demo/state').json()['scene']['objects']
-    oid = objects[0]['object_id']
+    oid = _demo_by_category(client, 'rug')['object_id']
     assert client.post('/households/demo/scene/objects/nope/texture',
                        files={'file': ('t.png', png(8, 8), 'image/png')}).status_code == 404
     assert client.post(f'/households/demo/scene/objects/{oid}/texture', data={'mode': 'shiny'},
@@ -191,8 +201,7 @@ def test_texture_upload_and_delete(client):
 
 
 def test_textured_asset_swaps_in_when_built(client, tmp_path, monkeypatch):
-    objects = client.get('/households/demo/state').json()['scene']['objects']
-    oid = objects[0]['object_id']
+    oid = _demo_by_category(client, 'rug')['object_id']
     client.post(f'/households/demo/scene/objects/{oid}/texture', files={'file': ('t.png', png(8, 8), 'image/png')})
     requested = []
     monkeypatch.setattr(assets, 'available', lambda: True)
@@ -205,3 +214,15 @@ def test_textured_asset_swaps_in_when_built(client, tmp_path, monkeypatch):
     obj = next(o for o in client.get('/households/demo/state').json()['scene']['objects'] if o['object_id'] == oid)
     assert obj['texture']['status'] == 'ready' and obj['asset_url'] == f"/assets/{'f' * 24}.usdz"
     textures.delete('demo', oid)
+
+
+def test_import_timeout_returns_actionable_error(client, monkeypatch):
+    import httpx
+
+    def slow_read(data, mime):
+        raise httpx.ReadTimeout('service timed out')
+
+    monkeypatch.setattr(floorplan, 'extract', slow_read)
+    response = client.post('/apartments/demo/floorplan', files={'file': ('plan.png', png(), 'image/png')})
+    assert response.status_code == 504
+    assert response.json()['detail'] == 'Reading the floor plan took too long. Please try again.'

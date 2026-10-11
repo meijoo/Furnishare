@@ -144,7 +144,7 @@ Proposal `status`: `draft`, `awaiting_approval`, `approved`, `superseded`, `purc
 | GET    | `/households/{hid}/events`                                  | Server-sent events; each event `state` carries `{"state_version": n}`. Clients refetch state on change. Polling `/state` every 2 s is an acceptable fallback.           |
 | PUT    | `/households/{hid}/room`                                    | Body: room object (without inspiration url)                                                                                                                             |
 | POST   | `/households/{hid}/inspiration`                             | multipart `file` image upload                                                                                                                                           |
-| POST   | `/households/{hid}/chat`                                    | `{"member_id", "text"}` furnishing request from the app; returns `{"reply"}`                                                                                            |
+| POST   | `/households/{hid}/chat`                                    | `{"member_id", "text", "pick_ids", "mode": "design"|"refine", "skip_categories"}`; returns `{"reply"}`                                                                   |
 | PUT    | `/households/{hid}/members/{mid}/limit`                     | `{"limit_cents"}` (private)                                                                                                                                             |
 | POST   | `/households/{hid}/proposals/{version}/approve`             | `{"member_id"}`                                                                                                                                                         |
 | POST   | `/households/{hid}/proposals/{version}/object`              | `{"member_id", "reason"}`                                                                                                                                               |
@@ -278,9 +278,9 @@ After an import, `GET /apartments/{aid}` also returns:
 
 ## Object textures
 
-`POST /households/{hid}/scene/objects/{object_id}/texture` (multipart):
+`POST /households/{hid}/scene/objects/{object_id}/texture` (multipart) is rugs only; other categories return 422:
 - `file`: PNG or JPEG, at most 15 MB.
-- Optional `mode`: `print` (the whole image across the top; the default for rugs) or `tile` (a repeating swatch on the main surfaces; the default otherwise).
+- Optional `mode`: `print` (the whole image across the rug; default) or `tile` (a repeating swatch).
 - Optional `tile_m`: the tile size, 0.05-2.0 m.
 
 The texture belongs to the object id, so it carries over when a revision swaps the product. A textured USDZ is built in the background. Scene objects with a texture gain:
@@ -299,11 +299,19 @@ The texture belongs to the object id, so it carries over when a revision swaps t
 
 ## Product search and realize
 
-`GET /products/search?q=&limit=` mixes the verified catalog with live shopping results. Style tokens (e.g. “brown couch”) rank live listings first; a bare category keeps catalog first. Each live hit includes parsed `dimensions_m` when the listing has W×D×H, otherwise estimated defaults.
+`GET /products/search?q=&limit=` uses SerpAPI Google Shopping when `SHOPPING_API_KEY` is set. Live listings with parsed or estimated `dimensions_m` are cached for design. Matching catalog items of the same type follow; a chair query will not return dressers.
 
 `POST /products/realize` accepts a listing (`id`, `title`, `category`, `dimensions_m`, optional image/source URLs) and returns a generated USDZ plus form/dimension reads. `POST /products/realize/upload` is the same with a photo. `GET /products/realize/{id}` is the snapshot.
 
 `PUT /households/{hid}/budget` `{ "budget_cents" }` updates the room budget.
+
+Live search hits are cached so `catalog.get` and proposals can use `live-…` ids. A listing is usable in a design if it has placeable sizes (parsed or estimated).
+
+## Design this room and refine
+
+`POST /households/{hid}/chat` with `mode=design` fills a proposal from the prompt, optional `pick_ids` (Inspiration selections, preferred when they fit), inspiration photos, and `skip_categories` (owned items). Remaining categories come from catalog + live search.
+
+If a proposal already exists, omit `mode` or send `mode=refine` to revise that proposal (“cheaper sofa”, “more oak”). “Start over” or `mode=design` publishes a new plan. The reply is `{"reply", "engine"}`; the 3D room updates on the next state/SSE tick.
 
 ## Roommate invitations and group preferences
 

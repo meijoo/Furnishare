@@ -389,7 +389,7 @@ final class AppModel {
                 object.dimensionsM = dims
                 object.colorHex = alt.style?.colorHex ?? object.colorHex
                 object.assetURL = alt.assetURL
-                if let photo = alt.imageURL ?? alt.localImage {
+                if object.category == "rug", let photo = alt.imageURL ?? alt.localImage {
                     object.texture = ObjectTexture(imageURL: photo)
                 }
             }
@@ -571,7 +571,7 @@ final class AppModel {
             objectID: objectID, productID: product.id, category: product.category,
             positionM: [x, 0, z], rotationYRad: 0, dimensionsM: dims,
             colorHex: product.style?.colorHex, assetURL: product.assetURL, proposalVersion: nil,
-            texture: photoPath.map { ObjectTexture(imageURL: $0) }))
+            texture: product.category == "rug" ? photoPath.map { ObjectTexture(imageURL: $0) } : nil))
         select(objectID)
         persistCurrentExtras()
         realizeInBackground(product, image: photo)
@@ -662,21 +662,20 @@ final class AppModel {
             return
         }
         inspirationCategory = Self.category(from: query)
-        if let category = inspirationCategory, inspirationPicks.contains(where: { product($0)?.category != category }) {
-            inspirationPicks = []
-        }
         busy.insert("inspiration-search")
         Task {
             defer { busy.remove("inspiration-search") }
             var results: [Product] = []
             if let client, source == .live {
-                results = (try? await client.searchProducts(query)) ?? []
+                do {
+                    results = try await client.searchProducts(query)
+                } catch {
+                    errorMessage = Self.message(error)
+                }
+            } else {
+                results = Self.rank(products: products + extraProducts, query: query, category: inspirationCategory)
             }
-            if results.isEmpty {
-                let category = inspirationCategory ?? Self.dominantCategory(in: products, query: query)
-                inspirationCategory = category
-                results = Self.rank(products: products + extraProducts, query: query, category: category)
-            } else if inspirationCategory == nil {
+            if inspirationCategory == nil {
                 inspirationCategory = results.first.flatMap { Self.category(from: $0.title) } ?? results.first?.category
             }
             results.forEach(remember)
@@ -693,9 +692,6 @@ final class AppModel {
             return
         }
         guard inspirationPicks.count < 10 else { return }
-        if let category = product(productID)?.category, inspirationPicks.contains(where: { product($0)?.category != category }) {
-            inspirationPicks = []
-        }
         inspirationPicks.append(productID)
         if let objectID = objectID(forCategory: product(productID)?.category) {
             setPreview(objectID: objectID, productID: productID)
@@ -730,6 +726,7 @@ final class AppModel {
             ("bed", ["bed", "beds", "mattress"]),
             ("nightstand", ["nightstand", "nightstands", "night table", "bedside"]),
             ("dresser", ["dresser", "dressers", "chest of drawers"]),
+            ("chair", ["chair", "chairs", "armchair", "armchairs"]),
             ("desk", ["desk", "desks"]),
             ("sofa", ["sofa", "sofas", "couch", "couches", "sectional"]),
             ("coffee_table", ["coffee table", "coffee tables"]),
@@ -742,18 +739,6 @@ final class AppModel {
                 return t.range(of: "\\b\(NSRegularExpression.escapedPattern(for: alias))\\b", options: .regularExpression) != nil
             }
         }?.0
-    }
-
-    private static func dominantCategory(in products: [Product], query: String) -> String? {
-        let tokens = query.lowercased().split { !$0.isLetter }.map(String.init)
-        guard !tokens.isEmpty else { return products.first?.category }
-        let scored = Dictionary(grouping: products, by: \.category).map { category, items -> (String, Int) in
-            let hits = items.reduce(0) { score, product in
-                score + tokens.filter { product.title.lowercased().contains($0) }.count
-            }
-            return (category, hits)
-        }
-        return scored.max(by: { $0.1 < $1.1 })?.0
     }
 
     static func rank(products: [Product], query: String, category: String?) -> [Product] {
@@ -1201,7 +1186,11 @@ final class AppModel {
         await refreshApartment()
     }
 
-    func sendChat(_ text: String) async {
+    func designRoom(_ text: String) async {
+        await sendChat(text.isEmpty ? chatSuggestion : text, mode: "design")
+    }
+
+    func sendChat(_ text: String, mode: String? = nil) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         let member = actingMemberID
@@ -1210,10 +1199,13 @@ final class AppModel {
             chat.append(ChatMessage(author: "Agent", text: "Offline demo: the backend isn't reachable, so I can't search products right now. Set the backend URL in Settings and try again.", fromMe: false, isError: true))
             return
         }
-        busy.insert("chat")
-        defer { busy.remove("chat") }
+        let resolved = mode ?? (state.proposal != nil ? "refine" : "design")
+        let skip = Array(Set(currentOwnedItems.map(\.category)))
+        busy.insert(resolved == "design" ? "design" : "chat")
+        defer { busy.remove(resolved == "design" ? "design" : "chat") }
         do {
-            let reply = try await client.chat(memberID: member, text: trimmed)
+            let reply = try await client.chat(memberID: member, text: trimmed, pickIds: inspirationPicks,
+                                             mode: resolved, skipCategories: skip)
             chat.append(ChatMessage(author: "Agent", text: reply, fromMe: false))
             try? await refresh(client)
         } catch {

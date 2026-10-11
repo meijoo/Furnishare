@@ -50,6 +50,14 @@ def reset(hid: str = HID, clear_handles: bool = False) -> dict:
             c.execute('INSERT INTO members (household_id, id, name, handle, limit_cents) VALUES (?, ?, ?, ?, ?)',
                       (hid, mid, name, core.normalize_handle(handles[mid]) if handles.get(mid) else None, SEED_LIMITS[mid]))
         db.log(c, hid, 'Demo household created')
+    catalog.clear_remembered()
+    from . import nessie
+    client = nessie.client()
+    if client.mode == 'mock' and hasattr(client, 'reset'):
+        client.reset()
+        db.kv_set('nessie_accounts:mock', {})
+    if config.SHOPPING_API_KEY:
+        return {'ok': True, 'proposal_version': None, 'sofa': None, 'shares': {}, 'scene': []}
     sofa = demo_sofa()
     if not sofa:
         return {'ok': False, 'error': 'No sofa with confirmed dimensions in the catalog'}

@@ -41,7 +41,9 @@ struct RoomPanel: View {
             }
 
             selectionBar
-            if let object = model.selectedObject { ObjectPhotoRow(object: object, name: model.displayName(object)) }
+            if let object = model.selectedObject, object.category == "rug" {
+                ObjectPhotoRow(object: object, name: model.displayName(object))
+            }
             hints(report)
         }
         .glassPanel()

@@ -121,7 +121,7 @@ private struct ObjectPhotoSheet: View {
                 } header: {
                     Text("Photo")
                 } footer: {
-                    Text("A fabric, a rug you like, a wood grain… It's sent to the backend, which builds a textured 3D model of \(name).")
+                    Text("The photo is printed on this rug. Other furniture uses the generated model, not a photo wrap.")
                 }
 
                 Section {

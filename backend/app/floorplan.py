@@ -4,6 +4,8 @@ Gemini is only trusted for what it reads (labels, "13'x12'" text, rough boxes). 
 every number is validated here, and the result is a plan in the same shape as the built-in apartment.
 """
 import re
+import logging
+import time
 import statistics
 import struct
 
@@ -159,14 +161,24 @@ def extract(data: bytes, mime: str) -> list[dict]:
     from google.genai import types
 
     from . import agent
+    # Extraction needs a short structured answer, not extended reasoning or retries.
+    thinking = (types.ThinkingConfig(thinking_budget=0) if '2.5' in config.GEMINI_MODEL
+                else types.ThinkingConfig(thinking_level='low'))
+    started = time.perf_counter()
     resp = agent._gemini().models.generate_content(
         model=config.GEMINI_MODEL,
         contents=[types.Part.from_bytes(data=data, mime_type=mime), PROMPT],
         config=types.GenerateContentConfig(response_mime_type='application/json', response_schema=RESPONSE_SCHEMA,
-                                           temperature=0),
+                                           temperature=0, thinking_config=thinking,
+                                           http_options=types.HttpOptions(
+                                               timeout=40_000,
+                                               retry_options=types.HttpRetryOptions(attempts=1))),
     )
     import json
-    return json.loads(resp.text)['rooms']
+    rooms = json.loads(resp.text)['rooms']
+    logging.getLogger('uvicorn.error').info('Floor-plan image read: %.1f s (%d rooms)',
+                                           time.perf_counter() - started, len(rooms))
+    return rooms
 
 
 def _r(v: float) -> float:

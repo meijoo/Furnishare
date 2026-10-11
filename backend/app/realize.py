@@ -136,9 +136,9 @@ def start(body: dict, image_bytes: bytes | None = None, mime: str = 'image/jpeg'
     style = {'form': form}
     if form.get('primary_hex'):
         style['color_hex'] = form['primary_hex']
-    if image_path:
+    if image_path and category == 'rug':
         style['texture_path'] = str(image_path)
-        style['texture_mode'] = 'print' if category == 'rug' else 'tile'
+        style['texture_mode'] = 'print'
         style['texture_tile_m'] = 0.5
     product = {
         'id': pid, 'title': title, 'category': category, 'retailer': body.get('retailer') or 'Live',
@@ -151,6 +151,7 @@ def start(body: dict, image_bytes: bytes | None = None, mime: str = 'image/jpeg'
     if rec['asset_url']:
         rec['status'] = 'ready'
     _store(pid, rec)
+    catalog.remember([product])
     if rec['status'] != 'ready':
         with _lock:
             if pid not in _inflight:
@@ -215,6 +216,7 @@ def _clamp_dims(category: str, dims: dict) -> dict:
         'coffee_table': {'width': (0.3, 2.0), 'depth': (0.3, 1.4), 'height': (0.2, 0.7)},
         'rug': {'width': (0.5, 4.0), 'depth': (0.5, 3.0), 'height': (0.003, 0.08)},
         'tv': {'width': (0.4, 2.2), 'depth': (0.04, 0.4), 'height': (0.25, 1.2)},
+        'chair': {'width': (0.35, 1.1), 'depth': (0.4, 1.1), 'height': (0.4, 1.3)},
     }.get(category, {'width': (0.2, 3.0), 'depth': (0.2, 2.0), 'height': (0.05, 2.0)})
     out = {}
     for axis in ('width', 'depth', 'height'):

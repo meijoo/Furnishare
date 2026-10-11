@@ -4,6 +4,7 @@ import SwiftUI
 struct InspirationPanel: View {
     @Environment(AppModel.self) private var model
     @State private var draft = ""
+    @State private var designDraft = ""
     @State private var photoItem: PhotosPickerItem?
 
     var body: some View {
@@ -37,6 +38,7 @@ struct InspirationPanel: View {
                 picks
             }
             results
+            design
         }
         .glassPanel()
         .onChange(of: photoItem) { _, item in
@@ -203,7 +205,33 @@ struct InspirationPanel: View {
             .strokeBorder(picked ? Color.aeroSky : Color.black.opacity(0.06), lineWidth: picked ? 2 : 1))
     }
 
+    private var design: some View {
+        let designing = model.busy.contains("design")
+        return VStack(alignment: .leading, spacing: 8) {
+            Text("Design this room").font(.headline).foregroundStyle(Color.aeroInk)
+            TextField(model.chatSuggestion, text: $designDraft, axis: .vertical)
+                .lineLimit(2...4)
+                .padding(12)
+                .background(RoundedRectangle(cornerRadius: 14).fill(Color.figmaWash))
+                .onSubmit(designRoom)
+            Button(action: designRoom) {
+                if designing {
+                    ProgressView().tint(.white)
+                } else {
+                    Label("Design this room", systemImage: "wand.and.stars")
+                }
+            }
+            .buttonStyle(AeroButtonStyle(compact: true))
+            .disabled(designing || model.busy.contains("chat") || !model.actingMemberInScope)
+        }
+    }
+
     private func search() {
         model.searchInspiration(draft)
+    }
+
+    private func designRoom() {
+        let text = designDraft.trimmingCharacters(in: .whitespacesAndNewlines)
+        Task { await model.designRoom(text) }
     }
 }

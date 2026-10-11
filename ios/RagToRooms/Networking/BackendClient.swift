@@ -146,8 +146,11 @@ struct BackendClient: Sendable {
         try await sendIgnoringBody("PUT", "\(household)/room", body: RoomUpdate(room))
     }
 
-    func chat(memberID: String, text: String) async throws -> String {
-        let reply: ChatReply = try await send("POST", "\(household)/chat", body: ChatBody(memberID: memberID, text: text), timeout: 90)
+    func chat(memberID: String, text: String, pickIds: [String] = [], mode: String? = nil,
+              skipCategories: [String] = []) async throws -> String {
+        let reply: ChatReply = try await send("POST", "\(household)/chat",
+                                              body: ChatBody(memberID: memberID, text: text, pickIds: pickIds,
+                                                             mode: mode, skipCategories: skipCategories), timeout: 90)
         return reply.reply
     }
 
