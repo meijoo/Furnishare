@@ -1,4 +1,4 @@
-# RAG to Rooms
+# Furnishare
 
 Roommates furnish a shared living room together. An AI agent proposes real products that fit the room, the budget and each person's private contribution limit. Everyone approves by text or on the iPad. The payer buys through the Nessie sandbox (fake money), the others reimburse, and the iPad shows the layout in 3D and in AR at true scale.
 
